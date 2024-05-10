@@ -32,7 +32,6 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    // return `This action returns a #${id} user`;
     if (!mongoose.Types.ObjectId.isValid(id)) return `Id is invalid`;
 
     return this.userModel.findOne({
@@ -49,7 +48,11 @@ export class UsersService {
     );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) return `Id is invalid`;
+
+    return this.userModel.deleteOne({
+      _id: id,
+    });
   }
 }
