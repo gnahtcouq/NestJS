@@ -1,11 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateFacultyDto } from './dto/update-faculty.dto';
+import { Faculty, FacultyDocument } from 'src/faculty/schemas/faculty.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 
 @Injectable()
 export class FacultyService {
+  constructor(
+    @InjectModel(Faculty.name)
+    private facultyModel: SoftDeleteModel<FacultyDocument>,
+  ) {}
+
   create(createFacultyDto: CreateFacultyDto) {
-    return 'This action adds a new faculty';
+    // eslint-disable-next-line prefer-const
+    // let faculty = await this.facultyModel.create({
+    //   name: createFacultyDto.name,
+    //   description: createFacultyDto.description,
+    // });
+
+    return this.facultyModel.create({ ...createFacultyDto });
   }
 
   findAll() {

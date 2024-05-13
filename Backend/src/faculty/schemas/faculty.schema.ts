@@ -11,7 +11,7 @@ export class Faculty {
   @Prop()
   description: string;
 
-  @Prop()
+  @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;

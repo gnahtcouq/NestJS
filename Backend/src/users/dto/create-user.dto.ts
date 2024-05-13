@@ -14,7 +14,7 @@ export class CreateUserDto {
   email: string;
 
   @IsNotEmpty({
-    message: 'Mật khẩu không được để trống',
+    message: 'Password không được để trống',
   })
   password: string;
   name: string;
