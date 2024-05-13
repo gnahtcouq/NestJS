@@ -13,7 +13,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user = await this.authService.validateUser(username, password);
     if (!user) {
       throw new UnauthorizedException(
-        'Tên đăng nhập hoặc mật khẩu không chính xác',
+        'Tài khoản hoặc mật khẩu không chính xác',
       );
     }
     return user;
