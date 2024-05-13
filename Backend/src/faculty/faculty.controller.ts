@@ -10,14 +10,17 @@ import {
 import { FacultyService } from './faculty.service';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateFacultyDto } from './dto/update-faculty.dto';
+import { User } from 'src/decorator/customize';
+import { IUser } from 'src/users/users.interface';
 
 @Controller('faculty')
 export class FacultyController {
   constructor(private readonly facultyService: FacultyService) {}
 
   @Post()
-  create(@Body() createFacultyDto: CreateFacultyDto) {
-    return this.facultyService.create(createFacultyDto);
+  create(@Body() createFacultyDto: CreateFacultyDto, @User() user: IUser) {
+    console.log('>>> user', user);
+    return this.facultyService.create(createFacultyDto, user);
   }
 
   @Get()

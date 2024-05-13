@@ -4,6 +4,7 @@ import { UpdateFacultyDto } from './dto/update-faculty.dto';
 import { Faculty, FacultyDocument } from 'src/faculty/schemas/faculty.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { IUser } from 'src/users/users.interface';
 
 @Injectable()
 export class FacultyService {
@@ -12,14 +13,14 @@ export class FacultyService {
     private facultyModel: SoftDeleteModel<FacultyDocument>,
   ) {}
 
-  create(createFacultyDto: CreateFacultyDto) {
-    // eslint-disable-next-line prefer-const
-    // let faculty = await this.facultyModel.create({
-    //   name: createFacultyDto.name,
-    //   description: createFacultyDto.description,
-    // });
-
-    return this.facultyModel.create({ ...createFacultyDto });
+  create(createFacultyDto: CreateFacultyDto, user: IUser) {
+    return this.facultyModel.create({
+      ...createFacultyDto,
+      createdBy: {
+        _id: user._id,
+        email: user.email,
+      },
+    });
   }
 
   findAll() {
