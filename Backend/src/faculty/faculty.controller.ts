@@ -20,7 +20,6 @@ export class FacultyController {
 
   @Post()
   create(@Body() createFacultyDto: CreateFacultyDto, @User() user: IUser) {
-    console.log('>>> user', user);
     return this.facultyService.create(createFacultyDto, user);
   }
 
