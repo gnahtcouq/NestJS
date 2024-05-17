@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { FacultyService } from './faculty.service';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
@@ -24,8 +25,12 @@ export class FacultyController {
   }
 
   @Get()
-  findAll() {
-    return this.facultyService.findAll();
+  findAll(
+    @Query('page') currentPage: string,
+    @Query('limit') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.facultyService.findAll(+currentPage, +limit, qs);
   }
 
   @Get(':id')
