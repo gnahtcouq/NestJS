@@ -11,7 +11,7 @@ import {
 import { FacultyService } from './faculty.service';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateFacultyDto } from './dto/update-faculty.dto';
-import { User } from 'src/decorator/customize';
+import { ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 
 @Controller('faculty')
@@ -24,6 +24,7 @@ export class FacultyController {
   }
 
   @Get()
+  @ResponseMessage('Fetch list of Faculty with paginate')
   findAll(
     @Query('page') currentPage: string,
     @Query('limit') limit: string,
