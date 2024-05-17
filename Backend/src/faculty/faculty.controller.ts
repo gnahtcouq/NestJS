@@ -43,7 +43,7 @@ export class FacultyController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.facultyService.remove(+id);
+  remove(@Param('id') id: string, @User() user: IUser) {
+    return this.facultyService.remove(id, user);
   }
 }

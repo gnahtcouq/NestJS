@@ -5,6 +5,7 @@ import { Faculty, FacultyDocument } from 'src/faculty/schemas/faculty.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class FacultyService {
@@ -46,7 +47,19 @@ export class FacultyService {
     );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} faculty`;
+  async remove(id: string, user: IUser) {
+    await this.facultyModel.updateOne(
+      { _id: id },
+      {
+        deletedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
+
+    return this.facultyModel.softDelete({
+      _id: id,
+    });
   }
 }
