@@ -31,8 +31,19 @@ export class FacultyService {
     return `This action returns a #${id} faculty`;
   }
 
-  update(id: number, updateFacultyDto: UpdateFacultyDto) {
-    return `This action updates a #${id} faculty`;
+  async update(id: string, updateFacultyDto: UpdateFacultyDto, user: IUser) {
+    return await this.facultyModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        ...updateFacultyDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
   }
 
   remove(id: number) {

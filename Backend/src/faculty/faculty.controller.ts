@@ -34,8 +34,12 @@ export class FacultyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFacultyDto: UpdateFacultyDto) {
-    return this.facultyService.update(+id, updateFacultyDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateFacultyDto: UpdateFacultyDto,
+    @User() user: IUser,
+  ) {
+    return this.facultyService.update(id, updateFacultyDto, user);
   }
 
   @Delete(':id')
