@@ -11,8 +11,9 @@ import {
 import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
-import { Public, ResponseMessage } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { IUser } from 'src/users/users.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -31,5 +32,11 @@ export class AuthController {
   @Post('/register')
   handleRegister(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.register(registerUserDto);
+  }
+
+  @ResponseMessage('Lấy thông tin người dùng thành công')
+  @Get('/account')
+  handleGetAccount(@User() user: IUser) {
+    return { user };
   }
 }
