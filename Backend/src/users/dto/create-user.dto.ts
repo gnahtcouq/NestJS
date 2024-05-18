@@ -7,8 +7,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
+import { join } from 'path';
 
-class Faculty {
+class Departments {
   @IsNotEmpty()
   _id: mongoose.Schema.Types.ObjectId;
 
@@ -67,8 +68,13 @@ export class CreateUserDto {
   @IsNotEmptyObject()
   @IsObject()
   @ValidateNested()
-  @Type(() => Faculty)
-  faculty: Faculty;
+  @Type(() => Departments)
+  department: Departments;
+
+  joiningDate: Date;
+  leavingDate: Date;
+  unionEntryDate: Date;
+  note: string;
 }
 
 export class RegisterUserDto {
@@ -112,4 +118,9 @@ export class RegisterUserDto {
     message: 'CCCD không được để trống',
   })
   CCCD: string;
+
+  joiningDate: Date;
+  leavingDate: Date;
+  unionEntryDate: Date;
+  note: string;
 }

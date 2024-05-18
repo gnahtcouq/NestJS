@@ -24,19 +24,22 @@ export class User {
   address: string;
 
   @Prop()
-  CCCD: string;
+  CCCD?: string;
 
   @Prop()
-  joiningDate: Date; //ngày chuyển đến
+  joiningDate?: Date; //ngày chuyển đến
 
   @Prop()
-  leavingDate: Date; //ngày chuyển đi
+  leavingDate?: Date; //ngày chuyển đi
 
   @Prop()
-  unionEntryDate: Date; //ngày vào công đoàn
+  unionEntryDate?: Date; //ngày vào công đoàn
+
+  @Prop()
+  note: Date; //ghi chú
 
   @Prop({ type: Object })
-  faculty: {
+  departments: {
     _id: mongoose.Schema.Types.ObjectId;
     name: string;
   };

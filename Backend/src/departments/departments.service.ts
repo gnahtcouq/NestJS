@@ -1,23 +1,26 @@
 /* eslint-disable prefer-const */
 import { Injectable } from '@nestjs/common';
-import { CreateFacultyDto } from './dto/create-faculty.dto';
-import { UpdateFacultyDto } from './dto/update-faculty.dto';
-import { Faculty, FacultyDocument } from 'src/faculty/schemas/faculty.schema';
+import { CreateDepartmentsDto } from './dto/create-department.dto';
+import { UpdateDepartmentsDto } from './dto/update-department.dto';
+import {
+  Departments,
+  DepartmentsDocument,
+} from 'src/departments/schemas/department.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 
 @Injectable()
-export class FacultyService {
+export class DepartmentsService {
   constructor(
-    @InjectModel(Faculty.name)
-    private facultyModel: SoftDeleteModel<FacultyDocument>,
+    @InjectModel(Departments.name)
+    private departmentsModel: SoftDeleteModel<DepartmentsDocument>,
   ) {}
 
-  create(createFacultyDto: CreateFacultyDto, user: IUser) {
-    return this.facultyModel.create({
-      ...createFacultyDto,
+  create(createDepartmentsDto: CreateDepartmentsDto, user: IUser) {
+    return this.departmentsModel.create({
+      ...createDepartmentsDto,
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -32,10 +35,10 @@ export class FacultyService {
 
     let offset = (+currentPage - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
-    const totalItems = (await this.facultyModel.find(filter)).length;
+    const totalItems = (await this.departmentsModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.facultyModel
+    const result = await this.departmentsModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -55,16 +58,20 @@ export class FacultyService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} faculty`;
+    return `This action returns a #${id} departments`;
   }
 
-  async update(id: string, updateFacultyDto: UpdateFacultyDto, user: IUser) {
-    return await this.facultyModel.updateOne(
+  async update(
+    id: string,
+    updateDepartmentsDto: UpdateDepartmentsDto,
+    user: IUser,
+  ) {
+    return await this.departmentsModel.updateOne(
       {
         _id: id,
       },
       {
-        ...updateFacultyDto,
+        ...updateDepartmentsDto,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -74,7 +81,7 @@ export class FacultyService {
   }
 
   async remove(id: string, user: IUser) {
-    await this.facultyModel.updateOne(
+    await this.departmentsModel.updateOne(
       { _id: id },
       {
         deletedBy: {
@@ -84,7 +91,7 @@ export class FacultyService {
       },
     );
 
-    return this.facultyModel.softDelete({
+    return this.departmentsModel.softDelete({
       _id: id,
     });
   }
