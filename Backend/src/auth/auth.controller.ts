@@ -3,10 +3,12 @@ import {
   Controller,
   Post,
   UseGuards,
-  Request,
   Get,
   Body,
+  Res,
+  Req,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { Public, ResponseMessage } from 'src/decorator/customize';
@@ -20,8 +22,8 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('/login')
   @ResponseMessage('Đăng nhập thành công')
-  handleLogin(@Request() req) {
-    return this.authService.login(req.user);
+  handleLogin(@Req() req, @Res({ passthrough: true }) response: Response) {
+    return this.authService.login(req.user, response);
   }
 
   @Public() //không dùng JWT để xác thực
