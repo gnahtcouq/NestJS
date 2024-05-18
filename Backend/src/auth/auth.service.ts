@@ -5,11 +5,14 @@ import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/users/users.interface';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { create } from 'domain';
+import { ConfigService } from '@nestjs/config';
+import ms from 'ms';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private configService: ConfigService,
     private jwtService: JwtService,
   ) {}
 
@@ -39,12 +42,18 @@ export class AuthService {
       email,
       role,
     };
+
+    const refresh_token = this.createRefreshToken(payload);
+
     return {
       access_token: this.jwtService.sign(payload),
-      _id,
-      name,
-      email,
-      role,
+      refresh_token,
+      user: {
+        _id,
+        name,
+        email,
+        role,
+      },
     };
   }
 
@@ -56,4 +65,13 @@ export class AuthService {
       createdAt: newUser?.createdAt,
     };
   }
+
+  createRefreshToken = (payload: any) => {
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn:
+        ms(this.configService.get<string>('JWT_REFRESH_EXPIRE')) / 1000,
+    });
+    return refreshToken;
+  };
 }

@@ -19,6 +19,7 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('/login')
+  @ResponseMessage('Đăng nhập thành công')
   handleLogin(@Request() req) {
     return this.authService.login(req.user);
   }
