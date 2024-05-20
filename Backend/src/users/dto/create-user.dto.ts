@@ -1,5 +1,6 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsDate,
   IsEmail,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -7,7 +8,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
-import { join } from 'path';
 
 class Departments {
   @IsNotEmpty()
@@ -119,8 +119,26 @@ export class RegisterUserDto {
   })
   CCCD: string;
 
+  @IsNotEmpty({
+    message: 'Ngày chuyển đến không được để trống',
+  })
+  @Transform(({ value }) => new Date(value))
+  @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
   joiningDate: Date;
+
+  @IsNotEmpty({
+    message: 'Ngày chuyển đi không được để trống',
+  })
+  @Transform(({ value }) => new Date(value))
+  @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
   leavingDate: Date;
+
+  @IsNotEmpty({
+    message: 'Ngày vào công đoàn không được để trống',
+  })
+  @Transform(({ value }) => new Date(value))
+  @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
   unionEntryDate: Date;
+
   note: string;
 }

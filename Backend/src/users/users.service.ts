@@ -131,7 +131,7 @@ export class UsersService {
     if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
 
     return this.userModel
-      .findOne({
+      .findById({
         _id: id,
       })
       .select('-password'); //không trả về password

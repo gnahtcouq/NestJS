@@ -9,13 +9,16 @@ export class Post {
   name: string;
 
   @Prop()
-  topics: string[];
+  threads: string[];
 
   @Prop({ type: Object })
   departments: {
     _id: mongoose.Schema.Types.ObjectId;
     name: string;
   };
+
+  @Prop()
+  location: string;
 
   @Prop()
   fee: number;

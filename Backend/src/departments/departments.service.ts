@@ -10,6 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class DepartmentsService {
@@ -57,8 +58,12 @@ export class DepartmentsService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} departments`;
+  findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+
+    return this.departmentsModel.findById({
+      _id: id,
+    });
   }
 
   async update(

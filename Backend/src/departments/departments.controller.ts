@@ -19,6 +19,7 @@ export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
+  @ResponseMessage('Tạo đơn vị')
   create(
     @Body() createDepartmentsDto: CreateDepartmentsDto,
     @User() user: IUser,
@@ -27,7 +28,7 @@ export class DepartmentsController {
   }
 
   @Get()
-  @ResponseMessage('Fetch list of Departments with paginate')
+  @ResponseMessage('Lấy danh sách đơn vị')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -37,11 +38,14 @@ export class DepartmentsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.departmentsService.findOne(+id);
+  @ResponseMessage('Lấy thông tin đơn vị')
+  async findOne(@Param('id') id: string) {
+    const foundDepartment = await this.departmentsService.findOne(id);
+    return foundDepartment;
   }
 
   @Patch(':id')
+  @ResponseMessage('Cập nhật đơn vị')
   update(
     @Param('id') id: string,
     @Body() updateDepartmentsDto: UpdateDepartmentsDto,
@@ -51,6 +55,7 @@ export class DepartmentsController {
   }
 
   @Delete(':id')
+  @ResponseMessage('Xóa đơn vị')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.departmentsService.remove(id, user);
   }
