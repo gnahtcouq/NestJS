@@ -15,7 +15,7 @@ export class User {
   password: string;
 
   @Prop()
-  dateOfBirth: string;
+  dateOfBirth: Date;
 
   @Prop()
   gender: string;
@@ -24,19 +24,19 @@ export class User {
   address: string;
 
   @Prop()
-  CCCD?: string;
+  CCCD: string; //căn cước công dân
 
   @Prop()
-  joiningDate?: Date; //ngày chuyển đến
+  joiningDate: Date; //ngày chuyển đến
 
   @Prop()
-  leavingDate?: Date; //ngày chuyển đi
+  leavingDate: Date; //ngày chuyển đi
 
   @Prop()
-  unionEntryDate?: Date; //ngày vào công đoàn
+  unionEntryDate: Date; //ngày vào công đoàn
 
   @Prop()
-  note: Date; //ghi chú
+  note: string; //ghi chú
 
   @Prop({ type: Object })
   departments: {

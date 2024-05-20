@@ -43,7 +43,7 @@ export class CreateUserDto {
   @IsNotEmpty({
     message: 'Ngày sinh không được để trống',
   })
-  dateOfBirth: string;
+  dateOfBirth: Date;
 
   @IsNotEmpty({
     message: 'Giới tính không được để trống',
@@ -102,7 +102,7 @@ export class RegisterUserDto {
   @IsNotEmpty({
     message: 'Ngày sinh không được để trống',
   })
-  dateOfBirth: string;
+  dateOfBirth: Date;
 
   @IsNotEmpty({
     message: 'Giới tính không được để trống',
