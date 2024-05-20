@@ -1,0 +1,69 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+
+export type PostDocument = HydratedDocument<Post>;
+
+@Schema({ timestamps: true })
+export class Post {
+  @Prop()
+  name: string;
+
+  @Prop()
+  topics: string[];
+
+  @Prop({ type: Object })
+  departments: {
+    _id: mongoose.Schema.Types.ObjectId;
+    name: string;
+  };
+
+  @Prop()
+  fee: number;
+
+  @Prop()
+  quantity: number;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  startDate: Date;
+
+  @Prop()
+  endDate: Date;
+
+  @Prop()
+  isActive: boolean;
+
+  @Prop({ type: Object })
+  createdBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
+
+  @Prop({ type: Object })
+  updatedBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
+
+  @Prop({ type: Object })
+  deletedBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
+
+  @Prop()
+  createdAt: Date;
+
+  @Prop()
+  updatedAt: Date;
+
+  @Prop()
+  isDeleted: boolean;
+
+  @Prop()
+  deletedAt: Date;
+}
+
+export const PostSchema = SchemaFactory.createForClass(Post);
