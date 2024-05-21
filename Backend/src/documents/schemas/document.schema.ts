@@ -2,54 +2,37 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-export type UserDocument = HydratedDocument<User>;
+export type DocumentDocument = HydratedDocument<Document>;
 
 @Schema({ timestamps: true })
-export class User {
+export class Document {
   @Prop()
-  name: string;
-
-  @Prop({ required: true })
   email: string;
 
-  @Prop({ required: true })
-  password: string;
+  @Prop()
+  userId: mongoose.Schema.Types.ObjectId;
 
   @Prop()
-  dateOfBirth: Date;
+  url: string;
 
   @Prop()
-  gender: string;
+  status: string;
 
   @Prop()
-  address: string;
+  departmentId: mongoose.Schema.Types.ObjectId;
 
-  @Prop()
-  CCCD: string; //căn cước công dân
+  //   @Prop()
+  //   postId: mongoose.Schema.Types.ObjectId
 
-  @Prop()
-  joiningDate: Date; //ngày chuyển đến
-
-  @Prop()
-  leavingDate: Date; //ngày chuyển đi
-
-  @Prop()
-  unionEntryDate: Date; //ngày vào công đoàn
-
-  @Prop()
-  note: string; //ghi chú
-
-  @Prop({ type: Object })
-  department: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
-
-  @Prop()
-  role: string;
-
-  @Prop()
-  refreshToken: string;
+  @Prop({ type: mongoose.Schema.Types.Array })
+  history: {
+    status: string;
+    updatedAt: Date;
+    updatedBy: {
+      _id: mongoose.Schema.Types.ObjectId;
+      email: string;
+    };
+  }[];
 
   @Prop({ type: Object })
   createdBy: {
@@ -82,4 +65,4 @@ export class User {
   deletedAt: Date;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const DocumentSchema = SchemaFactory.createForClass(Document);

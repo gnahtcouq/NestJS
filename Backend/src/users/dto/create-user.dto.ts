@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Transform, Type } from 'class-transformer';
 import {
   IsDate,

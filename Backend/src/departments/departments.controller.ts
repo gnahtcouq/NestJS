@@ -9,8 +9,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
-import { CreateDepartmentsDto } from './dto/create-department.dto';
-import { UpdateDepartmentsDto } from './dto/update-department.dto';
+import { CreateDepartmentDto } from './dto/create-department.dto';
+import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 
@@ -21,10 +21,10 @@ export class DepartmentsController {
   @Post()
   @ResponseMessage('Tạo đơn vị')
   create(
-    @Body() createDepartmentsDto: CreateDepartmentsDto,
+    @Body() createDepartmentDto: CreateDepartmentDto,
     @User() user: IUser,
   ) {
-    return this.departmentsService.create(createDepartmentsDto, user);
+    return this.departmentsService.create(createDepartmentDto, user);
   }
 
   @Get()
@@ -50,10 +50,10 @@ export class DepartmentsController {
   @ResponseMessage('Cập nhật đơn vị')
   update(
     @Param('id') id: string,
-    @Body() updateDepartmentsDto: UpdateDepartmentsDto,
+    @Body() updateDepartmentDto: UpdateDepartmentDto,
     @User() user: IUser,
   ) {
-    return this.departmentsService.update(id, updateDepartmentsDto, user);
+    return this.departmentsService.update(id, updateDepartmentDto, user);
   }
 
   @Delete(':id')

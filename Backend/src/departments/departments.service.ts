@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable prefer-const */
-import { Injectable } from '@nestjs/common';
-import { CreateDepartmentsDto } from './dto/create-department.dto';
-import { UpdateDepartmentsDto } from './dto/update-department.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreateDepartmentDto } from './dto/create-department.dto';
+import { UpdateDepartmentDto } from './dto/update-department.dto';
 import {
-  Departments,
-  DepartmentsDocument,
+  Department,
+  DepartmentDocument,
 } from 'src/departments/schemas/department.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -16,13 +16,13 @@ import mongoose from 'mongoose';
 @Injectable()
 export class DepartmentsService {
   constructor(
-    @InjectModel(Departments.name)
-    private departmentsModel: SoftDeleteModel<DepartmentsDocument>,
+    @InjectModel(Department.name)
+    private departmentModel: SoftDeleteModel<DepartmentDocument>,
   ) {}
 
-  create(createDepartmentsDto: CreateDepartmentsDto, user: IUser) {
-    return this.departmentsModel.create({
-      ...createDepartmentsDto,
+  create(createDepartmentDto: CreateDepartmentDto, user: IUser) {
+    return this.departmentModel.create({
+      ...createDepartmentDto,
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -37,10 +37,10 @@ export class DepartmentsService {
 
     let offset = (+currentPage - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
-    const totalItems = (await this.departmentsModel.find(filter)).length;
+    const totalItems = (await this.departmentModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.departmentsModel
+    const result = await this.departmentModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -59,25 +59,26 @@ export class DepartmentsService {
     };
   }
 
-  findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+  async findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id))
+      throw new BadRequestException(`Không tìm thấy đơn vị với ID là ${id}`);
 
-    return this.departmentsModel.findById({
+    return await this.departmentModel.findById({
       _id: id,
     });
   }
 
   async update(
     id: string,
-    updateDepartmentsDto: UpdateDepartmentsDto,
+    updateDepartmentDto: UpdateDepartmentDto,
     user: IUser,
   ) {
-    return await this.departmentsModel.updateOne(
+    return await this.departmentModel.updateOne(
       {
         _id: id,
       },
       {
-        ...updateDepartmentsDto,
+        ...updateDepartmentDto,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -87,7 +88,7 @@ export class DepartmentsService {
   }
 
   async remove(id: string, user: IUser) {
-    await this.departmentsModel.updateOne(
+    await this.departmentModel.updateOne(
       { _id: id },
       {
         deletedBy: {
@@ -97,7 +98,7 @@ export class DepartmentsService {
       },
     );
 
-    return this.departmentsModel.softDelete({
+    return this.departmentModel.softDelete({
       _id: id,
     });
   }

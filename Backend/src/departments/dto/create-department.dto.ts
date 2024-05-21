@@ -1,7 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
 
 //data transfer object for creating a Departments
-export class CreateDepartmentsDto {
+export class CreateDepartmentDto {
   @IsNotEmpty({
     message: 'Tên không được để trống',
   })

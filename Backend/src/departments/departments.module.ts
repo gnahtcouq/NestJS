@@ -4,14 +4,14 @@ import { DepartmentsService } from './departments.service';
 import { DepartmentsController } from './departments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
-  Departments,
-  DepartmentsSchema,
+  Department,
+  DepartmentSchema,
 } from 'src/departments/schemas/department.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Departments.name, schema: DepartmentsSchema },
+      { name: Department.name, schema: DepartmentSchema },
     ]),
   ],
   controllers: [DepartmentsController],
