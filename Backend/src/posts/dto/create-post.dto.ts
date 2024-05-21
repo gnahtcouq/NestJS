@@ -9,12 +9,15 @@ import {
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
-class Departments {
+class Department {
   @IsNotEmpty()
   _id: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmpty()
   name: string;
+
+  @IsNotEmpty()
+  logo: string;
 }
 
 export class CreatePostDto {
@@ -38,8 +41,8 @@ export class CreatePostDto {
   @IsNotEmptyObject()
   @IsObject()
   @ValidateNested()
-  @Type(() => Departments)
-  department: Departments;
+  @Type(() => Department)
+  department: Department;
 
   //   @IsNotEmpty({
   //     message: 'Địa điểm không được để trống',

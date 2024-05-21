@@ -12,9 +12,10 @@ export class Post {
   threads: string[];
 
   @Prop({ type: Object })
-  departments: {
+  department: {
     _id: mongoose.Schema.Types.ObjectId;
     name: string;
+    logo: string;
   };
 
   @Prop()

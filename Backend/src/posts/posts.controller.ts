@@ -11,7 +11,7 @@ import {
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 
 @Controller('posts')
@@ -25,6 +25,7 @@ export class PostsController {
   }
 
   @Get()
+  @Public()
   @ResponseMessage('Lấy danh sách bài viết')
   findAll(
     @Query('current') currentPage: string,
@@ -35,6 +36,7 @@ export class PostsController {
   }
 
   @Get(':id')
+  @Public()
   @ResponseMessage('Lấy thông tin bài viết')
   async findOne(@Param('id') id: string) {
     const foundPost = await this.postsService.findOne(id);

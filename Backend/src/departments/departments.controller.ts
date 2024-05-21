@@ -11,7 +11,7 @@ import {
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentsDto } from './dto/create-department.dto';
 import { UpdateDepartmentsDto } from './dto/update-department.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 
 @Controller('departments')
@@ -28,6 +28,7 @@ export class DepartmentsController {
   }
 
   @Get()
+  @Public()
   @ResponseMessage('Lấy danh sách đơn vị')
   findAll(
     @Query('current') currentPage: string,
@@ -38,6 +39,7 @@ export class DepartmentsController {
   }
 
   @Get(':id')
+  @Public()
   @ResponseMessage('Lấy thông tin đơn vị')
   async findOne(@Param('id') id: string) {
     const foundDepartment = await this.departmentsService.findOne(id);
