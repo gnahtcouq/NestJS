@@ -19,13 +19,7 @@ export class Post {
   };
 
   @Prop()
-  location: string;
-
-  @Prop()
   fee: number;
-
-  @Prop()
-  quantity: number;
 
   @Prop()
   description: string;

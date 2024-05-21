@@ -44,20 +44,10 @@ export class CreatePostDto {
   @Type(() => Department)
   department: Department;
 
-  //   @IsNotEmpty({
-  //     message: 'Địa điểm không được để trống',
-  //   })
-  location: string;
-
-  //   @IsNotEmpty({
-  //     message: 'Phí không được để trống',
-  //   })
+  @IsNotEmpty({
+    message: 'Phí không được để trống',
+  })
   fee: number;
-
-  //   @IsNotEmpty({
-  //     message: 'Số lượng không được để trống',
-  //   })
-  quantity: number;
 
   @IsNotEmpty({
     message: 'Mô tả không được để trống',
