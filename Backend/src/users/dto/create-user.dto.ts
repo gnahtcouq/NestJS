@@ -5,11 +5,12 @@ import {
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
+  IsOptional,
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
 
-class Departments {
+class Department {
   @IsNotEmpty()
   _id: mongoose.Schema.Types.ObjectId;
 
@@ -65,16 +66,35 @@ export class CreateUserDto {
   })
   role: string;
 
-  @IsNotEmptyObject()
+  // @IsNotEmptyObject()
   @IsObject()
   @ValidateNested()
-  @Type(() => Departments)
-  department: Departments;
+  @Type(() => Department)
+  department: Department;
 
+  @IsNotEmpty({
+    message: 'Ngày chuyển đến không được để trống',
+  })
+  @Transform(({ value }) => new Date(value))
+  @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
   joiningDate: Date;
+
+  @IsNotEmpty({
+    message: 'Ngày chuyển đi không được để trống',
+  })
+  @Transform(({ value }) => new Date(value))
+  @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
   leavingDate: Date;
+
+  @IsNotEmpty({
+    message: 'Ngày vào công đoàn không được để trống',
+  })
+  @Transform(({ value }) => new Date(value))
+  @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
   unionEntryDate: Date;
-  note: string;
+
+  @IsOptional()
+  note?: string;
 }
 
 export class RegisterUserDto {

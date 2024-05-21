@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable prefer-const */
 import { Injectable } from '@nestjs/common';
 import { CreateDepartmentsDto } from './dto/create-department.dto';

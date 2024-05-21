@@ -39,7 +39,7 @@ export class User {
   note: string; //ghi chú
 
   @Prop({ type: Object })
-  departments: {
+  department: {
     _id: mongoose.Schema.Types.ObjectId;
     name: string;
   };

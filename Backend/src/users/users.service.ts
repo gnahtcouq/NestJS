@@ -35,6 +35,10 @@ export class UsersService {
       role,
       CCCD,
       department,
+      joiningDate,
+      leavingDate,
+      unionEntryDate,
+      note,
     } = createUserDto;
 
     //logic check email exist
@@ -56,10 +60,10 @@ export class UsersService {
       role,
       CCCD,
       department,
-      joiningDate: '1999',
-      leavingDate: '',
-      unionEntryDate: '',
-      note: '',
+      joiningDate,
+      leavingDate,
+      unionEntryDate,
+      note,
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -160,6 +164,7 @@ export class UsersService {
         },
       },
     );
+
     return updated;
   }
 
