@@ -20,13 +20,14 @@ export class DocumentsService {
   ) {}
 
   async create(createUserDocDto: CreateUserDocDto, user: IUser) {
-    const { url, departmentId } = createUserDocDto;
+    const { url, departmentId, postId } = createUserDocDto;
     const { email, _id } = user;
 
     const newDocument = await this.documentModel.create({
       url,
       departmentId,
       email,
+      postId,
       userId: _id,
       status: 'PENDING',
       createdBy: { _id, email },
@@ -48,7 +49,7 @@ export class DocumentsService {
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, sort, population } = aqp(qs);
+    const { filter, sort, population, projection } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
@@ -64,6 +65,7 @@ export class DocumentsService {
       .limit(defaultLimit)
       .sort(sort as any)
       .populate(population)
+      .select(projection as any)
       .exec();
 
     return {

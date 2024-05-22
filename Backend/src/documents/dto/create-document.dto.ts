@@ -18,8 +18,8 @@ export class CreateDocumentDto {
   @IsNotEmpty({ message: 'ID đơn vị không được để trống' })
   departmentId: mongoose.Schema.Types.ObjectId;
 
-  //   @IsNotEmpty({ message: 'ID bài viết không được để trống' })
-  //   postId: mongoose.Schema.Types.ObjectId;
+  @IsNotEmpty({ message: 'ID bài viết không được để trống' })
+  postId: mongoose.Schema.Types.ObjectId;
 }
 
 export class CreateUserDocDto {
@@ -30,6 +30,7 @@ export class CreateUserDocDto {
   @IsMongoId({ message: 'ID đơn vị không hợp lệ' })
   departmentId: mongoose.Schema.Types.ObjectId;
 
-  //   @IsNotEmpty({ message: 'ID bài viết không được để trống' })
-  //   postId: mongoose.Schema.Types.ObjectId;
+  @IsNotEmpty({ message: 'ID bài viết không được để trống' })
+  @IsMongoId({ message: 'ID bài viết không hợp lệ' })
+  postId: mongoose.Schema.Types.ObjectId;
 }

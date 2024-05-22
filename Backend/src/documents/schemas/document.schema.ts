@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Department } from 'src/departments/schemas/department.schema';
+import { Post } from 'src/posts/schemas/post.schema';
 
 export type DocumentDocument = HydratedDocument<Document>;
 
@@ -18,11 +20,14 @@ export class Document {
   @Prop()
   status: string;
 
-  @Prop()
+  // @Prop()
+  // departmentId: mongoose.Schema.Types.ObjectId;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Department.name })
   departmentId: mongoose.Schema.Types.ObjectId;
 
-  //   @Prop()
-  //   postId: mongoose.Schema.Types.ObjectId
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Post.name })
+  postId: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.Array })
   history: {
