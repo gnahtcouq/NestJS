@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 import { Schema } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 
@@ -27,6 +27,7 @@ export class CreateUserDocDto {
   url: string;
 
   @IsNotEmpty({ message: 'ID đơn vị không được để trống' })
+  @IsMongoId({ message: 'ID đơn vị không hợp lệ' })
   departmentId: mongoose.Schema.Types.ObjectId;
 
   //   @IsNotEmpty({ message: 'ID bài viết không được để trống' })
