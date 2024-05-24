@@ -10,6 +10,8 @@ import { DepartmentsModule } from './departments/departments.module';
 import { PostsModule } from './posts/posts.module';
 import { FilesModule } from './files/files.module';
 import { DocumentsModule } from './documents/documents.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { DocumentsModule } from './documents/documents.module';
     PostsModule,
     FilesModule,
     DocumentsModule,
+    PermissionsModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
