@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -75,7 +75,8 @@ export class PostsService {
   }
 
   findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+    if (!mongoose.Types.ObjectId.isValid(id))
+      throw new BadRequestException('ID không hợp lệ');
 
     return this.postModel.findById({
       _id: id,
@@ -99,7 +100,8 @@ export class PostsService {
   }
 
   async remove(id: string, user: IUser) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+    if (!mongoose.Types.ObjectId.isValid(id))
+      throw new BadRequestException('ID không hợp lệ');
 
     await this.postModel.updateOne(
       {
