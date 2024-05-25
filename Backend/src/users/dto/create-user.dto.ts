@@ -69,7 +69,7 @@ export class CreateUserDto {
   @IsMongoId({
     message: 'Vai trò không đúng định dạng',
   })
-  role: string;
+  role: mongoose.Schema.Types.ObjectId;
 
   // @IsNotEmptyObject()
   @IsObject()
