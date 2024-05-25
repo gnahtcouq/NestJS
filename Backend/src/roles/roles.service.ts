@@ -1,5 +1,9 @@
 /* eslint-disable prefer-const */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { IUser } from 'src/users/users.interface';
@@ -74,23 +78,26 @@ export class RolesService {
 
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
 
-    return (await this.roleModel.findById(id)).populate({
+    const role = await this.roleModel.findById(id);
+    if (!role) throw new NotFoundException('Không tìm thấy vai trò!');
+
+    return role.populate({
       path: 'permissions',
-      select: { _id: 1, apiPath: 1, name: 1, method: 1 },
+      select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
     });
   }
 
   async update(_id: string, updateRoleDto: UpdateRoleDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id))
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
 
     const { name, description, isActive, permissions } = updateRoleDto;
 
-    const isExist = await this.roleModel.findOne({ name });
-    if (isExist)
-      throw new BadRequestException(`Vai trò với tên: ${name} đã tồn tại!`);
+    // const isExist = await this.roleModel.findOne({ name });
+    // if (isExist)
+    //   throw new BadRequestException(`Vai trò với tên: ${name} đã tồn tại!`);
 
     const updated = await this.roleModel.updateOne(
       { _id },
@@ -110,6 +117,10 @@ export class RolesService {
   }
 
   async remove(id: string, user: IUser) {
+    const foundRole = await this.roleModel.findById(id);
+    if (foundRole.name === 'ADMIN')
+      throw new BadRequestException('Không thể xóa vai trò ADMIN!');
+
     await this.roleModel.updateOne(
       {
         _id: id,

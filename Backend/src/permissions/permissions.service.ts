@@ -79,7 +79,7 @@ export class PermissionsService {
 
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
     return await this.permissionModel.findById(id);
   }
 
@@ -89,7 +89,7 @@ export class PermissionsService {
     user: IUser,
   ) {
     if (!mongoose.Types.ObjectId.isValid(_id))
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
 
     const { module, method, apiPath, name } = updatePermissionDto;
 

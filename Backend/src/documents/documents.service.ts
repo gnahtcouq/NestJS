@@ -81,18 +81,30 @@ export class DocumentsService {
 
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
     }
     return await this.documentModel.findById(id);
   }
 
   async findByUsers(user: IUser) {
-    return await this.documentModel.find({ userId: user._id });
+    return await this.documentModel
+      .find({ userId: user._id })
+      .sort('-createdAt')
+      .populate([
+        {
+          path: 'departmentId',
+          select: { name: 1 },
+        },
+        {
+          path: 'postId',
+          select: { name: 1 },
+        },
+      ]);
   }
 
   async update(_id: string, status: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id)) {
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
     }
     const updated = await this.documentModel.updateOne(
       { _id },

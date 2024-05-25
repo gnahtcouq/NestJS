@@ -76,7 +76,7 @@ export class PostsService {
 
   findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
 
     return this.postModel.findById({
       _id: id,
@@ -101,7 +101,7 @@ export class PostsService {
 
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id))
-      throw new BadRequestException('ID không hợp lệ');
+      throw new BadRequestException('ID không hợp lệ!');
 
     await this.postModel.updateOne(
       {

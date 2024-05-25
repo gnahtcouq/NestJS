@@ -132,19 +132,22 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ!`;
 
     return this.userModel
       .findById({
         _id: id,
       })
-      .select('-password'); //không trả về password
+      .select('-password') //không trả về password
+      .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
   findOneByUserName(username: string) {
-    return this.userModel.findOne({
-      email: username,
-    });
+    return this.userModel
+      .findOne({
+        email: username,
+      })
+      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
   }
 
   isValidPassword(password: string, hashPassword: string) {
@@ -169,7 +172,13 @@ export class UsersService {
   }
 
   async remove(id: string, user: IUser) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+    //admin@stu.id.vn
+
+    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ!`;
+
+    const foundUser = await this.userModel.findById(id);
+    if (foundUser.email === 'admin@stu.id.vn')
+      throw new BadRequestException('Không thể xóa tài khoản admin!');
 
     await this.userModel.updateOne(
       {

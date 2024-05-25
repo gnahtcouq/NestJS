@@ -3,6 +3,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsDate,
   IsEmail,
+  IsMongoId,
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
@@ -63,7 +64,10 @@ export class CreateUserDto {
   CCCD: string;
 
   @IsNotEmpty({
-    message: 'Quyền không được để trống',
+    message: 'Vai trò không được để trống',
+  })
+  @IsMongoId({
+    message: 'Vai trò không đúng định dạng',
   })
   role: string;
 
