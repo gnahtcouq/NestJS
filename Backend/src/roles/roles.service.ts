@@ -12,6 +12,7 @@ import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import { ADMIN_ROLE } from 'src/databases/sample';
 
 @Injectable()
 export class RolesService {
@@ -118,7 +119,7 @@ export class RolesService {
 
   async remove(id: string, user: IUser) {
     const foundRole = await this.roleModel.findById(id);
-    if (foundRole.name === 'ADMIN')
+    if (foundRole.name === ADMIN_ROLE)
       throw new BadRequestException('Không thể xóa vai trò ADMIN!');
 
     await this.roleModel.updateOne(
