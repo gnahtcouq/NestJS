@@ -30,11 +30,11 @@ export class CreatePostDto {
     message: 'Chủ đề không được để trống',
   })
   @IsArray({
-    message: 'Chủ đề phải là mảng',
+    message: 'Chủ đề phải có định dạng là mảng',
   })
   @IsString({
     each: true, //kiểm tra từng phần tử trong mảng nếu không phải là string sẽ báo lỗi
-    message: 'Chủ đề phải là chuỗi',
+    message: 'Chủ đề phải có định dạng là chuỗi',
   })
   threads: string[];
 
