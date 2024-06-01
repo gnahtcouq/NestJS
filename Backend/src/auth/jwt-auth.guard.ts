@@ -43,20 +43,21 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       );
     }
 
-    // //check permission
-    // const targetMethod = request.method;
-    // const targetEndpoint = request.route?.path as string;
+    //check permission
+    const targetMethod = request.method;
+    const targetEndpoint = request.route?.path as string;
 
-    // const permissions = user?.permissions ?? [];
-    // let isExist = permissions.find(
-    //   (permission) =>
-    //     targetMethod === permission.method &&
-    //     targetEndpoint === permission.apiPath,
-    // );
-    // if (targetEndpoint.startsWith('/api/v1/auth')) isExist = true;
-    // if (!isExist && !isSkipPermission) {
-    //   throw new ForbiddenException('Bạn không có quyền truy cập endpoint');
-    // }
+    const permissions = user?.permissions ?? [];
+    let isExist = permissions.find(
+      (permission) =>
+        targetMethod === permission.method &&
+        targetEndpoint === permission.apiPath,
+    );
+    if (targetEndpoint.startsWith('/api/v1/auth')) isExist = true;
+    if (!isExist && !isSkipPermission) {
+      throw new ForbiddenException('Bạn không có quyền truy cập endpoint');
+    }
+
     return user;
   }
 }

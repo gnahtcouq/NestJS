@@ -9,6 +9,7 @@ import {
 } from 'src/subscribers/schemas/subscriber.schema';
 import { Post, PostDocument } from 'src/posts/schemas/post.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Controller('mail')
 export class MailController {
@@ -22,6 +23,11 @@ export class MailController {
     @InjectModel(Post.name)
     private postModel: SoftDeleteModel<PostDocument>,
   ) {}
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  testCron() {
+    console.log('Every 5 seconds');
+  }
 
   @Get()
   @Public()
