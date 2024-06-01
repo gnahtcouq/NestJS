@@ -27,7 +27,7 @@
                     <tr>
                         <td colspan="2">
                             <div style="text-align: left;">
-                                <div style="font-size: 16px;">Xin chào Quốc Thắng,</div>
+                                <div style="font-size: 16px;">Xin chào {{receiver}},</div>
                                 <div style="font-size: 16px;">Thông báo mới từ Đại học Công nghệ Sài Gòn!</div>
                             </div>
                         </td>
@@ -38,40 +38,29 @@
                     <tr>
                         <td colspan="2">
                             <table>
+                                {{#each posts}}
                                 <tr>
                                     <td>
                                         <div style="font-size: 16px;">
-                                            <a href="https://hoidanit.com.vn/" target="_blank"
-                                                style="text-decoration: none;">Thông báo về việc Đăng ký bảo hiểm y tế và bảo hiểm tai nạn đợt 8 năm học 2023 - 2024</a>
+                                            <a href="https://stu.id.vn/" target="_blank"
+                                                style="text-decoration: none;">{{name}}</a>
                                         </div>
-                                        <div style="font-size: 14px;">Khoa Công Nghệ Thông Tin</div>
+                                        <div style="font-size: 14px;">{{department}}</div>
                                         <div>
-                                            <span style="font-size: 14px;">THÔNG BÁO</span>
-                                            <span style="font-size: 14px;">QUYẾT ĐỊNH</span>
+                                            {{#each threads}}
+                                                <span style="font-size: 14px;">{{this}}</span>
+                                            {{/each}}
                                         </div>
                                         <div style="margin: 15px 0; border-top: 1px dashed rgba(5, 5, 5, 0.06);"></div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <div style="font-size: 16px;">
-                                            <a href="https://hoidanit.com.vn/" target="_blank"
-                                                style="text-decoration: none;">Quyết định về việc Ban hành Kế hoạch cải tiến hiệu quả hoạt động của Nhà trường</a>
-                                        </div>
-                                        <div style="font-size: 14px;">Khoa Công Nghệ Thông Tin</div>
-                                        <div>
-                                            <span style="font-size: 14px;">THÔNG BÁO</span>
-                                            <span style="font-size: 14px;">QUYẾT ĐỊNH</span>
-                                        </div>
-                                        <div style="margin: 15px 0; border-top: 1px dashed rgba(5, 5, 5, 0.06);"></div>
-                                    </td>
-                                </tr>
+                                {{/each}}
                             </table>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: center;">
-                            <a href="https://hoidanit.com.vn/" target="_blank"
+                            <a href="https://stu.id.vn/" target="_blank"
                                 style="display: inline-block; width: 100%; height: 40px; line-height: 40px; cursor: pointer; border-radius: 5px; background-color: #ea1e30; color: white; border: none; outline: none; text-decoration: none; font-size: 16px;">
                                 Xem thêm thông báo
                             </a>
