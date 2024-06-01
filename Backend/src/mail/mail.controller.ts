@@ -24,28 +24,16 @@ export class MailController {
     private postModel: SoftDeleteModel<PostDocument>,
   ) {}
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
-  testCron() {
-    console.log('Every 5 seconds');
-  }
+  // @Cron(CronExpression.EVERY_5_SECONDS)
+  // testCron() {
+  //   console.log('Every 5 seconds');
+  // }
 
   @Get()
   @Public()
   @ResponseMessage('Gửi email')
+  @Cron('* * 6 * * *') // 6h hàng ngày
   async handleTestEmail() {
-    const posts = [
-      {
-        name: 'Thông báo về việc Đăng ký bảo hiểm y tế và bảo hiểm tai nạn đợt 8 năm học 2023 - 2024',
-        department: 'Khoa Công Nghệ Thông Tin',
-        threads: ['THÔNG BÁO', 'QUYẾT ĐỊNH'],
-      },
-      {
-        name: 'Quyết định về việc Ban hành Kế hoạch cải tiến hiệu quả hoạt động của Nhà trường',
-        department: 'Khoa Công Nghệ Thông Tin',
-        threads: ['THÔNG BÁO', 'QUYẾT ĐỊNH'],
-      },
-    ];
-
     const subscribers = await this.subscriberModel.find({});
     for (const subs of subscribers) {
       const subsThreads = subs.threads;
