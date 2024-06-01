@@ -18,7 +18,7 @@ export class MailController {
       to: 'comehere.thang@gmail.com',
       from: '"Support Team" <support@stu.id.vn>', // override default from
       subject: 'Thông báo mới từ Đại học Công nghệ Sài Gòn',
-      html: '<b>Welcome...</b>', // HTML body content
+      template: 'post',
     });
   }
 }
