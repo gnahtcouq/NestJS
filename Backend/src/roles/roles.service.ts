@@ -26,7 +26,7 @@ export class RolesService {
 
     const isExist = await this.roleModel.findOne({ name });
     if (isExist) {
-      throw new BadRequestException(`Vai trò với tên: ${name} đã tồn tại!`);
+      throw new BadRequestException(`Vai trò với tên: ${name} đã tồn tại`);
     }
 
     const newRole = await this.roleModel.create({
@@ -120,7 +120,7 @@ export class RolesService {
   async remove(id: string, user: IUser) {
     const foundRole = await this.roleModel.findById(id);
     if (foundRole.name === ADMIN_ROLE)
-      throw new BadRequestException('Không thể xóa vai trò ADMIN!');
+      throw new BadRequestException('Không thể xóa vai trò ADMIN');
 
     await this.roleModel.updateOne(
       {

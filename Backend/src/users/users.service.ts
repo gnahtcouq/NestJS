@@ -9,17 +9,18 @@ import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import { User } from 'src/decorator/customize';
-import { use } from 'passport';
 import aqp from 'api-query-params';
 import { USER_ROLE } from 'src/databases/sample';
 import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
-import path from 'path';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
     @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
+
+    private configService: ConfigService,
   ) {}
 
   getHashPassword = (password: string) => {
@@ -101,7 +102,7 @@ export class UsersService {
       address,
       role: userRole?._id,
       CCCD,
-      joiningDate: '1999',
+      joiningDate: '',
       leavingDate: '',
       unionEntryDate: '',
       note: '',
@@ -142,10 +143,10 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ!`;
+    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
 
     return this.userModel
-      .findById({
+      .findOne({
         _id: id,
       })
       .select('-password') //không trả về password
@@ -182,13 +183,14 @@ export class UsersService {
   }
 
   async remove(id: string, user: IUser) {
-    //admin@stu.id.vn
-
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ!`;
+    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
 
     const foundUser = await this.userModel.findById(id);
-    if (foundUser.email === 'admin@stu.id.vn')
-      throw new BadRequestException('Không thể xóa tài khoản admin!');
+    if (
+      foundUser &&
+      foundUser.email === this.configService.get<string>('EMAIL_ADMIN')
+    )
+      throw new BadRequestException('Không thể xóa tài khoản Admin');
 
     await this.userModel.updateOne(
       {

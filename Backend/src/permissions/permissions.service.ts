@@ -25,7 +25,7 @@ export class PermissionsService {
     const isExist = await this.permissionModel.findOne({ apiPath, method });
     if (isExist) {
       throw new BadRequestException(
-        `Quyền hạn với apiPath: ${apiPath} và method: ${method} đã tồn tại!`,
+        `Quyền hạn với apiPath: ${apiPath} và method: ${method} đã tồn tại`,
       );
     }
 
@@ -79,7 +79,7 @@ export class PermissionsService {
 
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
-      throw new BadRequestException('ID không hợp lệ!');
+      throw new BadRequestException('ID không hợp lệ');
     return await this.permissionModel.findById(id);
   }
 
@@ -89,17 +89,17 @@ export class PermissionsService {
     user: IUser,
   ) {
     if (!mongoose.Types.ObjectId.isValid(_id))
-      throw new BadRequestException('ID không hợp lệ!');
+      throw new BadRequestException('ID không hợp lệ');
 
     const { module, method, apiPath, name } = updatePermissionDto;
 
     const updated = await this.permissionModel.updateOne(
       { _id },
       {
-        module,
-        method,
-        apiPath,
         name,
+        apiPath,
+        method,
+        module,
         updatedBy: {
           _id: user._id,
           email: user.email,

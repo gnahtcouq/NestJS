@@ -32,13 +32,13 @@ export class AuthController {
   }
 
   @Public() //không dùng JWT để xác thực
-  @ResponseMessage('Tạo tài khoản thành công') //trả về response message
+  @ResponseMessage('Tạo tài khoản') //trả về response message
   @Post('/register')
   handleRegister(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.register(registerUserDto);
   }
 
-  @ResponseMessage('Lấy thông tin người dùng thành công')
+  @ResponseMessage('Lấy thông tin người dùng')
   @Get('/account')
   async handleGetAccount(@User() user: IUser) {
     const temp = (await this.rolesService.findOne(user.role._id)) as any;
@@ -57,7 +57,7 @@ export class AuthController {
     return this.authService.processNewToken(refreshToken, response);
   }
 
-  @ResponseMessage('Đăng xuất thành công')
+  @ResponseMessage('Đăng xuất')
   @Post('/logout')
   handleLogout(
     @Res({ passthrough: true }) response: Response,

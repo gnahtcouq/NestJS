@@ -5,7 +5,7 @@ export const USER_ROLE = 'NORMAL_USER';
 export const INIT_PERMISSIONS = [
   {
     _id: '648ab415f4328bd3153ee211',
-    name: 'Get Department with paginate',
+    name: 'Xem danh sách đơn vị',
     apiPath: '/api/v1/departments',
     method: 'GET',
     module: 'DEPARTMENTS',
@@ -25,7 +25,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab436f4328bd3153ee216',
-    name: 'Create Department',
+    name: 'Thêm mới đơn vị',
     apiPath: '/api/v1/departments',
     method: 'POST',
     module: 'DEPARTMENTS',
@@ -41,7 +41,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab4d5f4328bd3153ee21b',
-    name: 'Update Department',
+    name: 'Cập nhật thông tin đơn vị',
     apiPath: '/api/v1/departments/:id',
     method: 'PATCH',
     module: 'DEPARTMENTS',
@@ -57,7 +57,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab4ebf4328bd3153ee220',
-    name: 'Delete Department',
+    name: 'Xoá đơn vị',
     apiPath: '/api/v1/departments/:id',
     method: 'DELETE',
     module: 'DEPARTMENTS',
@@ -73,7 +73,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab5a8072f2a2ef910638d',
-    name: 'Get Department by id',
+    name: 'Xem thông tin chi tiết đơn vị',
     apiPath: '/api/v1/departments/:id',
     method: 'GET',
     module: 'DEPARTMENTS',
@@ -89,7 +89,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab6d3fa16b294212e4033',
-    name: 'Create User',
+    name: 'Thêm mới người dùng',
     apiPath: '/api/v1/users',
     method: 'POST',
     module: 'USERS',
@@ -105,7 +105,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab6e7fa16b294212e4038',
-    name: 'Get User by Id',
+    name: 'Xem thông tin chi tiết người dùng',
     apiPath: '/api/v1/users/:id',
     method: 'GET',
     module: 'USERS',
@@ -121,7 +121,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab6fdfa16b294212e403d',
-    name: 'Get User with paginate',
+    name: 'Xem danh sách người dùng',
     apiPath: '/api/v1/users',
     method: 'GET',
     module: 'USERS',
@@ -137,7 +137,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab719fa16b294212e4042',
-    name: 'Update User',
+    name: 'Cập nhật thông tin người dùng',
     apiPath: '/api/v1/users/:id',
     method: 'PATCH',
     module: 'USERS',
@@ -153,7 +153,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab728fa16b294212e4047',
-    name: 'Delete User',
+    name: 'Xoá người dùng',
     apiPath: '/api/v1/users/:id',
     method: 'DELETE',
     module: 'USERS',
@@ -169,7 +169,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ab750fa16b294212e404c',
-    name: 'Upload Single File',
+    name: 'Upload File',
     apiPath: '/api/v1/files/upload',
     method: 'POST',
     module: 'FILES',
@@ -185,7 +185,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad488dafdb9754f40b846',
-    name: 'Create a Post',
+    name: 'Thêm mới bài đăng',
     apiPath: '/api/v1/posts',
     method: 'POST',
     module: 'POSTS',
@@ -201,7 +201,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad499dafdb9754f40b84b',
-    name: 'Get a post by id',
+    name: 'Xem thông tin chi tiết bài đăng',
     apiPath: '/api/v1/posts/:id',
     method: 'GET',
     module: 'POSTS',
@@ -217,7 +217,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad4a6dafdb9754f40b850',
-    name: 'Update a Post',
+    name: 'Cập nhật thông tin bài đăng',
     apiPath: '/api/v1/posts/:id',
     method: 'PATCH',
     module: 'POSTS',
@@ -233,7 +233,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad4ccdafdb9754f40b859',
-    name: 'Get Post with paginate',
+    name: 'Xem danh sách bài đăng',
     apiPath: '/api/v1/posts',
     method: 'GET',
     module: 'POSTS',
@@ -249,7 +249,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad4d9dafdb9754f40b85e',
-    name: 'Delete a Post',
+    name: 'Xoá bài đăng',
     apiPath: '/api/v1/posts/:id',
     method: 'DELETE',
     module: 'POSTS',
@@ -265,10 +265,10 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad4fedafdb9754f40b863',
-    name: 'Create a Document',
+    name: 'Tạo mới văn bản',
     apiPath: '/api/v1/documents',
     method: 'POST',
-    module: 'RESUMES',
+    module: 'DOCUMENTS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
       email: 'comehere.thang@gmail.com',
@@ -281,10 +281,10 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad511dafdb9754f40b868',
-    name: 'Fetch document with paginate',
+    name: 'Xem danh sách văn bản',
     apiPath: '/api/v1/documents',
     method: 'GET',
-    module: 'RESUMES',
+    module: 'DOCUMENTS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
       email: 'comehere.thang@gmail.com',
@@ -297,10 +297,10 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad522dafdb9754f40b86d',
-    name: 'Get document by id',
+    name: 'Xem thông tin chi tiết văn bản',
     apiPath: '/api/v1/documents/:id',
     method: 'GET',
-    module: 'RESUMES',
+    module: 'DOCUMENTS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
       email: 'comehere.thang@gmail.com',
@@ -313,10 +313,10 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad53bdafdb9754f40b872',
-    name: 'Delete a document',
+    name: 'Xoá văn bản',
     apiPath: '/api/v1/documents/:id',
     method: 'DELETE',
-    module: 'RESUMES',
+    module: 'DOCUMENTS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
       email: 'comehere.thang@gmail.com',
@@ -329,10 +329,10 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad555dafdb9754f40b877',
-    name: 'Update document status',
+    name: 'Cập nhật trạng thái văn bản',
     apiPath: '/api/v1/documents/:id',
     method: 'PATCH',
-    module: 'RESUMES',
+    module: 'DOCUMENTS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
       email: 'comehere.thang@gmail.com',
@@ -345,10 +345,10 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad56ddafdb9754f40b87c',
-    name: 'Fetch documents by user',
+    name: 'Xem danh sách văn bản theo người dùng',
     apiPath: '/api/v1/documents/by-user',
     method: 'POST',
-    module: 'RESUMES',
+    module: 'DOCUMENTS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
       email: 'comehere.thang@gmail.com',
@@ -361,7 +361,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad59adafdb9754f40b881',
-    name: 'Create a permission',
+    name: 'Tạo mới quyền hạn',
     apiPath: '/api/v1/permissions',
     method: 'POST',
     module: 'PERMISSIONS',
@@ -377,7 +377,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad5aedafdb9754f40b886',
-    name: 'Fetch Permission with paginate',
+    name: 'Xem danh sách quyền hạn',
     apiPath: '/api/v1/permissions',
     method: 'GET',
     module: 'PERMISSIONS',
@@ -393,7 +393,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad5c5dafdb9754f40b88b',
-    name: 'Fetch permission by id',
+    name: 'Xem thông tin chi tiết quyền hạn',
     apiPath: '/api/v1/permissions/:id',
     method: 'GET',
     module: 'PERMISSIONS',
@@ -409,7 +409,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad5d4dafdb9754f40b890',
-    name: 'Update a permission',
+    name: 'Cập nhật thông tin quyền hạn',
     apiPath: '/api/v1/permissions/:id',
     method: 'PATCH',
     module: 'PERMISSIONS',
@@ -425,7 +425,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad5ebdafdb9754f40b895',
-    name: 'Delete a permission',
+    name: 'Xoá quyền hạn',
     apiPath: '/api/v1/permissions/:id',
     method: 'DELETE',
     module: 'PERMISSIONS',
@@ -441,7 +441,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad613dafdb9754f40b89a',
-    name: 'Create Role',
+    name: 'Thêm mới vai trò',
     apiPath: '/api/v1/roles',
     method: 'POST',
     module: 'ROLES',
@@ -457,7 +457,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad622dafdb9754f40b89f',
-    name: 'Fetch roles with paginate',
+    name: 'Xem danh sách vai trò',
     apiPath: '/api/v1/roles',
     method: 'GET',
     module: 'ROLES',
@@ -473,7 +473,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad630dafdb9754f40b8a6',
-    name: 'Fetch role by id',
+    name: 'Xem thông tin chi tiết vai trò',
     apiPath: '/api/v1/roles/:id',
     method: 'GET',
     module: 'ROLES',
@@ -489,7 +489,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad640dafdb9754f40b8ab',
-    name: 'Update Role',
+    name: 'Cập nhật thông tin vai trò',
     apiPath: '/api/v1/roles/:id',
     method: 'PATCH',
     module: 'ROLES',
@@ -505,7 +505,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad650dafdb9754f40b8b0',
-    name: 'Delete a Role',
+    name: 'Xoá vai trò',
     apiPath: '/api/v1/roles/:id',
     method: 'DELETE',
     module: 'ROLES',

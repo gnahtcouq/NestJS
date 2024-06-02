@@ -31,6 +31,7 @@ export class DatabasesService implements OnModuleInit {
   async onModuleInit() {
     const isInit = this.configService.get<string>('SHOULD_INIT');
     if (Boolean(isInit)) {
+      //check if already init
       const countUser = await this.userModel.count({});
       const countPermission = await this.permissionModel.count({});
       const countRole = await this.roleModel.count({});
@@ -76,6 +77,7 @@ export class DatabasesService implements OnModuleInit {
             joiningDate: '1999-01-01T00:00:00.00+00:00',
             leavingDate: '1999-01-01T00:00:00.00+00:00',
             unionEntryDate: '1999-01-01T00:00:00.00+00:00',
+            note: 'Saigon Technology University',
           },
           {
             name: 'Trần Văn Quốc Thắng',
@@ -91,10 +93,11 @@ export class DatabasesService implements OnModuleInit {
             joiningDate: '1999-01-01T00:00:00.00+00:00',
             leavingDate: '1999-01-01T00:00:00.00+00:00',
             unionEntryDate: '1999-01-01T00:00:00.00+00:00',
+            note: 'Saigon Technology University',
           },
           {
             name: 'Lại Văn Toàn',
-            email: 'nadmat1205@gmail.com',
+            email: 'dh52006741@student.stu.edu.vn',
             password: this.userService.getHashPassword(
               this.configService.get<string>('INIT_PASSWORD'),
             ),
@@ -106,6 +109,7 @@ export class DatabasesService implements OnModuleInit {
             joiningDate: '1999-01-01T00:00:00.00+00:00',
             leavingDate: '1999-01-01T00:00:00.00+00:00',
             unionEntryDate: '1999-01-01T00:00:00.00+00:00',
+            note: 'Saigon Technology University',
           },
           {
             name: 'Trần Nguyễn Thanh Sang',
@@ -121,6 +125,7 @@ export class DatabasesService implements OnModuleInit {
             joiningDate: '1999-01-01T00:00:00.00+00:00',
             leavingDate: '1999-01-01T00:00:00.00+00:00',
             unionEntryDate: '1999-01-01T00:00:00.00+00:00',
+            note: 'Saigon Technology University',
           },
           {
             name: 'Trần A Huy',
@@ -136,6 +141,7 @@ export class DatabasesService implements OnModuleInit {
             joiningDate: '1999-01-01T00:00:00.00+00:00',
             leavingDate: '1999-01-01T00:00:00.00+00:00',
             unionEntryDate: '1999-01-01T00:00:00.00+00:00',
+            note: 'Saigon Technology University',
           },
         ]);
       }
