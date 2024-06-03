@@ -19,9 +19,6 @@ export class Post {
   };
 
   @Prop()
-  fee: number;
-
-  @Prop()
   description: string;
 
   @Prop()

@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -45,11 +46,6 @@ export class CreatePostDto {
   department: Department;
 
   @IsNotEmpty({
-    message: 'Phí không được để trống',
-  })
-  fee: number;
-
-  @IsNotEmpty({
     message: 'Mô tả không được để trống',
   })
   description: string;
@@ -68,5 +64,7 @@ export class CreatePostDto {
   @IsDate({ message: 'Ngày kết thúc không đúng định dạng' })
   endDate: Date;
 
+  @IsNotEmpty({ message: 'Trạng thái không được để trống' })
+  @IsBoolean({ message: 'Trạng thái phải có định dạng là boolean' })
   isActive: boolean;
 }
