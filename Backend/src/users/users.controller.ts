@@ -41,17 +41,21 @@ export class UsersController {
   }
 
   @Public()
-  @Get(':id')
   @ResponseMessage('Lấy thông tin người dùng')
+  @Get(':id')
   async findOne(@Param('id') id: string) {
     const foundUser = await this.usersService.findOne(id);
     return foundUser;
   }
 
-  @Patch()
+  @Patch(':id')
   @ResponseMessage('Cập nhật người dùng')
-  async update(@Body() updateUserDto: UpdateUserDto, @User() user: IUser) {
-    let updatedUser = await this.usersService.update(updateUserDto, user);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @User() user: IUser,
+  ) {
+    let updatedUser = await this.usersService.update(id, updateUserDto, user);
     return updatedUser;
   }
 

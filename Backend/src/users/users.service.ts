@@ -165,7 +165,7 @@ export class UsersService {
     return compareSync(password, hashPassword);
   }
 
-  async update(updateUserDto: UpdateUserDto, user: IUser) {
+  async update(_id: string, updateUserDto: UpdateUserDto, user: IUser) {
     const updated = await this.userModel.updateOne(
       {
         _id: updateUserDto._id,

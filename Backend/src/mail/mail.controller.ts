@@ -51,7 +51,7 @@ export class MailController {
 
         await this.mailerService.sendMail({
           to: 'comehere.thang@gmail.com',
-          from: '"Support Team" <support@stu.id.vn>', // override default from
+          from: '"Saigon Technology University" <support@stu.id.vn>', // override default from
           subject: 'Thông báo mới từ Đại học Công nghệ Sài Gòn',
           template: 'new-post',
           context: {
