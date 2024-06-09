@@ -15,22 +15,14 @@ export class CreateDocumentDto {
   @IsNotEmpty({ message: 'Trạng thái không được để trống' })
   status: string;
 
-  @IsNotEmpty({ message: 'ID đơn vị không được để trống' })
-  departmentId: mongoose.Schema.Types.ObjectId;
-
-  @IsNotEmpty({ message: 'ID bài viết không được để trống' })
-  postId: mongoose.Schema.Types.ObjectId;
+  @IsNotEmpty({ message: 'Tên văn bản không được để trống' })
+  name: string;
 }
 
 export class CreateUserDocDto {
   @IsNotEmpty({ message: 'URL không được để trống' })
   url: string;
 
-  @IsNotEmpty({ message: 'ID đơn vị không được để trống' })
-  @IsMongoId({ message: 'ID đơn vị không hợp lệ' })
-  departmentId: mongoose.Schema.Types.ObjectId;
-
-  @IsNotEmpty({ message: 'ID bài viết không được để trống' })
-  @IsMongoId({ message: 'ID bài viết không hợp lệ' })
-  postId: mongoose.Schema.Types.ObjectId;
+  @IsNotEmpty({ message: 'Tên văn bản không được để trống' })
+  name: string;
 }

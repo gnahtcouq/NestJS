@@ -20,20 +20,19 @@ export class DocumentsService {
   ) {}
 
   async create(createUserDocDto: CreateUserDocDto, user: IUser) {
-    const { url, departmentId, postId } = createUserDocDto;
+    const { name, url } = createUserDocDto;
     const { email, _id } = user;
 
     const newDocument = await this.documentModel.create({
+      name,
       url,
-      departmentId,
       email,
-      postId,
       userId: _id,
-      status: 'PENDING',
+      status: 'ACTIVE',
       createdBy: { _id, email },
       history: [
         {
-          status: 'PENDING',
+          status: 'ACTIVE',
           updatedAt: new Date(),
           updatedBy: {
             _id: user._id,
@@ -89,17 +88,7 @@ export class DocumentsService {
   async findByUsers(user: IUser) {
     return await this.documentModel
       .find({ userId: user._id })
-      .sort('-createdAt')
-      .populate([
-        {
-          path: 'departmentId',
-          select: { name: 1 },
-        },
-        {
-          path: 'postId',
-          select: { name: 1 },
-        },
-      ]);
+      .sort('-createdAt');
   }
 
   async update(_id: string, status: string, user: IUser) {

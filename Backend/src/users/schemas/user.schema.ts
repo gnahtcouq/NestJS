@@ -28,23 +28,23 @@ export class User {
   @Prop()
   CCCD: string; //căn cước công dân
 
-  @Prop()
-  joiningDate: Date; //ngày chuyển đến
+  // @Prop()
+  // joiningDate: Date; //ngày chuyển đến
 
-  @Prop()
-  leavingDate: Date; //ngày chuyển đi
+  // @Prop()
+  // leavingDate: Date; //ngày chuyển đi
 
-  @Prop()
-  unionEntryDate: Date; //ngày vào công đoàn
+  // @Prop()
+  // unionEntryDate: Date; //ngày vào công đoàn
 
   @Prop()
   note: string; //ghi chú
 
-  @Prop({ type: Object })
-  department: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
+  // @Prop({ type: Object })
+  // department: {
+  //   _id: mongoose.Schema.Types.ObjectId;
+  //   name: string;
+  // };
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Role.name }) //relationship
   role: mongoose.Schema.Types.ObjectId;

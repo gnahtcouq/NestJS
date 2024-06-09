@@ -12,13 +12,13 @@ import {
 } from 'class-validator';
 import mongoose from 'mongoose';
 
-class Department {
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
+// class Department {
+//   @IsNotEmpty()
+//   _id: mongoose.Schema.Types.ObjectId;
 
-  @IsNotEmpty()
-  name: string;
-}
+//   @IsNotEmpty()
+//   name: string;
+// }
 
 //data transfer object for creating a user
 export class CreateUserDto {
@@ -72,31 +72,31 @@ export class CreateUserDto {
   role: mongoose.Schema.Types.ObjectId;
 
   // @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => Department)
-  department: Department;
+  // @IsObject()
+  // @ValidateNested()
+  // @Type(() => Department)
+  // department: Department;
 
-  @IsNotEmpty({
-    message: 'Ngày chuyển đến không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
-  joiningDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày chuyển đến không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
+  // joiningDate: Date;
 
-  @IsNotEmpty({
-    message: 'Ngày chuyển đi không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
-  leavingDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày chuyển đi không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
+  // leavingDate: Date;
 
-  @IsNotEmpty({
-    message: 'Ngày vào công đoàn không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
-  unionEntryDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày vào công đoàn không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
+  // unionEntryDate: Date;
 
   @IsOptional()
   note?: string;
@@ -144,26 +144,26 @@ export class RegisterUserDto {
   })
   CCCD: string;
 
-  @IsNotEmpty({
-    message: 'Ngày chuyển đến không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
-  joiningDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày chuyển đến không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
+  // joiningDate: Date;
 
-  @IsNotEmpty({
-    message: 'Ngày chuyển đi không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
-  leavingDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày chuyển đi không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
+  // leavingDate: Date;
 
-  @IsNotEmpty({
-    message: 'Ngày vào công đoàn không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
-  unionEntryDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày vào công đoàn không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
+  // unionEntryDate: Date;
 
   note: string;
 }

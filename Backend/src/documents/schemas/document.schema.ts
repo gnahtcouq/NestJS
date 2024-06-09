@@ -9,6 +9,9 @@ export type DocumentDocument = HydratedDocument<Document>;
 @Schema({ timestamps: true })
 export class Document {
   @Prop()
+  name: string;
+
+  @Prop()
   email: string;
 
   @Prop()
@@ -23,11 +26,11 @@ export class Document {
   // @Prop()
   // departmentId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Department.name })
-  departmentId: mongoose.Schema.Types.ObjectId;
+  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Department.name })
+  // departmentId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Post.name })
-  postId: mongoose.Schema.Types.ObjectId;
+  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Post.name })
+  // postId: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.Array })
   history: {

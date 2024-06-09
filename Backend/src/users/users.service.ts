@@ -39,10 +39,10 @@ export class UsersService {
       address,
       role,
       CCCD,
-      department,
-      joiningDate,
-      leavingDate,
-      unionEntryDate,
+      // department,
+      // joiningDate,
+      // leavingDate,
+      // unionEntryDate,
       note,
     } = createUserDto;
 
@@ -64,10 +64,10 @@ export class UsersService {
       address,
       role,
       CCCD,
-      department,
-      joiningDate,
-      leavingDate,
-      unionEntryDate,
+      // department,
+      // joiningDate,
+      // leavingDate,
+      // unionEntryDate,
       note,
       createdBy: {
         _id: user._id,
@@ -102,9 +102,9 @@ export class UsersService {
       address,
       role: userRole?._id,
       CCCD,
-      joiningDate: '',
-      leavingDate: '',
-      unionEntryDate: '',
+      // joiningDate: '',
+      // leavingDate: '',
+      // unionEntryDate: '',
       note: '',
     });
 
@@ -143,7 +143,8 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+    if (!mongoose.Types.ObjectId.isValid(id))
+      throw new BadRequestException('ID không hợp lệ!');
 
     return this.userModel
       .findOne({
