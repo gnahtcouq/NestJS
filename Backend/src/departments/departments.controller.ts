@@ -61,4 +61,10 @@ export class DepartmentsController {
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.departmentsService.remove(id, user);
   }
+
+  @Post('count')
+  @ResponseMessage('Lấy số lượng đơn vị')
+  countDepartments() {
+    return this.departmentsService.countDepartments();
+  }
 }

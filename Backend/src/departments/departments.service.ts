@@ -102,4 +102,8 @@ export class DepartmentsService {
       _id: id,
     });
   }
+
+  async countDepartments() {
+    return await this.departmentModel.countDocuments({ isDeleted: false });
+  }
 }

@@ -64,4 +64,10 @@ export class UsersController {
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.usersService.remove(id, user);
   }
+
+  @Post('count')
+  @ResponseMessage('Lấy số lượng người dùng')
+  countUsers() {
+    return this.usersService.countUsers();
+  }
 }

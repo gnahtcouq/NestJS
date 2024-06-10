@@ -132,4 +132,8 @@ export class DocumentsService {
       _id: id,
     });
   }
+
+  async countDocuments() {
+    return await this.documentModel.countDocuments({ isDeleted: false });
+  }
 }

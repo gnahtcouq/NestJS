@@ -12,7 +12,7 @@ import {
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto, CreateUserDocDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 
 @Controller('documents')
@@ -61,5 +61,11 @@ export class DocumentsController {
   @ResponseMessage('Xóa văn bản')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.documentsService.remove(id, user);
+  }
+
+  @Post('count')
+  @ResponseMessage('Lấy số lượng văn bản')
+  countDocuments() {
+    return this.documentsService.countDocuments();
   }
 }

@@ -117,4 +117,8 @@ export class PostsService {
       _id: id,
     });
   }
+
+  async countPosts() {
+    return await this.postModel.countDocuments({ isDeleted: false });
+  }
 }

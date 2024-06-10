@@ -58,4 +58,10 @@ export class PostsController {
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.postsService.remove(id, user);
   }
+
+  @Post('count')
+  @ResponseMessage('Lấy số lượng bài đăng')
+  countPosts() {
+    return this.postsService.countPosts();
+  }
 }

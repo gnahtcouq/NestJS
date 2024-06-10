@@ -231,4 +231,8 @@ export class UsersService {
         select: { name: 1 },
       });
   };
+
+  async countUsers() {
+    return await this.userModel.countDocuments({ isDeleted: false });
+  }
 }
