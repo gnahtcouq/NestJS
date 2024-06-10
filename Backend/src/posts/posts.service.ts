@@ -19,7 +19,7 @@ export class PostsService {
     const {
       name,
       threads,
-      department,
+      // department,
       description,
       startDate,
       endDate,
@@ -29,7 +29,7 @@ export class PostsService {
     let newPost = await this.postModel.create({
       name,
       threads,
-      department,
+      // department,
       description,
       startDate,
       endDate,

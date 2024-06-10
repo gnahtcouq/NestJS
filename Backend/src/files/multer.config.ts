@@ -56,15 +56,7 @@ export class MulterConfigService implements MulterOptionsFactory {
         },
       }),
       fileFilter: (req, file, cb) => {
-        const allowedFileTypes = [
-          'jpg',
-          'jpeg',
-          'png',
-          'gif',
-          'pdf',
-          'doc',
-          'docx',
-        ];
+        const allowedFileTypes = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
         const fileExtension = file.originalname.split('.').pop().toLowerCase();
         const isValidFileType = allowedFileTypes.includes(fileExtension);
         if (!isValidFileType) {
@@ -78,7 +70,7 @@ export class MulterConfigService implements MulterOptionsFactory {
         } else cb(null, true);
       },
       limits: {
-        fileSize: 1024 * 1024 * 1, // 1MB
+        fileSize: 1024 * 1024 * 10, // 10MB
       },
     };
   }

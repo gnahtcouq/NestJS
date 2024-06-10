@@ -39,11 +39,11 @@ export class CreatePostDto {
   })
   threads: string[];
 
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => Department)
-  department: Department;
+  // @IsNotEmptyObject()
+  // @IsObject()
+  // @ValidateNested()
+  // @Type(() => Department)
+  // department: Department;
 
   @IsNotEmpty({
     message: 'Mô tả không được để trống',
