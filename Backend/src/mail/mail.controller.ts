@@ -32,7 +32,7 @@ export class MailController {
   @Get()
   @Public()
   @ResponseMessage('Gửi email')
-  @Cron('0 0 23 * * *') // 23h hàng ngày
+  @Cron('0 0 19 * * *') // 19h hàng ngày
   async handleTestEmail() {
     const subscribers = await this.subscriberModel.find({});
     for (const subs of subscribers) {
@@ -44,7 +44,6 @@ export class MailController {
         const posts = postWithMatchingThreads.map((item) => {
           return {
             name: item.name,
-            department: item.department.name,
             threads: item.threads,
           };
         });
