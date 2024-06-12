@@ -78,7 +78,7 @@ export class UsersService {
   }
 
   async register(user: RegisterUserDto) {
-    const { name, email, password, dateOfBirth, gender, address, CCCD } = user;
+    const { name, email, password, dateOfBirth, gender, address } = user;
 
     //logic check email exist
     const isExist = await this.userModel.findOne({ email });
@@ -101,7 +101,6 @@ export class UsersService {
       gender,
       address,
       role: userRole?._id,
-      CCCD,
       // joiningDate: '',
       // leavingDate: '',
       // unionEntryDate: '',

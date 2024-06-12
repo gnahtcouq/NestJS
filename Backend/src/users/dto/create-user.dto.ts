@@ -139,10 +139,10 @@ export class RegisterUserDto {
   })
   address: string;
 
-  @IsNotEmpty({
-    message: 'CCCD không được để trống',
-  })
-  CCCD: string;
+  // @IsNotEmpty({
+  //   message: 'CCCD không được để trống',
+  // })
+  // CCCD: string;
 
   // @IsNotEmpty({
   //   message: 'Ngày chuyển đến không được để trống',
