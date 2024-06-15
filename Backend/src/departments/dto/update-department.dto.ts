@@ -1,4 +1,21 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateDepartmentDto } from './create-department.dto';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
-export class UpdateDepartmentDto extends PartialType(CreateDepartmentDto) {}
+export class UpdateDepartmentDto {
+  @IsOptional()
+  @IsNotEmpty({
+    message: 'Tên không được để trống',
+  })
+  name: string;
+
+  @IsOptional()
+  @IsNotEmpty({
+    message: 'Mô tả không được để trống',
+  })
+  description: string;
+
+  @IsOptional()
+  @IsNotEmpty({
+    message: 'Logo không được để trống',
+  })
+  logo: string;
+}
