@@ -22,7 +22,7 @@ export class PostsService {
       // department,
       description,
       startDate,
-      endDate,
+      // endDate,
       isActive,
     } = createPostDto;
 
@@ -32,7 +32,7 @@ export class PostsService {
       // department,
       description,
       startDate,
-      endDate,
+      // endDate,
       isActive,
       createdBy: {
         _id: user._id,

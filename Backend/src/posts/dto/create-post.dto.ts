@@ -57,12 +57,12 @@ export class CreatePostDto {
   @IsDate({ message: 'Ngày bắt đầu không đúng định dạng' })
   startDate: Date;
 
-  @IsNotEmpty({
-    message: 'Ngày kết thúc không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày kết thúc không đúng định dạng' })
-  endDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày kết thúc không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày kết thúc không đúng định dạng' })
+  // endDate: Date;
 
   @IsNotEmpty({ message: 'Trạng thái không được để trống' })
   @IsBoolean({ message: 'Trạng thái phải có định dạng là boolean' })
