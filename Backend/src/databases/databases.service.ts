@@ -11,6 +11,10 @@ import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { Logger } from '@nestjs/common';
+import {
+  Unionist,
+  UnionistDocument,
+} from 'src/unionists/schemas/unionist.schema';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -18,6 +22,8 @@ export class DatabasesService implements OnModuleInit {
 
   constructor(
     @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
+    @InjectModel(Unionist.name)
+    private unionistModel: SoftDeleteModel<UnionistDocument>,
 
     @InjectModel(Permission.name)
     private permissionModel: SoftDeleteModel<PermissionDocument>,
@@ -26,6 +32,7 @@ export class DatabasesService implements OnModuleInit {
 
     private configService: ConfigService,
     private userService: UsersService,
+    private unionistService: UsersService,
   ) {}
 
   async onModuleInit() {
@@ -33,6 +40,7 @@ export class DatabasesService implements OnModuleInit {
     if (Boolean(isInit)) {
       //check if already init
       const countUser = await this.userModel.count({});
+      const countUnionist = await this.unionistModel.count({});
       const countPermission = await this.permissionModel.count({});
       const countRole = await this.roleModel.count({});
 
@@ -127,6 +135,28 @@ export class DatabasesService implements OnModuleInit {
             role: userRole?._id,
             CCCD: '080202004633',
             note: 'Saigon Technology University',
+          },
+        ]);
+      }
+
+      if (countUnionist === 0) {
+        const adminRole = await this.roleModel.findOne({ name: ADMIN_ROLE });
+        await this.unionistModel.insertMany([
+          {
+            name: 'Unionist',
+            email: 'unionist@stu.id.vn',
+            password: this.unionistService.getHashPassword(
+              this.configService.get<string>('INIT_PASSWORD'),
+            ),
+            dateOfBirth: null,
+            gender: null,
+            address: null,
+            role: adminRole?._id,
+            CCCD: null,
+            joiningDate: null,
+            leavingDate: null,
+            unionEntryDate: null,
+            note: null,
           },
         ]);
       }

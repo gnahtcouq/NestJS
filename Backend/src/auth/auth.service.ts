@@ -4,16 +4,18 @@ import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/users/users.interface';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
-import { create } from 'domain';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { Response } from 'express';
 import { RolesService } from 'src/roles/roles.service';
+import { UnionistsService } from 'src/unionists/unionists.service';
+import { IUnionist } from 'src/unionists/unionists.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private unionistsService: UnionistsService,
     private configService: ConfigService,
     private jwtService: JwtService,
     private rolesService: RolesService,
@@ -40,7 +42,33 @@ export class AuthService {
     return null;
   }
 
-  async login(user: IUser, response: Response) {
+  async validateUnionist(username: string, pass: string): Promise<any> {
+    const unionist = await this.unionistsService.findOneByUserName(username);
+    if (unionist) {
+      const isValid = this.unionistsService.isValidPassword(
+        pass,
+        unionist.password,
+      );
+      if (isValid === true) {
+        const unionistRole = unionist.role as unknown as {
+          _id: string;
+          name: string;
+        };
+        const temp = await this.rolesService.findOne(unionistRole._id);
+
+        const objUser = {
+          ...unionist.toObject(),
+          permissions: temp?.permissions ?? [],
+        };
+
+        return objUser;
+      }
+    }
+
+    return null;
+  }
+
+  async login(user: IUser | IUnionist, response: Response) {
     const { _id, name, email, role, permissions } = user;
     const payload = {
       sub: 'token login',
@@ -54,7 +82,8 @@ export class AuthService {
     const refresh_token = this.createRefreshToken(payload);
 
     //update user with refresh token
-    await this.usersService.updateUserToken(refresh_token, _id);
+    await this?.usersService?.updateUserToken(refresh_token, _id);
+    await this?.unionistsService?.updateUnionistToken(refresh_token, _id);
 
     //set refresh_token as cookies
     response.cookie('refresh_token', refresh_token, {
@@ -99,6 +128,9 @@ export class AuthService {
       });
 
       let user = await this.usersService.findUserByToken(refreshToken);
+      if (!user) {
+        user = await this.unionistsService.findUnionistByToken(refreshToken);
+      }
       // console.log(user);
       if (user) {
         //update refresh_token
@@ -150,8 +182,9 @@ export class AuthService {
     }
   };
 
-  logout = async (response: Response, user: IUser) => {
-    await this.usersService.updateUserToken('', user._id);
+  logout = async (response: Response, user: IUser | IUnionist) => {
+    await this?.usersService?.updateUserToken('', user._id);
+    await this?.unionistsService?.updateUnionistToken('', user._id);
     response.clearCookie('refresh_token');
     return 'ok';
   };

@@ -11,11 +11,21 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
   async validate(username: string, password: string): Promise<any> {
     const user = await this.authService.validateUser(username, password);
+
     if (!user) {
-      throw new UnauthorizedException(
-        'Tài khoản hoặc mật khẩu không chính xác',
+      // Nếu validateUser không thành công, thử validateUnionist
+      const unionist = await this.authService.validateUnionist(
+        username,
+        password,
       );
+      if (!unionist) {
+        throw new UnauthorizedException(
+          'Tài khoản hoặc mật khẩu không chính xác',
+        );
+      }
+      return unionist;
     }
+
     return user;
   }
 }

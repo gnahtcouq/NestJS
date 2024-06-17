@@ -69,7 +69,7 @@ export class CreateUnionistDto {
   })
   role: mongoose.Schema.Types.ObjectId;
 
-  // @IsNotEmptyObject()
+  @IsNotEmptyObject()
   @IsObject()
   @ValidateNested()
   @Type(() => Department)
