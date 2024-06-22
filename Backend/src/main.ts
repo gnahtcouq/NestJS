@@ -8,9 +8,14 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { TransformInterceptor } from 'src/core/transform.interceptor';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
   const configService = app.get(ConfigService);
 
   const reflector = app.get(Reflector);
