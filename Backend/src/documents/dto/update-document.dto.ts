@@ -15,6 +15,9 @@ class UpdatedBy {
 
 class History {
   @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
   status: string;
 
   @IsNotEmpty()
@@ -27,6 +30,12 @@ class History {
 }
 
 export class UpdateDocumentDto extends PartialType(CreateDocumentDto) {
+  @IsNotEmpty({ message: 'ID không được để trống' })
+  _id: string;
+
+  @IsNotEmpty({ message: 'Tên văn bản không được để trống' })
+  name: string;
+
   @IsNotEmpty({ message: 'Lịch sử không được để trống' })
   @IsArray({ message: 'Lịch sử có định dạng là mảng' })
   @ValidateNested()

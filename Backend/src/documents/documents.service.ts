@@ -91,6 +91,38 @@ export class DocumentsService {
       .sort('-createdAt');
   }
 
+  async updateName(
+    _id: string,
+    updateDocumentDto: UpdateDocumentDto,
+    user: IUser,
+  ) {
+    const updated = await this.documentModel.updateOne(
+      { _id },
+      {
+        $set: {
+          name: updateDocumentDto.name,
+          status: updateDocumentDto.status,
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+        $push: {
+          history: {
+            name: updateDocumentDto.name,
+            status: updateDocumentDto.status,
+            updatedAt: new Date(),
+            updatedBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          },
+        },
+      },
+    );
+    return updated;
+  }
+
   async update(_id: string, status: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id)) {
       throw new BadRequestException('ID không hợp lệ!');

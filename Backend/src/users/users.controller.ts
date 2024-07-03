@@ -49,7 +49,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @ResponseMessage('Cập nhật thành viên')
+  @ResponseMessage('Cập nhật thông tin thành viên')
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,

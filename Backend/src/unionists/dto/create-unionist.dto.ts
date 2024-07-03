@@ -56,7 +56,7 @@ export class CreateUnionistDto {
   })
   address: string;
 
-  @IsNotEmpty({
+  @IsOptional({
     message: 'CCCD không được để trống',
   })
   CCCD: string;

@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   Res,
+  Put,
 } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto, CreateUserDocDto } from './dto/create-document.dto';
@@ -55,6 +56,16 @@ export class DocumentsController {
     @User() user: IUser,
   ) {
     return this.documentsService.update(id, status, user);
+  }
+
+  @Put(':id')
+  @ResponseMessage('Cập nhật tên văn bản')
+  async updateName(
+    @Param('id') id: string,
+    @Body() updateDocumentDto: UpdateDocumentDto,
+    @User() user: IUser,
+  ) {
+    return this.documentsService.updateName(id, updateDocumentDto, user);
   }
 
   @Delete(':id')

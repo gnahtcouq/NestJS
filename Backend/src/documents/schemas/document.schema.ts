@@ -23,17 +23,9 @@ export class Document {
   @Prop()
   status: string;
 
-  // @Prop()
-  // departmentId: mongoose.Schema.Types.ObjectId;
-
-  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Department.name })
-  // departmentId: mongoose.Schema.Types.ObjectId;
-
-  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Post.name })
-  // postId: mongoose.Schema.Types.ObjectId;
-
   @Prop({ type: mongoose.Schema.Types.Array })
   history: {
+    name: string;
     status: string;
     updatedAt: Date;
     updatedBy: {
