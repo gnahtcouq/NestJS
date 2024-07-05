@@ -1,6 +1,12 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateDocumentDto } from './create-document.dto';
-import { IsArray, IsEmail, IsNotEmpty, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
 
@@ -30,12 +36,19 @@ class History {
 }
 
 export class UpdateDocumentDto extends PartialType(CreateDocumentDto) {
+  @IsOptional()
   @IsNotEmpty({ message: 'ID không được để trống' })
   _id: string;
 
+  @IsOptional()
   @IsNotEmpty({ message: 'Tên văn bản không được để trống' })
   name: string;
 
+  @IsOptional()
+  @IsNotEmpty({ message: 'Trạng thái không được để trống' })
+  status: string;
+
+  @IsOptional()
   @IsNotEmpty({ message: 'Lịch sử không được để trống' })
   @IsArray({ message: 'Lịch sử có định dạng là mảng' })
   @ValidateNested()
