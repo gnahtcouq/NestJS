@@ -488,6 +488,22 @@ export const INIT_PERMISSIONS = [
     __v: 0,
   },
   {
+    _id: '6684fc817e6150f6975463aa',
+    name: 'Cập nhật tên văn bản',
+    apiPath: '/api/v1/documents/:id',
+    method: 'PUT',
+    module: 'DOCUMENTS',
+    createdBy: {
+      _id: '647b5108a8a243e8191855b5',
+      email: 'comehere.thang@gmail.com',
+    },
+    isDeleted: false,
+    deletedAt: null,
+    createdAt: '2023-06-15T09:09:41.694Z',
+    updatedAt: '2023-06-15T09:09:41.694Z',
+    __v: 0,
+  },
+  {
     _id: '648ad56ddafdb9754f40b87c',
     name: 'Xem danh sách văn bản theo thành viên',
     apiPath: '/api/v1/documents/by-user',
