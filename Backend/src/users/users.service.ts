@@ -261,7 +261,7 @@ export class UsersService {
     return result;
   }
 
-  private async sendEmailChangeConfirmationEmail(
+  async sendEmailChangeConfirmationEmail(
     email: string,
     newEmail: string,
     verificationCode: string,
@@ -271,7 +271,7 @@ export class UsersService {
       to: email,
       from: '"Saigon Technology University" <support@stu.id.vn>',
       subject: 'Xác Nhận Yêu Cầu Thay Đổi Email',
-      template: 'change-mail',
+      template: 'mail-change',
       context: {
         receiver: user.name,
         verificationCode,

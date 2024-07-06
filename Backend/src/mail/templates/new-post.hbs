@@ -15,10 +15,10 @@
                 <table style="background-color: white; border-radius: 5px; padding: 20px;">
                     <tr>
                         <td>
-                            <div style="text-align: left; font-size: 20px;">STU</div>
+                            <div style="text-align: left; font-size: 20px;">Thông báo mới</div>
                         </td>
                         <td>
-                            <div style="text-align: right; font-size: 20px;">Thông báo mới</div>
+                            <div style="text-align: right; font-size: 20px;">STU</div>
                         </td>
                     </tr>
                     <tr>
@@ -42,13 +42,12 @@
                                 <tr>
                                     <td>
                                         <div style="font-size: 16px;">
-                                            <a href="https://stu.id.vn/" target="_blank"
+                                            <a href="{{url}}" target="_blank"
                                                 style="text-decoration: none;">{{name}}</a>
                                         </div>
-                                        {{!-- <div style="font-size: 14px;">{{department}}</div> --}}
                                         <div>
                                             {{#each threads}}
-                                                <span style="font-size: 14px;">{{this}}</span>
+                                                <span style="font-size: 14px; color: #d48806;background: #fffbe6;border-color: #ffe58f">{{this}}</span>
                                             {{/each}}
                                         </div>
                                         <div style="margin: 15px 0; border-top: 1px dashed rgba(5, 5, 5, 0.06);"></div>
@@ -60,7 +59,7 @@
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: center;">
-                            <a href="https://stu.id.vn/" target="_blank"
+                            <a href="{{urlAllPost}}" target="_blank"
                                 style="display: inline-block; width: 100%; height: 40px; line-height: 40px; cursor: pointer; border-radius: 5px; background-color: #ea1e30; color: white; border: none; outline: none; text-decoration: none; font-size: 16px;">
                                 Xem thêm thông báo
                             </a>
