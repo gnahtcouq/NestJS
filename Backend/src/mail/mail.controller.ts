@@ -61,7 +61,7 @@ export class MailController {
         });
 
         await this.mailerService.sendMail({
-          to: 'comehere.thang@gmail.com',
+          to: subs.email,
           from: '"Saigon Technology University" <support@stu.id.vn>',
           subject: 'Thông báo mới từ Đại học Công nghệ Sài Gòn',
           template: 'new-post',
