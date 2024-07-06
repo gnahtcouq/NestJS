@@ -21,7 +21,7 @@ export class PostsService {
       threads,
       // department,
       description,
-      startDate,
+      // startDate,
       // endDate,
       isActive,
     } = createPostDto;
@@ -31,7 +31,7 @@ export class PostsService {
       threads,
       // department,
       description,
-      startDate,
+      // startDate,
       // endDate,
       isActive,
       createdBy: {

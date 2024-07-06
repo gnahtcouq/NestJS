@@ -50,12 +50,12 @@ export class CreatePostDto {
   })
   description: string;
 
-  @IsNotEmpty({
-    message: 'Ngày bắt đầu không được để trống',
-  })
-  @Transform(({ value }) => new Date(value))
-  @IsDate({ message: 'Ngày bắt đầu không đúng định dạng' })
-  startDate: Date;
+  // @IsNotEmpty({
+  //   message: 'Ngày bắt đầu không được để trống',
+  // })
+  // @Transform(({ value }) => new Date(value))
+  // @IsDate({ message: 'Ngày bắt đầu không đúng định dạng' })
+  // startDate: Date;
 
   // @IsNotEmpty({
   //   message: 'Ngày kết thúc không được để trống',

@@ -21,11 +21,11 @@ export class Post {
   @Prop()
   description: string;
 
-  @Prop()
-  startDate: Date;
+  // @Prop()
+  // startDate: Date;
 
-  @Prop()
-  endDate: Date;
+  // @Prop()
+  // endDate: Date;
 
   @Prop()
   isActive: boolean;
