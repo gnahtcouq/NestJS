@@ -14,7 +14,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 @Controller('mail')
 export class MailController {
   constructor(
-    private readonly mailService: MailService,
     private mailerService: MailerService,
 
     @InjectModel(Subscriber.name)
@@ -50,7 +49,7 @@ export class MailController {
 
         await this.mailerService.sendMail({
           to: 'comehere.thang@gmail.com',
-          from: '"Saigon Technology University" <support@stu.id.vn>', // override default from
+          from: '"Saigon Technology University" <support@stu.id.vn>',
           subject: 'Thông báo mới từ Đại học Công nghệ Sài Gòn',
           template: 'new-post',
           context: {

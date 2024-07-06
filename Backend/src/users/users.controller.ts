@@ -70,4 +70,34 @@ export class UsersController {
   countUsers() {
     return this.usersService.countUsers();
   }
+
+  @Post('request-email-change/:id')
+  @ResponseMessage('Gửi yêu cầu thay đổi email')
+  async requestEmailChange(
+    @Param('id') id: string,
+    @Body('newEmail') newEmail: string,
+    @User() user: IUser,
+  ) {
+    const result = await this.usersService.requestEmailChange(
+      id,
+      newEmail,
+      user,
+    );
+    return { success: result };
+  }
+
+  @Post('confirm-email-change/:id')
+  @ResponseMessage('Xác nhận thay đổi email')
+  async confirmEmailChange(
+    @Param('id') id: string,
+    @Body('verificationCode') verificationCode: string,
+    @Body('newEmail') newEmail: string,
+  ) {
+    const result = await this.usersService.confirmEmailChange(
+      id,
+      verificationCode,
+      newEmail,
+    );
+    return { success: result };
+  }
 }

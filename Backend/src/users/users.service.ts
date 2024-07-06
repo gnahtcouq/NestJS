@@ -13,14 +13,16 @@ import aqp from 'api-query-params';
 import { USER_ROLE } from 'src/databases/sample';
 import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { ConfigService } from '@nestjs/config';
+import { MailerService } from '@nestjs-modules/mailer';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
     @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
-
     private configService: ConfigService,
+    private readonly mailerService: MailerService,
   ) {}
 
   getHashPassword = (password: string) => {
@@ -233,5 +235,80 @@ export class UsersService {
 
   async countUsers() {
     return await this.userModel.countDocuments({ isDeleted: false });
+  }
+
+  async requestEmailChange(userId: string, newEmail: string, user: IUser) {
+    const uuid = uuidv4().replace(/-/g, '');
+    const verificationCode = uuid.slice(0, 5);
+    const verificationExpires = new Date(Date.now() + 20 * 60 * 1000); // 20 phút
+
+    const result = await this.userModel.updateOne(
+      { _id: userId },
+      {
+        verificationCode,
+        verificationExpires,
+      },
+    );
+
+    // Send confirmation email to current email
+    await this.sendEmailChangeConfirmationEmail(
+      user.email,
+      newEmail,
+      verificationCode,
+      user,
+    );
+
+    return result;
+  }
+
+  private async sendEmailChangeConfirmationEmail(
+    email: string,
+    newEmail: string,
+    verificationCode: string,
+    user: IUser,
+  ) {
+    await this.mailerService.sendMail({
+      to: email,
+      from: '"Saigon Technology University" <support@stu.id.vn>',
+      subject: 'Xác Nhận Yêu Cầu Thay Đổi Email',
+      template: 'change-mail',
+      context: {
+        receiver: user.name,
+        verificationCode,
+        url: `${this.configService.get<string>(
+          'FRONTEND_URL',
+        )}/confirm-email-change/${user._id}?newEmail=${newEmail}`,
+      },
+    });
+  }
+
+  async confirmEmailChange(
+    userId: string,
+    verificationCode: string,
+    newEmail: string,
+  ) {
+    // Find the user by userId and verificationCode
+    const findUser = await this.userModel.findOne({
+      _id: userId,
+      verificationCode,
+      verificationExpires: { $gt: new Date() }, // Verification code should be valid
+    });
+
+    if (!findUser) {
+      throw new BadRequestException(
+        'Mã xác minh không hợp lệ hoặc đã hết hạn.',
+      );
+    }
+
+    // Update email and clear verification fields
+    await this.userModel.findByIdAndUpdate(userId, {
+      email: newEmail,
+      $unset: {
+        verificationCode: 1,
+        verificationExpires: 1,
+      },
+    });
+
+    return true;
   }
 }

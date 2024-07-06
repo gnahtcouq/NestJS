@@ -52,6 +52,12 @@ export class Unionist {
   @Prop()
   refreshToken: string;
 
+  @Prop()
+  verificationCode: string;
+
+  @Prop()
+  verificationExpires: Date;
+
   @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;
