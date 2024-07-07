@@ -25,7 +25,7 @@ export class SubscribersService {
     const isExist = await this.subscriberModel.findOne({ email });
     if (isExist) {
       throw new BadRequestException(
-        `Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
+        `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
     }
     let newSubs = await this.subscriberModel.create({

@@ -53,7 +53,7 @@ export class UnionistsService {
     const isExist = await this.unionistModel.findOne({ email });
     if (isExist)
       throw new BadRequestException(
-        `Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
+        `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
 
     const hashPassword = this.getHashPassword(password);

@@ -52,7 +52,7 @@ export class UsersService {
     const isExist = await this.userModel.findOne({ email });
     if (isExist)
       throw new BadRequestException(
-        `Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
+        `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
 
     const hashPassword = this.getHashPassword(password);
@@ -86,7 +86,7 @@ export class UsersService {
     const isExist = await this.userModel.findOne({ email });
     if (isExist)
       throw new BadRequestException(
-        `Email: ${email} đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
+        `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
 
     //fetch user role
@@ -238,6 +238,13 @@ export class UsersService {
   }
 
   async requestEmailChange(userId: string, newEmail: string, user: IUser) {
+    const isExist = await this.userModel.findOne({ email: newEmail });
+    if (isExist) {
+      throw new BadRequestException(
+        `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác.`,
+      );
+    }
+
     const uuid = uuidv4().replace(/-/g, '');
     const verificationCode = uuid.slice(0, 5);
     const verificationExpires = new Date(Date.now() + 20 * 60 * 1000); // 20 phút
