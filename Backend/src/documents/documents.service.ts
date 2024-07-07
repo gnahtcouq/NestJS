@@ -1,5 +1,9 @@
 /* eslint-disable prefer-const */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateDocumentDto, CreateUserDocDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -79,10 +83,20 @@ export class DocumentsService {
   }
 
   async findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new BadRequestException('ID không hợp lệ!');
     }
-    return await this.documentModel.findById(id);
+
+    const document = await this.documentModel.findOne({
+      _id: id,
+      status: 'ACTIVE',
+    });
+
+    if (!document) {
+      throw new NotFoundException('Văn bản đã được hạn chế quyền truy cập!');
+    }
+
+    return document;
   }
 
   async findByUsers(user: IUser) {

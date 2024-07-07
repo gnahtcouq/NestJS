@@ -17,7 +17,7 @@ export class MulterConfigService implements MulterOptionsFactory {
   ensureExists(targetDirectory: string) {
     fs.mkdir(targetDirectory, { recursive: true }, (error) => {
       if (!error) {
-        console.log('Directory successfully created, or it already exists.');
+        console.log('Thư mục được tạo thành công hoặc đã tồn tại.');
         return;
       }
       switch (error.code) {

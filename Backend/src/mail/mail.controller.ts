@@ -11,7 +11,7 @@ import {
 import { Post, PostDocument } from 'src/posts/schemas/post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { convertSlug } from 'src/utils/utils';
+import { convertSlug } from 'src/util/utils';
 
 @Controller('mail')
 export class MailController {
