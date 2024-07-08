@@ -15,6 +15,8 @@ import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
+import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -152,6 +154,17 @@ export class UsersService {
         _id: id,
       })
       .select('-password') //không trả về password
+      .populate({ path: 'role', select: { name: 1, _id: 1 } });
+  }
+
+  private findOneWithPassword(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id))
+      throw new BadRequestException('ID không hợp lệ!');
+
+    return this.userModel
+      .findOne({
+        _id: id,
+      })
       .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
@@ -317,5 +330,31 @@ export class UsersService {
     });
 
     return true;
+  }
+
+  async changePassword(id: string, changePasswordDto: ChangePasswordDto) {
+    const { currentPassword, newPassword } = changePasswordDto;
+
+    const foundUser = await this.findOneWithPassword(id);
+    if (!foundUser) {
+      throw new BadRequestException('ID không hợp lệ');
+    }
+
+    const isCurrentPasswordValid = await this.verifyPassword(
+      currentPassword,
+      foundUser.password,
+    );
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Mật khẩu hiện tại không chính xác');
+    }
+
+    foundUser.password = await this.getHashPassword(newPassword);
+    await foundUser.save();
+
+    return true;
+  }
+
+  private async verifyPassword(password: string, hashedPassword: string) {
+    return await bcrypt.compare(password, hashedPassword);
   }
 }

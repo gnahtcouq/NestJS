@@ -89,11 +89,13 @@ export class DocumentsService {
 
     const document = await this.documentModel.findOne({
       _id: id,
-      status: 'ACTIVE',
+      status: 'ACTIVE', // Chỉ lấy tài liệu có trạng thái ACTIVE
     });
 
     if (!document) {
-      throw new NotFoundException('Văn bản đã được hạn chế quyền truy cập!');
+      throw new NotFoundException(
+        'Văn bản không tồn tại hoặc đã bị hạn chế quyền truy cập!',
+      );
     }
 
     return document;

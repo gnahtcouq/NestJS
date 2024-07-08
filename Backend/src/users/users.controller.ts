@@ -15,6 +15,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
+import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 
 @Controller('users') // => /users
 export class UsersController {
@@ -97,6 +98,19 @@ export class UsersController {
       id,
       verificationCode,
       newEmail,
+    );
+    return { success: result };
+  }
+
+  @Post('change-password/:id')
+  @ResponseMessage('Thay đổi mật khẩu')
+  async requestPasswordChange(
+    @Param('id') id: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const result = await this.usersService.changePassword(
+      id,
+      changePasswordDto,
     );
     return { success: result };
   }

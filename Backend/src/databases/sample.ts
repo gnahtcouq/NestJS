@@ -232,6 +232,22 @@ export const INIT_PERMISSIONS = [
     __v: 0,
   },
   {
+    _id: '668b84dce8720bbbd18c7e77',
+    name: 'Thay đổi mật khẩu',
+    apiPath: '/api/v1/users/change-password/:id',
+    method: 'POST',
+    module: 'USERS',
+    createdBy: {
+      _id: '647b5108a8a243e8191855b5',
+      email: 'comehere.thang@gmail.com',
+    },
+    isDeleted: false,
+    deletedAt: null,
+    createdAt: '2023-06-15T09:13:52.798Z',
+    updatedAt: '2023-06-15T09:13:52.798Z',
+    __v: 0,
+  },
+  {
     _id: '666f366d683cf1b5e2c9b7f9',
     name: 'Thêm mới công đoàn viên',
     apiPath: '/api/v1/unionists',
