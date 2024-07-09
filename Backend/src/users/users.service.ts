@@ -17,15 +17,26 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
+import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
 
 @Injectable()
 export class UsersService {
+  private readonly encryptionKey: Buffer;
+  private readonly ivLength: number = 16; // Đảm bảo ivLength là số
   constructor(
     @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
     @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
     private configService: ConfigService,
     private readonly mailerService: MailerService,
-  ) {}
+  ) {
+    const key = this.configService.get<string>('ENCRYPTION_KEY');
+    if (!key || key.length !== 64) {
+      throw new Error(
+        'Độ dài ENCRYPTION_KEY không hợp lệ. Nó phải dài 64 ký tự (32 byte)',
+      );
+    }
+    this.encryptionKey = Buffer.from(key, 'hex');
+  }
 
   getHashPassword = (password: string) => {
     const salt = genSaltSync(10);
@@ -250,6 +261,24 @@ export class UsersService {
     return await this.userModel.countDocuments({ isDeleted: false });
   }
 
+  private encrypt(text: string): string {
+    const iv = randomBytes(this.ivLength);
+    const cipher = createCipheriv('aes-256-cbc', this.encryptionKey, iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return iv.toString('hex') + ':' + encrypted.toString('hex');
+  }
+
+  private decrypt(text: string): string {
+    const textParts = text.split(':');
+    const iv = Buffer.from(textParts.shift(), 'hex');
+    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+    const decipher = createDecipheriv('aes-256-cbc', this.encryptionKey, iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  }
+
   async requestEmailChange(userId: string, newEmail: string, user: IUser) {
     // Validate new email format
     if (!this.isValidEmail(newEmail)) {
@@ -275,10 +304,13 @@ export class UsersService {
       },
     );
 
+    // Encrypt new email
+    const encryptedEmail = this.encrypt(newEmail);
+
     // Send confirmation email to current email
     await this.sendEmailChangeConfirmationEmail(
       user.email,
-      newEmail,
+      encryptedEmail,
       verificationCode,
       user,
     );
@@ -288,7 +320,7 @@ export class UsersService {
 
   async sendEmailChangeConfirmationEmail(
     email: string,
-    newEmail: string,
+    encryptedNewEmail: string,
     verificationCode: string,
     user: IUser,
   ) {
@@ -302,7 +334,7 @@ export class UsersService {
         verificationCode,
         url: `${this.configService.get<string>(
           'FRONTEND_URL',
-        )}/confirm-email-change/${user._id}?newEmail=${newEmail}`,
+        )}/confirm-email-change/${user._id}?newEmail=${encryptedNewEmail}`,
       },
     });
   }
@@ -310,8 +342,11 @@ export class UsersService {
   async confirmEmailChange(
     userId: string,
     verificationCode: string,
-    newEmail: string,
+    encryptedNewEmail: string,
   ) {
+    // Decrypt new email
+    const newEmail = this.decrypt(encryptedNewEmail);
+
     // Validate new email format
     if (!this.isValidEmail(newEmail)) {
       throw new BadRequestException('Email mới không hợp lệ');
