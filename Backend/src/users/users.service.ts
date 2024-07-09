@@ -251,6 +251,11 @@ export class UsersService {
   }
 
   async requestEmailChange(userId: string, newEmail: string, user: IUser) {
+    // Validate new email format
+    if (!this.isValidEmail(newEmail)) {
+      throw new BadRequestException('Email mới không hợp lệ');
+    }
+
     const isExist = await this.userModel.findOne({ email: newEmail });
     if (isExist) {
       throw new BadRequestException(
@@ -307,6 +312,11 @@ export class UsersService {
     verificationCode: string,
     newEmail: string,
   ) {
+    // Validate new email format
+    if (!this.isValidEmail(newEmail)) {
+      throw new BadRequestException('Email mới không hợp lệ');
+    }
+
     // Find the user by userId and verificationCode
     const findUser = await this.userModel.findOne({
       _id: userId,
@@ -315,9 +325,7 @@ export class UsersService {
     });
 
     if (!findUser) {
-      throw new BadRequestException(
-        'Mã xác minh không hợp lệ hoặc đã hết hạn.',
-      );
+      throw new BadRequestException('Mã xác minh không hợp lệ hoặc đã hết hạn');
     }
 
     // Update email and clear verification fields
@@ -332,8 +340,26 @@ export class UsersService {
     return true;
   }
 
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
   async changePassword(id: string, changePasswordDto: ChangePasswordDto) {
     const { currentPassword, newPassword } = changePasswordDto;
+
+    if (
+      !(
+        /[a-z]/.test(newPassword) &&
+        /[A-Z]/.test(newPassword) &&
+        /\d/.test(newPassword) &&
+        newPassword.length >= 8
+      )
+    ) {
+      throw new BadRequestException(
+        'Mật khẩu mới phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
+      );
+    }
 
     const foundUser = await this.findOneWithPassword(id);
     if (!foundUser) {
