@@ -305,12 +305,15 @@ export class UsersService {
     );
 
     // Encrypt new email
-    const encryptedEmail = this.encrypt(newEmail);
+    const encryptedNewEmail = this.encrypt(newEmail);
+
+    // Lấy email hiện tại từ cơ sở dữ liệu
+    const currentUser = await this.userModel.findById(userId).select('email');
 
     // Send confirmation email to current email
     await this.sendEmailChangeConfirmationEmail(
-      user.email,
-      encryptedEmail,
+      currentUser.email,
+      encryptedNewEmail,
       verificationCode,
       user,
     );
@@ -372,7 +375,7 @@ export class UsersService {
       },
     });
 
-    return true;
+    return newEmail;
   }
 
   private isValidEmail(email: string): boolean {

@@ -99,7 +99,7 @@ export class UsersController {
       verificationCode,
       newEmail,
     );
-    return { success: result };
+    return { email: result };
   }
 
   @Post('change-password/:id')
