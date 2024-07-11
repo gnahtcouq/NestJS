@@ -45,7 +45,7 @@ export class MailController {
           threads: { $in: subsThreads },
           isActive: true,
         })
-        .sort({ updatedAt: -1 }) // Sort by updatedAt date in descending order
+        .sort({ createdAt: -1 }) // Sort by updatedAt date in descending order
         .limit(6); // Limit to 6 posts
       if (postWithMatchingThreads?.length) {
         const posts = postWithMatchingThreads.map((item) => {
