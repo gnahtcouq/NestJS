@@ -202,7 +202,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '6688dfd0a9b3d97d1b368c44',
     name: 'Gửi yêu cầu thay đổi email',
-    apiPath: '/api/v1/users/request-email-change/:id',
+    apiPath: '/api/v1/users/request-change-email/:id',
     method: 'POST',
     module: 'USERS',
     createdBy: {
@@ -218,7 +218,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '66890545d40c708b15d2f329',
     name: 'Xác nhận thay đổi email',
-    apiPath: '/api/v1/users/confirm-email-change/:id',
+    apiPath: '/api/v1/users/confirm-change-email/:id',
     method: 'GET',
     module: 'USERS',
     createdBy: {

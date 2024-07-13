@@ -72,14 +72,14 @@ export class UsersController {
     return this.usersService.countUsers();
   }
 
-  @Post('request-email-change/:id')
+  @Post('request-change-email/:id')
   @ResponseMessage('Gửi yêu cầu thay đổi email')
-  async requestEmailChange(
+  async requestChangeEmail(
     @Param('id') id: string,
     @Body('newEmail') newEmail: string,
     @User() user: IUser,
   ) {
-    const result = await this.usersService.requestEmailChange(
+    const result = await this.usersService.requestChangeEmail(
       id,
       newEmail,
       user,
@@ -87,14 +87,14 @@ export class UsersController {
     return { success: result };
   }
 
-  @Post('confirm-email-change/:id')
+  @Post('confirm-change-email/:id')
   @ResponseMessage('Xác nhận thay đổi email')
-  async confirmEmailChange(
+  async confirmChangeEmail(
     @Param('id') id: string,
     @Body('verificationCode') verificationCode: string,
     @Body('newEmail') newEmail: string,
   ) {
-    const result = await this.usersService.confirmEmailChange(
+    const result = await this.usersService.confirmChangeEmail(
       id,
       verificationCode,
       newEmail,

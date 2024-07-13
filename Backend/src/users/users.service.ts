@@ -279,7 +279,7 @@ export class UsersService {
     return decrypted.toString();
   }
 
-  async requestEmailChange(userId: string, newEmail: string, user: IUser) {
+  async requestChangeEmail(userId: string, newEmail: string, user: IUser) {
     // Validate new email format
     if (!this.isValidEmail(newEmail)) {
       throw new BadRequestException('Email mới không hợp lệ');
@@ -311,7 +311,7 @@ export class UsersService {
     const currentUser = await this.userModel.findById(userId).select('email');
 
     // Send confirmation email to current email
-    await this.sendEmailChangeConfirmationEmail(
+    await this.sendChangeEmailConfirmationEmail(
       currentUser.email,
       encryptedNewEmail,
       verificationCode,
@@ -321,7 +321,7 @@ export class UsersService {
     return result;
   }
 
-  async sendEmailChangeConfirmationEmail(
+  async sendChangeEmailConfirmationEmail(
     email: string,
     encryptedNewEmail: string,
     verificationCode: string,
@@ -331,18 +331,18 @@ export class UsersService {
       to: email,
       from: '"Saigon Technology University" <support@stu.id.vn>',
       subject: 'Xác Nhận Yêu Cầu Thay Đổi Email',
-      template: 'mail-change',
+      template: 'change-mail',
       context: {
         receiver: user.name,
         verificationCode,
         url: `${this.configService.get<string>(
           'FRONTEND_URL',
-        )}/confirm-email-change/${user._id}?newEmail=${encryptedNewEmail}`,
+        )}/confirm-change-email/${user._id}?newEmail=${encryptedNewEmail}`,
       },
     });
   }
 
-  async confirmEmailChange(
+  async confirmChangeEmail(
     userId: string,
     verificationCode: string,
     encryptedNewEmail: string,
