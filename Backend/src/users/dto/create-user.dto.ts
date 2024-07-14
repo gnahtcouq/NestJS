@@ -58,7 +58,7 @@ export class CreateUserDto {
   })
   address: string;
 
-  @IsNotEmpty({
+  @IsOptional({
     message: 'CCCD không được để trống',
   })
   CCCD: string;
@@ -70,33 +70,6 @@ export class CreateUserDto {
     message: 'Vai trò không đúng định dạng',
   })
   role: mongoose.Schema.Types.ObjectId;
-
-  // @IsNotEmptyObject()
-  // @IsObject()
-  // @ValidateNested()
-  // @Type(() => Department)
-  // department: Department;
-
-  // @IsNotEmpty({
-  //   message: 'Ngày chuyển đến không được để trống',
-  // })
-  // @Transform(({ value }) => new Date(value))
-  // @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
-  // joiningDate: Date;
-
-  // @IsNotEmpty({
-  //   message: 'Ngày chuyển đi không được để trống',
-  // })
-  // @Transform(({ value }) => new Date(value))
-  // @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
-  // leavingDate: Date;
-
-  // @IsNotEmpty({
-  //   message: 'Ngày vào công đoàn không được để trống',
-  // })
-  // @Transform(({ value }) => new Date(value))
-  // @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
-  // unionEntryDate: Date;
 
   @IsOptional()
   note?: string;
@@ -138,32 +111,6 @@ export class RegisterUserDto {
     message: 'Địa chỉ không được để trống',
   })
   address: string;
-
-  // @IsNotEmpty({
-  //   message: 'CCCD không được để trống',
-  // })
-  // CCCD: string;
-
-  // @IsNotEmpty({
-  //   message: 'Ngày chuyển đến không được để trống',
-  // })
-  // @Transform(({ value }) => new Date(value))
-  // @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
-  // joiningDate: Date;
-
-  // @IsNotEmpty({
-  //   message: 'Ngày chuyển đi không được để trống',
-  // })
-  // @Transform(({ value }) => new Date(value))
-  // @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
-  // leavingDate: Date;
-
-  // @IsNotEmpty({
-  //   message: 'Ngày vào công đoàn không được để trống',
-  // })
-  // @Transform(({ value }) => new Date(value))
-  // @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
-  // unionEntryDate: Date;
 
   note: string;
 }

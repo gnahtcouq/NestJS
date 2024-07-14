@@ -54,10 +54,6 @@ export class UsersService {
       address,
       role,
       CCCD,
-      // department,
-      // joiningDate,
-      // leavingDate,
-      // unionEntryDate,
       note,
     } = createUserDto;
 
@@ -79,10 +75,6 @@ export class UsersService {
       address,
       role,
       CCCD,
-      // department,
-      // joiningDate,
-      // leavingDate,
-      // unionEntryDate,
       note,
       createdBy: {
         _id: user._id,
@@ -116,9 +108,6 @@ export class UsersService {
       gender,
       address,
       role: userRole?._id,
-      // joiningDate: '',
-      // leavingDate: '',
-      // unionEntryDate: '',
       note: '',
     });
 
@@ -164,8 +153,7 @@ export class UsersService {
       .findOne({
         _id: id,
       })
-      .select('-password') //không trả về password
-      .populate({ path: 'role', select: { name: 1, _id: 1 } });
+      .select('-password'); //không trả về password
   }
 
   private findOneWithPassword(id: string) {
@@ -180,11 +168,9 @@ export class UsersService {
   }
 
   findOneByUserName(username: string) {
-    return this.userModel
-      .findOne({
-        email: username,
-      })
-      .populate({ path: 'role', select: { name: 1 } });
+    return this.userModel.findOne({
+      email: username,
+    });
   }
 
   isValidPassword(password: string, hashPassword: string) {
@@ -247,14 +233,9 @@ export class UsersService {
   };
 
   findUserByToken = async (refreshToken: string) => {
-    return await this.userModel
-      .findOne({
-        refreshToken,
-      })
-      .populate({
-        path: 'role',
-        select: { name: 1 },
-      });
+    return await this.userModel.findOne({
+      refreshToken,
+    });
   };
 
   async countUsers() {
