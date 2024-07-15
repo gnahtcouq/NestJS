@@ -1,6 +1,26 @@
 /* eslint-disable prettier/prettier */
 export const INIT_PERMISSIONS = [
   {
+    _id: '6694902bda1f6560724cb094',
+    name: 'Truy cập trang quản trị',
+    apiPath: '/admin',
+    method: 'ACCESS_TO_ADMIN_PAGE',
+    module: 'PERMISSIONS',
+    createdBy: {
+      _id: '647b5108a8a243e8191855b5',
+      email: 'comehere.thang@gmail.com',
+    },
+    isDeleted: false,
+    deletedAt: null,
+    createdAt: '2022-06-15T06:47:49.369Z',
+    updatedAt: '2022-06-15T06:54:05.131Z',
+    __v: 0,
+    updatedBy: {
+      _id: '647b5108a8a243e8191855b5',
+      email: 'comehere.thang@gmail.com',
+    },
+  },
+  {
     _id: '648ab415f4328bd3153ee211',
     name: 'Xem danh sách đơn vị',
     apiPath: '/api/v1/departments',
@@ -162,6 +182,22 @@ export const INIT_PERMISSIONS = [
     deletedAt: null,
     createdAt: '2023-06-15T07:00:41.934Z',
     updatedAt: '2023-06-15T07:00:41.934Z',
+    __v: 0,
+  },
+  {
+    _id: '66943bdd23978c1c8958970e',
+    name: 'Cập nhật quyền hạn thành viên',
+    apiPath: '/api/v1/users/:id',
+    method: 'PUT',
+    module: 'USERS',
+    createdBy: {
+      _id: '647b5108a8a243e8191855b5',
+      email: 'comehere.thang@gmail.com',
+    },
+    isDeleted: false,
+    deletedAt: null,
+    createdAt: '2023-06-15T09:12:11.323Z',
+    updatedAt: '2023-06-15T09:12:11.323Z',
     __v: 0,
   },
   {
