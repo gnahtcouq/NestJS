@@ -59,7 +59,7 @@ export class DatabasesService implements OnModuleInit {
             CCCD: null,
             note: null,
             permissions: [
-              new ObjectId('6694902bda1f6560724cb094'), // Fix the syntax error by removing the curly braces
+              new ObjectId('6694902bda1f6560724cb094'),
               new ObjectId('648ab415f4328bd3153ee211'),
               new ObjectId('648ab436f4328bd3153ee216'),
               new ObjectId('648ab4d5f4328bd3153ee21b'),

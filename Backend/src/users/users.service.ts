@@ -17,6 +17,7 @@ import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
+import { ObjectId } from 'mongodb'; // Import the ObjectId class from the 'mongodb' module
 
 @Injectable()
 export class UsersService {
@@ -43,17 +44,8 @@ export class UsersService {
   };
 
   async create(createUserDto: CreateUserDto, @User() user: IUser) {
-    const {
-      name,
-      email,
-      password,
-      dateOfBirth,
-      gender,
-      address,
-      permissions,
-      CCCD,
-      note,
-    } = createUserDto;
+    const { name, email, password, dateOfBirth, gender, address, CCCD, note } =
+      createUserDto;
 
     if (!this.isValidEmail(email)) {
       throw new BadRequestException('Email mới không hợp lệ');
@@ -88,7 +80,13 @@ export class UsersService {
       dateOfBirth,
       gender,
       address,
-      permissions,
+      permissions: [
+        new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
+        new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+        new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
+        new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
+        new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+      ],
       CCCD,
       note,
       createdBy: {
@@ -135,6 +133,13 @@ export class UsersService {
       gender,
       address,
       note: '',
+      permissions: [
+        new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
+        new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+        new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
+        new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
+        new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+      ],
     });
 
     return newRegister;
