@@ -200,11 +200,11 @@ export class DatabasesService implements OnModuleInit {
             unionEntryDate: null,
             note: null,
             permissions: [
-              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
-              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
-              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
-              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
-              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+              new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
+              new ObjectId('666f3680006c1579a34d5ec2'), //Cập nhật thông tin công đoàn viên
+              new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
+              new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
+              new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
             ],
           },
         ]);
