@@ -115,7 +115,13 @@ export class DatabasesService implements OnModuleInit {
             address: 'Nha Trang',
             CCCD: '056202011199',
             note: 'Saigon Technology University',
-            permissions: [],
+            permissions: [
+              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
+              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
+              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
+              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+            ],
           },
           {
             name: 'Lại Văn Toàn',
@@ -128,7 +134,13 @@ export class DatabasesService implements OnModuleInit {
             address: 'Huế',
             CCCD: '046202003204',
             note: 'Saigon Technology University',
-            permissions: [],
+            permissions: [
+              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
+              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
+              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
+              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+            ],
           },
           {
             name: 'Trần Nguyễn Thanh Sang',
@@ -141,7 +153,13 @@ export class DatabasesService implements OnModuleInit {
             address: 'Nha Trang',
             CCCD: '056202007313',
             note: 'Saigon Technology University',
-            permissions: [],
+            permissions: [
+              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
+              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
+              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
+              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+            ],
           },
           {
             name: 'Trần A Huy',
@@ -154,7 +172,13 @@ export class DatabasesService implements OnModuleInit {
             address: 'Đồng Nai',
             CCCD: '080202004633',
             note: 'Saigon Technology University',
-            permissions: [],
+            permissions: [
+              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
+              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
+              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
+              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+            ],
           },
         ]);
       }
@@ -175,7 +199,13 @@ export class DatabasesService implements OnModuleInit {
             leavingDate: null,
             unionEntryDate: null,
             note: null,
-            permissions: [],
+            permissions: [
+              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
+              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
+              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
+              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
+            ],
           },
         ]);
       }

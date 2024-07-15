@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const { _id, name, email } = payload;
 
     //cần gắn thêm permissions vào req.user
-    const temp = (await this.usersService.findOne(_id)).toObject();
+    const temp = await this.usersService.findOne(_id);
 
     //req.user
     return {

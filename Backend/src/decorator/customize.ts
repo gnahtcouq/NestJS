@@ -19,6 +19,13 @@ export const User = createParamDecorator(
   },
 );
 
+export const Unionist = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    return request.user;
+  },
+);
+
 export const IS_PUBLLIC_PERMISSION = 'isPublicPermission';
 export const SkipCheckPermission = () =>
   SetMetadata(IS_PUBLLIC_PERMISSION, true);
