@@ -7,7 +7,6 @@ import {
   Permission,
   PermissionSchema,
 } from 'src/permissions/schemas/permission.schema';
-import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { UsersService } from 'src/users/users.service';
 import {
   Unionist,
@@ -21,7 +20,6 @@ import { UnionistsService } from 'src/unionists/unionists.service';
       { name: User.name, schema: UserSchema },
       { name: Unionist.name, schema: UnionistSchema },
       { name: Permission.name, schema: PermissionSchema },
-      { name: Role.name, schema: RoleSchema },
     ]),
   ],
   controllers: [DatabasesController],

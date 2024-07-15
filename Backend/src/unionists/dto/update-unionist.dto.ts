@@ -1,6 +1,7 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateUnionistDto } from './create-unionist.dto';
 import {
+  IsArray,
   IsMongoId,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -33,13 +34,13 @@ export class UpdateUnionistDto extends OmitType(CreateUnionistDto, [
   CCCD: string;
 
   @IsOptional()
-  @IsNotEmpty({
-    message: 'Vai trò không được để trống',
-  })
+  @IsNotEmpty({ message: 'Quyền hạn không được để trống' })
   @IsMongoId({
-    message: 'Vai trò không đúng định dạng',
+    each: true,
+    message: 'Mỗi quyền hạn phải có định dạng là mongo object ID',
   })
-  role: mongoose.Schema.Types.ObjectId;
+  @IsArray({ message: 'Quyền hạn phải có định dạng là mảng' })
+  permissions: mongoose.Schema.Types.ObjectId[];
 
   @IsOptional()
   @IsNotEmptyObject()

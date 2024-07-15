@@ -11,7 +11,6 @@ import { PostsModule } from './posts/posts.module';
 import { FilesModule } from './files/files.module';
 import { DocumentsModule } from './documents/documents.module';
 import { PermissionsModule } from './permissions/permissions.module';
-import { RolesModule } from './roles/roles.module';
 import { DatabasesModule } from './databases/databases.module';
 import { SubscribersModule } from './subscribers/subscribers.module';
 import { UnionistsModule } from './unionists/unionists.module';
@@ -45,7 +44,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     FilesModule,
     DocumentsModule,
     PermissionsModule,
-    RolesModule,
     DatabasesModule,
     SubscribersModule,
     UnionistsModule,

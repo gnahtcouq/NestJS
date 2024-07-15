@@ -1,5 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import {
+  IsArray,
   IsDate,
   IsEmail,
   IsMongoId,
@@ -61,13 +62,14 @@ export class CreateUnionistDto {
   })
   CCCD: string;
 
-  @IsNotEmpty({
-    message: 'Vai trò không được để trống',
-  })
+  @IsOptional()
+  @IsNotEmpty({ message: 'Quyền hạn không được để trống' })
   @IsMongoId({
-    message: 'Vai trò không đúng định dạng',
+    each: true,
+    message: 'Mỗi quyền hạn phải có định dạng là mongo object ID',
   })
-  role: mongoose.Schema.Types.ObjectId;
+  @IsArray({ message: 'Quyền hạn phải có định dạng là mảng' })
+  permissions: mongoose.Schema.Types.ObjectId[];
 
   @IsNotEmptyObject()
   @IsObject()

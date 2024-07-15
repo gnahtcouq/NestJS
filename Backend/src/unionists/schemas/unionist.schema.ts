@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Role } from 'src/roles/schemas/role.schema';
+import { Permission } from 'src/permissions/schemas/permission.schema';
 
 export type UnionistDocument = HydratedDocument<Unionist>;
 
@@ -46,8 +46,8 @@ export class Unionist {
     name: string;
   };
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Role.name }) //relationship
-  role: mongoose.Schema.Types.ObjectId;
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Permission.name })
+  permissions: Permission[];
 
   @Prop()
   refreshToken: string;

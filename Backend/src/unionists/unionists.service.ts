@@ -8,7 +8,6 @@ import {
   UnionistDocument,
 } from 'src/unionists/schemas/unionist.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { ConfigService } from '@nestjs/config';
 import { User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
@@ -21,8 +20,6 @@ export class UnionistsService {
   constructor(
     @InjectModel(Unionist.name)
     private unionistModel: SoftDeleteModel<UnionistDocument>,
-    @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
-
     private configService: ConfigService,
   ) {}
 
@@ -40,7 +37,6 @@ export class UnionistsService {
       dateOfBirth,
       gender,
       address,
-      role,
       CCCD,
       department,
       joiningDate,
@@ -65,7 +61,6 @@ export class UnionistsService {
       dateOfBirth,
       gender,
       address,
-      role,
       CCCD,
       department,
       joiningDate,
@@ -120,15 +115,16 @@ export class UnionistsService {
         _id: id,
       })
       .select('-password') //không trả về password
-      .populate({ path: 'role', select: { name: 1, _id: 1 } });
+      .populate({
+        path: 'permissions',
+        select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
+      });
   }
 
   findOneByUserName(username: string) {
-    return this.unionistModel
-      .findOne({
-        email: username,
-      })
-      .populate({ path: 'role', select: { name: 1 } });
+    return this.unionistModel.findOne({
+      email: username,
+    });
   }
 
   isValidPassword(password: string, hashPassword: string) {
@@ -191,14 +187,9 @@ export class UnionistsService {
   };
 
   findUnionistByToken = async (refreshToken: string) => {
-    return await this.unionistModel
-      .findOne({
-        refreshToken,
-      })
-      .populate({
-        path: 'role',
-        select: { name: 1 },
-      });
+    return await this.unionistModel.findOne({
+      refreshToken,
+    });
   };
 
   async countUnionists() {

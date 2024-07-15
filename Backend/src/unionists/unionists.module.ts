@@ -6,13 +6,11 @@ import {
   Unionist,
   UnionistSchema,
 } from 'src/unionists/schemas/unionist.schema';
-import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Unionist.name, schema: UnionistSchema },
-      { name: Role.name, schema: RoleSchema },
     ]),
   ],
   controllers: [UnionistsController],

@@ -9,6 +9,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,6 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
+import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 
 @Controller('users') // => /users
 export class UsersController {
@@ -41,9 +43,8 @@ export class UsersController {
     return this.usersService.findAll(+currentPage, +limit, qs);
   }
 
-  @Public()
-  @ResponseMessage('Lấy thông tin thành viên')
   @Get(':id')
+  @ResponseMessage('Lấy thông tin thành viên')
   async findOne(@Param('id') id: string) {
     const foundUser = await this.usersService.findOne(id);
     return foundUser;
@@ -58,6 +59,20 @@ export class UsersController {
   ) {
     let updatedUser = await this.usersService.update(id, updateUserDto, user);
     return updatedUser;
+  }
+
+  @Put(':id')
+  @ResponseMessage('Cập nhật quyền hạn thành viên')
+  updateUserPermissions(
+    @Param('id') id: string,
+    @Body() updateUserPermissionsDto: UpdateUserPermissionsDto,
+    @User() user: IUser,
+  ) {
+    return this.usersService.updateUserPermissions(
+      id,
+      updateUserPermissionsDto,
+      user,
+    );
   }
 
   @Delete(':id')

@@ -12,15 +12,15 @@ import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
-import { RolesService } from 'src/roles/roles.service';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { IUser } from 'src/users/users.interface';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private rolesService: RolesService,
+    private usersService: UsersService,
   ) {}
 
   @Public()
@@ -41,8 +41,7 @@ export class AuthController {
   @ResponseMessage('Lấy thông tin người dùng')
   @Get('/account')
   async handleGetAccount(@User() user: IUser) {
-    const temp = (await this.rolesService.findOne(user.role._id)) as any;
-    user.permissions = temp.permissions;
+    (await this.usersService.findOne(user._id)) as any;
     return { user };
   }
 

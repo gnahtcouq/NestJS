@@ -4,20 +4,19 @@ import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User as UserM, UserDocument } from 'src/users/schemas/user.schema';
-import mongoose, { Model } from 'mongoose';
+import mongoose from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import { User } from 'src/decorator/customize';
 import aqp from 'api-query-params';
-import { USER_ROLE } from 'src/databases/sample';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
+import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +24,6 @@ export class UsersService {
   private readonly ivLength: number = 16; // Đảm bảo ivLength là số
   constructor(
     @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
-    @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
     private configService: ConfigService,
     private readonly mailerService: MailerService,
   ) {
@@ -52,10 +50,14 @@ export class UsersService {
       dateOfBirth,
       gender,
       address,
-      role,
+      permissions,
       CCCD,
       note,
     } = createUserDto;
+
+    if (!this.isValidEmail(email)) {
+      throw new BadRequestException('Email mới không hợp lệ');
+    }
 
     //logic check email exist
     const isExist = await this.userModel.findOne({ email });
@@ -63,6 +65,19 @@ export class UsersService {
       throw new BadRequestException(
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
+
+    if (
+      !(
+        /[a-z]/.test(password) &&
+        /[A-Z]/.test(password) &&
+        /\d/.test(password) &&
+        password.length >= 8
+      )
+    ) {
+      throw new BadRequestException(
+        'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
+      );
+    }
 
     const hashPassword = this.getHashPassword(password);
 
@@ -73,7 +88,7 @@ export class UsersService {
       dateOfBirth,
       gender,
       address,
-      role,
+      permissions,
       CCCD,
       note,
       createdBy: {
@@ -87,6 +102,10 @@ export class UsersService {
   async register(user: RegisterUserDto) {
     const { name, email, password, dateOfBirth, gender, address } = user;
 
+    if (!this.isValidEmail(email)) {
+      throw new BadRequestException('Email mới không hợp lệ');
+    }
+
     //logic check email exist
     const isExist = await this.userModel.findOne({ email });
     if (isExist)
@@ -94,10 +113,18 @@ export class UsersService {
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
 
-    //fetch user role
-    const userRole = await this.roleModel.findOne({
-      name: USER_ROLE,
-    });
+    if (
+      !(
+        /[a-z]/.test(password) &&
+        /[A-Z]/.test(password) &&
+        /\d/.test(password) &&
+        password.length >= 8
+      )
+    ) {
+      throw new BadRequestException(
+        'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
+      );
+    }
 
     const hashPassword = this.getHashPassword(password);
     let newRegister = await this.userModel.create({
@@ -107,7 +134,6 @@ export class UsersService {
       dateOfBirth,
       gender,
       address,
-      role: userRole?._id,
       note: '',
     });
 
@@ -153,7 +179,11 @@ export class UsersService {
       .findOne({
         _id: id,
       })
-      .select('-password'); //không trả về password
+      .select('-password') //không trả về password
+      .populate({
+        path: 'permissions',
+        select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
+      });
   }
 
   private findOneWithPassword(id: string) {
@@ -164,7 +194,10 @@ export class UsersService {
       .findOne({
         _id: id,
       })
-      .populate({ path: 'role', select: { name: 1, _id: 1 } });
+      .populate({
+        path: 'permissions',
+        select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
+      });
   }
 
   findOneByUserName(username: string) {
@@ -184,6 +217,30 @@ export class UsersService {
       },
       {
         ...updateUserDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
+
+    return updated;
+  }
+
+  async updateUserPermissions(
+    _id: string,
+    updateUserPermissionsDto: UpdateUserPermissionsDto,
+    user: IUser,
+  ) {
+    if (!mongoose.Types.ObjectId.isValid(_id))
+      throw new BadRequestException('ID không hợp lệ!');
+
+    const { permissions } = updateUserPermissionsDto;
+
+    const updated = await this.userModel.updateOne(
+      { _id },
+      {
+        permissions,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -328,26 +385,26 @@ export class UsersService {
     verificationCode: string,
     encryptedNewEmail: string,
   ) {
-    // Decrypt new email
+    // Decrypt email mới
     const newEmail = this.decrypt(encryptedNewEmail);
 
-    // Validate new email format
+    // Kiểm tra định dạng email mới
     if (!this.isValidEmail(newEmail)) {
       throw new BadRequestException('Email mới không hợp lệ');
     }
 
-    // Find the user by userId and verificationCode
+    // Tìm kiếm user theo userId và verificationCode
     const findUser = await this.userModel.findOne({
       _id: userId,
       verificationCode,
-      verificationExpires: { $gt: new Date() }, // Verification code should be valid
+      verificationExpires: { $gt: new Date() }, // verificationCode phải hợp lệ
     });
 
     if (!findUser) {
       throw new BadRequestException('Mã xác minh không hợp lệ hoặc đã hết hạn');
     }
 
-    // Update email and clear verification fields
+    // Cập nhật email và xóa verificationCode, verificationExpires
     await this.userModel.findByIdAndUpdate(userId, {
       email: newEmail,
       $unset: {

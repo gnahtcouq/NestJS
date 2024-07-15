@@ -1,7 +1,4 @@
 /* eslint-disable prettier/prettier */
-export const ADMIN_ROLE = 'SUPER_ADMIN';
-export const USER_ROLE = 'NORMAL_USER';
-
 export const INIT_PERMISSIONS = [
   {
     _id: '648ab415f4328bd3153ee211',
@@ -661,86 +658,6 @@ export const INIT_PERMISSIONS = [
     deletedAt: null,
     createdAt: '2023-06-15T09:12:11.323Z',
     updatedAt: '2023-06-15T09:12:11.323Z',
-    __v: 0,
-  },
-  {
-    _id: '648ad613dafdb9754f40b89a',
-    name: 'Thêm mới vai trò',
-    apiPath: '/api/v1/roles',
-    method: 'POST',
-    module: 'ROLES',
-    createdBy: {
-      _id: '647b5108a8a243e8191855b5',
-      email: 'comehere.thang@gmail.com',
-    },
-    isDeleted: false,
-    deletedAt: null,
-    createdAt: '2023-06-15T09:12:51.974Z',
-    updatedAt: '2023-06-15T09:12:51.974Z',
-    __v: 0,
-  },
-  {
-    _id: '648ad622dafdb9754f40b89f',
-    name: 'Xem danh sách vai trò',
-    apiPath: '/api/v1/roles',
-    method: 'GET',
-    module: 'ROLES',
-    createdBy: {
-      _id: '647b5108a8a243e8191855b5',
-      email: 'comehere.thang@gmail.com',
-    },
-    isDeleted: false,
-    deletedAt: null,
-    createdAt: '2023-06-15T09:13:06.618Z',
-    updatedAt: '2023-06-15T09:13:06.618Z',
-    __v: 0,
-  },
-  {
-    _id: '648ad630dafdb9754f40b8a6',
-    name: 'Xem thông tin chi tiết vai trò',
-    apiPath: '/api/v1/roles/:id',
-    method: 'GET',
-    module: 'ROLES',
-    createdBy: {
-      _id: '647b5108a8a243e8191855b5',
-      email: 'comehere.thang@gmail.com',
-    },
-    isDeleted: false,
-    deletedAt: null,
-    createdAt: '2023-06-15T09:13:20.853Z',
-    updatedAt: '2023-06-15T09:13:20.853Z',
-    __v: 0,
-  },
-  {
-    _id: '648ad640dafdb9754f40b8ab',
-    name: 'Cập nhật thông tin vai trò',
-    apiPath: '/api/v1/roles/:id',
-    method: 'PATCH',
-    module: 'ROLES',
-    createdBy: {
-      _id: '647b5108a8a243e8191855b5',
-      email: 'comehere.thang@gmail.com',
-    },
-    isDeleted: false,
-    deletedAt: null,
-    createdAt: '2023-06-15T09:13:36.836Z',
-    updatedAt: '2023-06-15T09:13:36.836Z',
-    __v: 0,
-  },
-  {
-    _id: '648ad650dafdb9754f40b8b0',
-    name: 'Xoá vai trò',
-    apiPath: '/api/v1/roles/:id',
-    method: 'DELETE',
-    module: 'ROLES',
-    createdBy: {
-      _id: '647b5108a8a243e8191855b5',
-      email: 'comehere.thang@gmail.com',
-    },
-    isDeleted: false,
-    deletedAt: null,
-    createdAt: '2023-06-15T09:13:52.798Z',
-    updatedAt: '2023-06-15T09:13:52.798Z',
     __v: 0,
   },
 ];
