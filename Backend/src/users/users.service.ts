@@ -111,18 +111,18 @@ export class UsersService {
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
 
-    if (
-      !(
-        /[a-z]/.test(password) &&
-        /[A-Z]/.test(password) &&
-        /\d/.test(password) &&
-        password.length >= 8
-      )
-    ) {
-      throw new BadRequestException(
-        'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
-      );
-    }
+    // if (
+    //   !(
+    //     /[a-z]/.test(password) &&
+    //     /[A-Z]/.test(password) &&
+    //     /\d/.test(password) &&
+    //     password.length >= 8
+    //   )
+    // ) {
+    //   throw new BadRequestException(
+    //     'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
+    //   );
+    // }
 
     const hashPassword = this.getHashPassword(password);
     let newRegister = await this.userModel.create({

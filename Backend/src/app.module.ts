@@ -16,6 +16,9 @@ import { SubscribersModule } from './subscribers/subscribers.module';
 import { UnionistsModule } from './unionists/unionists.module';
 import { MailModule } from './mail/mail.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FeesModule } from './fees/fees.module';
+import { ReceiptsModule } from './receipts/receipts.module';
+import { IncomeCategoriesModule } from './income-categories/income-categories.module';
 
 @Module({
   imports: [
@@ -48,6 +51,9 @@ import { ScheduleModule } from '@nestjs/schedule';
     SubscribersModule,
     UnionistsModule,
     MailModule,
+    FeesModule,
+    ReceiptsModule,
+    IncomeCategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

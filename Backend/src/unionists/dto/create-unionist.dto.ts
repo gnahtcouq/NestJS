@@ -71,6 +71,9 @@ export class CreateUnionistDto {
   @IsArray({ message: 'Quyền hạn phải có định dạng là mảng' })
   permissions: mongoose.Schema.Types.ObjectId[];
 
+  @IsNotEmpty({
+    message: 'Đơn vị không được để trống',
+  })
   @IsNotEmptyObject()
   @IsObject()
   @ValidateNested()
