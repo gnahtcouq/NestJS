@@ -1,5 +1,10 @@
 /* eslint-disable prefer-const */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateUnionistDto } from './dto/create-unionist.dto';
 import { UpdateUnionistDto } from './dto/update-unionist.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -21,6 +26,10 @@ import { UpdateUnionistPermissionsDto } from 'src/unionists/dto/update-unionist-
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import { ChangePasswordDto } from 'src/unionists/dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
+import { IUser } from 'src/users/users.interface';
+import * as xlsx from 'xlsx';
+import { parse, formatISO } from 'date-fns';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class UnionistsService {
@@ -29,6 +38,8 @@ export class UnionistsService {
   constructor(
     @InjectModel(Unionist.name)
     private unionistModel: SoftDeleteModel<UnionistDocument>,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
     private configService: ConfigService,
     private readonly mailerService: MailerService,
   ) {
@@ -448,5 +459,226 @@ export class UnionistsService {
 
   private async verifyPassword(password: string, hashedPassword: string) {
     return await bcrypt.compare(password, hashedPassword);
+  }
+
+  async uploadFile(file: Express.Multer.File, user: IUnionist | IUser) {
+    // Kiểm tra xem file có tồn tại không
+    if (!file) {
+      throw new BadRequestException('Không tìm thấy file để tải lên');
+    }
+
+    // Kiểm tra loại file
+    const allowedTypes = [
+      'application/vnd.ms-excel', // for .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // for .xlsx
+    ];
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Chỉ cho phép nhập từ file Excel');
+    }
+
+    // Đọc dữ liệu từ file Excel
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet, {
+      header: 1,
+      defval: null,
+    });
+
+    const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
+
+    const invalidRows = [];
+
+    // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
+    const filteredData = data.slice(1).filter((row, index) => {
+      // Kiểm tra dòng có đủ các cột cần thiết không
+      if ((row as any[]).length < 8) {
+        return false;
+      }
+
+      // Kiểm tra các giá trị cột có hợp lệ không
+      const unionistId = row[0];
+      const unionistEmail = row[1];
+      const unionistName = row[2];
+      const unionistGender = row[3];
+      const unionistBirthday = row[4];
+      const unionistCCCD = row[5];
+      const unionistAddress = row[6];
+      const unionistJoiningDate = row[8] || null;
+      const unionistLeavingDate = row[9] || null;
+      const unionistUnionEntryDate = row[10] || null;
+
+      if (
+        !unionistId ||
+        !unionistName ||
+        !unionistGender ||
+        !unionistBirthday ||
+        !unionistAddress
+      ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra email
+      if (!this.isValidEmail(unionistEmail)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra giới tính
+      if (unionistGender !== 'MALE' && unionistGender !== 'FEMALE') {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra ngày sinh
+      const dayMonthYearRegex =
+        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+      if (!dayMonthYearRegex.test(unionistBirthday)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      const [day, month, year] = unionistBirthday.split('/').map(Number);
+      const isValidDate = (
+        day: number,
+        month: number,
+        year: number,
+      ): boolean => {
+        const date = new Date(year, month - 1, day);
+        return (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        );
+      };
+
+      if (!isValidDate(day, month, year)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra CCCD nếu có
+      if (unionistCCCD && !/^\d{12}$/.test(unionistCCCD)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra ngày tham gia nếu có
+      if (unionistJoiningDate && !dayMonthYearRegex.test(unionistJoiningDate)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra ngày rời khỏi nếu có
+      if (unionistLeavingDate && !dayMonthYearRegex.test(unionistLeavingDate)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra ngày gia nhập công đoàn nếu có
+      if (
+        unionistUnionEntryDate &&
+        !dayMonthYearRegex.test(unionistUnionEntryDate)
+      ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      return true;
+    });
+
+    // Số dòng hợp lệ
+    const validRowsCount = filteredData.length;
+
+    if (filteredData.length === 0) {
+      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
+    } else if (invalidRows.length > 0) {
+      throw new BadRequestException(
+        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+      );
+    }
+
+    // Lưu dữ liệu vào cơ sở dữ liệu
+    for (const row of filteredData) {
+      const unionistId = row[0];
+      const unionistEmail = row[1];
+      const unionistName = row[2];
+      const unionistGender = row[3];
+      const unionistBirthday = row[4];
+      const unionistCCCD = row[5] || null;
+      const unionistAddress = row[6];
+      const unionistNote = row[7] || null;
+      const unionistJoiningDate = row[8] || null;
+      const unionistLeavingDate = row[9] || null;
+      const unionistUnionEntryDate = row[10] || null;
+
+      const [day, month, year] = unionistBirthday.split('/');
+      const parsedDate = parse(
+        `${day}/${month}/${year}`,
+        'dd/MM/yyyy',
+        new Date(),
+      );
+      const formattedDate = formatISO(parsedDate);
+
+      try {
+        // Kiểm tra xem bản ghi đã tồn tại chưa
+        const existingUnionist = await this.unionistModel.findOne({
+          _id: unionistId,
+          name: unionistName,
+          email: unionistEmail,
+        });
+
+        const isExistUser = await this.usersService.findOneByUserName(
+          unionistEmail,
+        );
+
+        if (existingUnionist || isExistUser) {
+          throw new BadRequestException(
+            `Công đoàn viên ${unionistName} với email ${unionistEmail} đã tồn tại`,
+          );
+        }
+
+        // Tạo mới bản ghi unionist
+        await this.unionistModel.create({
+          _id: unionistId,
+          name: unionistName,
+          password: this.getHashPassword(
+            this.configService.get<string>('INIT_PASSWORD'),
+          ),
+          email: unionistEmail,
+          gender: unionistGender,
+          dateOfBirth: formattedDate,
+          CCCD: unionistCCCD,
+          address: unionistAddress,
+          note: unionistNote,
+          permissions: [
+            new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
+            new ObjectId('666f3680006c1579a34d5ec2'), //Cập nhật thông tin công đoàn viên
+            new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
+            new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
+            new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
+          ],
+          joiningDate: unionistJoiningDate,
+          leavingDate: unionistLeavingDate,
+          unionEntryDate: unionistUnionEntryDate,
+          createdBy: {
+            _id: user._id,
+            email: user.email,
+          },
+          isDeleted: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      } catch (error) {
+        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      }
+    }
+
+    return {
+      message: 'Tải file lên thành công',
+      totalRowsRead,
+      validRowsCount,
+    };
   }
 }

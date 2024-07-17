@@ -8,6 +8,8 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import * as xlsx from 'xlsx';
+import { parse, formatISO } from 'date-fns';
 
 @Injectable()
 export class ReceiptsService {
@@ -108,5 +110,165 @@ export class ReceiptsService {
     return this.receiptModel.softDelete({
       _id: id,
     });
+  }
+
+  async uploadFile(file: Express.Multer.File, user: IUser) {
+    // Kiểm tra xem file có tồn tại không
+    if (!file) {
+      throw new BadRequestException('Không tìm thấy file để tải lên');
+    }
+
+    // Kiểm tra loại file
+    const allowedTypes = [
+      'application/vnd.ms-excel', // for .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // for .xlsx
+    ];
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Chỉ cho phép nhập từ file Excel');
+    }
+
+    // Đọc dữ liệu từ file Excel
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet, {
+      header: 1,
+      defval: null,
+    });
+
+    const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
+
+    const invalidRows = [];
+
+    // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
+    const filteredData = data.slice(1).filter((row, index) => {
+      // Kiểm tra dòng có đủ các cột cần thiết không
+      if ((row as any[]).length < 5) {
+        return false;
+      }
+
+      // Kiểm tra các giá trị cột có hợp lệ không
+      const receiptUserId = row[0];
+      const receiptUserName = row[1];
+      const receiptDescription = row[2];
+      const receiptTime = row[3];
+      const receiptAmount = row[4];
+      if (
+        !receiptUserId ||
+        !receiptUserName ||
+        !receiptDescription ||
+        !receiptTime ||
+        isNaN(receiptAmount) ||
+        receiptAmount < 0 ||
+        receiptAmount >= 10000000000
+      ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra ngày tháng năm
+      const dayMonthYearRegex =
+        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+      if (!dayMonthYearRegex.test(receiptTime)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      const [day, month, year] = receiptTime.split('/').map(Number);
+      const isValidDate = (
+        day: number,
+        month: number,
+        year: number,
+      ): boolean => {
+        const date = new Date(year, month - 1, day);
+        return (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        );
+      };
+
+      if (!isValidDate(day, month, year)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra receiptAmount có phải là số không âm
+      if (isNaN(parseFloat(receiptAmount)) || parseFloat(receiptAmount) < 0) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      return true;
+    });
+
+    // Số dòng hợp lệ
+    const validRowsCount = filteredData.length;
+
+    if (filteredData.length === 0) {
+      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
+    } else if (invalidRows.length > 0) {
+      throw new BadRequestException(
+        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+      );
+    }
+
+    // Lưu dữ liệu vào cơ sở dữ liệu
+    for (const row of filteredData) {
+      const receiptUserId = row[0];
+      const receiptUserName = row[1];
+      const receiptDescription = row[2];
+      const receiptTime = row[3];
+      const receiptAmount = row[4];
+
+      const [day, month, year] = receiptTime.split('/');
+      const parsedDate = parse(
+        `${day}/${month}/${year}`,
+        'dd/MM/yyyy',
+        new Date(),
+      );
+      const formattedDate = formatISO(parsedDate);
+
+      try {
+        // Kiểm tra xem bản ghi đã tồn tại chưa
+        const existingUnionist = await this.receiptModel.findOne({
+          description: receiptDescription,
+          time: formattedDate,
+          amount: receiptAmount,
+        });
+
+        if (existingUnionist) {
+          throw new BadRequestException(
+            `${receiptDescription} (${receiptTime}) đã tồn tại`,
+          );
+        }
+
+        // Tạo mới bản ghi phiếu thu
+        await this.receiptModel.create({
+          user: {
+            _id: receiptUserId,
+            name: receiptUserName,
+          },
+          description: receiptDescription,
+          time: formattedDate,
+          amount: receiptAmount,
+          createdBy: {
+            _id: user._id,
+            email: user.email,
+          },
+          isDeleted: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      } catch (error) {
+        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      }
+    }
+
+    return {
+      message: 'Tải file lên thành công',
+      totalRowsRead,
+      validRowsCount,
+    };
   }
 }

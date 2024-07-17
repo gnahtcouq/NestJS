@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ExpenseCategoriesService } from './expense-categories.service';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto';
 import { ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('expense-categories')
 export class ExpenseCategoriesController {
@@ -63,5 +66,12 @@ export class ExpenseCategoriesController {
   @ResponseMessage('Xóa danh mục thu')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.expenseCategoriesService.remove(id, user);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ResponseMessage('Tải lên danh mục chi')
+  async upload(@UploadedFile() file: Express.Multer.File, @User() user: IUser) {
+    return this.expenseCategoriesService.uploadFile(file, user);
   }
 }

@@ -9,6 +9,8 @@ import {
   Delete,
   Query,
   Put,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UnionistsService } from './unionists.service';
 import { CreateUnionistDto } from './dto/create-unionist.dto';
@@ -17,6 +19,8 @@ import { IUnionist } from 'src/unionists/unionists.interface';
 import { Public, ResponseMessage, Unionist } from 'src/decorator/customize';
 import { UpdateUnionistPermissionsDto } from 'src/unionists/dto/update-unionist-permissions';
 import { ChangePasswordDto } from 'src/unionists/dto/change-password.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { IUser } from 'src/users/users.interface';
 
 @Controller('unionists')
 export class UnionistsController {
@@ -26,11 +30,11 @@ export class UnionistsController {
   @ResponseMessage('Tạo công đoàn viên')
   async create(
     @Body() createUnionistDto: CreateUnionistDto,
-    @Unionist() unionist: IUnionist,
+    @Unionist() user: IUnionist | IUser,
   ) {
     let newUnionist = await this.unionistsService.create(
       createUnionistDto,
-      unionist,
+      user,
     );
     return {
       _id: newUnionist?._id,
@@ -60,12 +64,12 @@ export class UnionistsController {
   async update(
     @Param('id') id: string,
     @Body() updateUnionistDto: UpdateUnionistDto,
-    @Unionist() unionist: IUnionist,
+    @Unionist() user: IUnionist | IUser,
   ) {
     let updatedUnionist = await this.unionistsService.update(
       id,
       updateUnionistDto,
-      unionist,
+      user,
     );
     return updatedUnionist;
   }
@@ -75,19 +79,19 @@ export class UnionistsController {
   updateUnionistPermissions(
     @Param('id') id: string,
     @Body() updateUnionistPermissionsDto: UpdateUnionistPermissionsDto,
-    @Unionist() unionist: IUnionist,
+    @Unionist() user: IUnionist | IUser,
   ) {
     return this.unionistsService.updateUnionistPermissions(
       id,
       updateUnionistPermissionsDto,
-      unionist,
+      user,
     );
   }
 
   @Delete(':id')
   @ResponseMessage('Xóa công đoàn viên')
-  remove(@Param('id') id: string, @Unionist() unionist: IUnionist) {
-    return this.unionistsService.remove(id, unionist);
+  remove(@Param('id') id: string, @Unionist() user: IUnionist | IUser) {
+    return this.unionistsService.remove(id, user);
   }
 
   @Post('count')
@@ -137,5 +141,15 @@ export class UnionistsController {
       changePasswordDto,
     );
     return { success: result };
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ResponseMessage('Tải lên danh sách công đoàn viên')
+  async upload(
+    @UploadedFile() file: Express.Multer.File,
+    @Unionist() user: IUnionist | IUser,
+  ) {
+    return this.unionistsService.uploadFile(file, user);
   }
 }

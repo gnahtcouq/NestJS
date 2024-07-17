@@ -136,6 +136,11 @@ export class FeesService {
       header: 1,
       defval: null,
     });
+
+    const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
+
+    const invalidRows = [];
+
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
@@ -157,22 +162,36 @@ export class FeesService {
         fee < 0 ||
         fee >= 10000000000
       ) {
+        invalidRows.push(index + 2);
         return false;
       }
 
       // Kiểm tra monthYear theo định dạng yyyy/mm
       const yearMonthRegex = /^\d{4}\/(0[1-9]|1[0-2])$/;
       if (!yearMonthRegex.test(monthYear)) {
+        invalidRows.push(index + 2);
         return false;
       }
 
       // Kiểm tra fee có phải là số không âm
       if (isNaN(parseFloat(fee)) || parseFloat(fee) < 0) {
+        invalidRows.push(index + 2);
         return false;
       }
 
       return true;
     });
+
+    // Số dòng hợp lệ
+    const validRowsCount = filteredData.length;
+
+    if (filteredData.length === 0) {
+      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
+    } else if (invalidRows.length > 0) {
+      throw new BadRequestException(
+        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+      );
+    }
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
@@ -185,7 +204,7 @@ export class FeesService {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingFee = await this.feeModel.findOne({
           monthYear,
-          'unionist._id': unionistId,
+          unionistId,
         });
 
         if (existingFee) {
@@ -215,6 +234,10 @@ export class FeesService {
       }
     }
 
-    return { message: 'Tải file lên thành công' };
+    return {
+      message: 'Tải file lên thành công',
+      totalRowsRead,
+      validRowsCount,
+    };
   }
 }

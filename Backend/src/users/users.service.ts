@@ -1,5 +1,10 @@
 /* eslint-disable prefer-const */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -18,13 +23,17 @@ import * as bcrypt from 'bcryptjs';
 import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 import { ObjectId } from 'mongodb'; // Import the ObjectId class from the 'mongodb' module
-
+import * as xlsx from 'xlsx';
+import { parse, formatISO } from 'date-fns';
+import { UnionistsService } from 'src/unionists/unionists.service';
 @Injectable()
 export class UsersService {
   private readonly encryptionKey: Buffer;
   private readonly ivLength: number = 16; // Đảm bảo ivLength là số
   constructor(
     @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
+    @Inject(forwardRef(() => UnionistsService))
+    private readonly unionistsService: UnionistsService,
     private configService: ConfigService,
     private readonly mailerService: MailerService,
   ) {
@@ -105,8 +114,12 @@ export class UsersService {
     }
 
     //logic check email exist
-    const isExist = await this.userModel.findOne({ email });
-    if (isExist)
+    const isExistUser = await this.userModel.findOne({ email });
+    const isExistUnionist = await this.unionistsService.findOneByUserName(
+      email,
+    );
+
+    if (isExistUser || isExistUnionist)
       throw new BadRequestException(
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
@@ -329,7 +342,10 @@ export class UsersService {
     }
 
     const isExist = await this.userModel.findOne({ email: newEmail });
-    if (isExist) {
+    const isExistUnionist = await this.unionistsService.findOneByUserName(
+      newEmail,
+    );
+    if (isExist || isExistUnionist) {
       throw new BadRequestException(
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác.`,
       );
@@ -463,5 +479,196 @@ export class UsersService {
 
   private async verifyPassword(password: string, hashedPassword: string) {
     return await bcrypt.compare(password, hashedPassword);
+  }
+
+  async uploadFile(file: Express.Multer.File, user: IUser) {
+    // Kiểm tra xem file có tồn tại không
+    if (!file) {
+      throw new BadRequestException('Không tìm thấy file để tải lên');
+    }
+
+    // Kiểm tra loại file
+    const allowedTypes = [
+      'application/vnd.ms-excel', // for .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // for .xlsx
+    ];
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Chỉ cho phép nhập từ file Excel');
+    }
+
+    // Đọc dữ liệu từ file Excel
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet, {
+      header: 1,
+      defval: null,
+    });
+
+    const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
+
+    const invalidRows = [];
+
+    // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
+    const filteredData = data.slice(1).filter((row, index) => {
+      // Kiểm tra dòng có đủ các cột cần thiết không
+      if ((row as any[]).length < 8) {
+        return false;
+      }
+
+      // Kiểm tra các giá trị cột có hợp lệ không
+      const userId = row[0];
+      const userEmail = row[1];
+      const userName = row[2];
+      const userGender = row[3];
+      const userBirthday = row[4];
+      const userCCCD = row[5] || null;
+      const userAddress = row[6];
+
+      if (
+        !userId ||
+        !userName ||
+        !userGender ||
+        !userBirthday ||
+        !userAddress
+      ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra email
+      if (!this.isValidEmail(userEmail)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra giới tính
+      if (userGender !== 'MALE' && userGender !== 'FEMALE') {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra ngày sinh
+      const dayMonthYearRegex =
+        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+      if (!dayMonthYearRegex.test(userBirthday)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      const [day, month, year] = userBirthday.split('/').map(Number);
+      const isValidDate = (
+        day: number,
+        month: number,
+        year: number,
+      ): boolean => {
+        const date = new Date(year, month - 1, day);
+        return (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        );
+      };
+
+      if (!isValidDate(day, month, year)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra CCCD nếu có
+      if (userCCCD && !/^\d{12}$/.test(userCCCD)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      return true;
+    });
+
+    // Số dòng hợp lệ
+    const validRowsCount = filteredData.length;
+
+    if (filteredData.length === 0) {
+      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
+    } else if (invalidRows.length > 0) {
+      throw new BadRequestException(
+        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+      );
+    }
+
+    // Lưu dữ liệu vào cơ sở dữ liệu
+    for (const row of filteredData) {
+      const userId = row[0];
+      const userEmail = row[1];
+      const userName = row[2];
+      const userGender = row[3];
+      const userBirthday = row[4];
+      const userCCCD = row[5] || null;
+      const userAddress = row[6];
+      const userNote = row[7] || null;
+
+      const [day, month, year] = userBirthday.split('/');
+      const parsedDate = parse(
+        `${day}/${month}/${year}`,
+        'dd/MM/yyyy',
+        new Date(),
+      );
+      const formattedDate = formatISO(parsedDate);
+
+      try {
+        // Kiểm tra xem bản ghi đã tồn tại chưa
+        const existingUser = await this.userModel.findOne({
+          _id: userId,
+          name: userName,
+          email: userEmail,
+        });
+
+        const isExistUnionist = await this.unionistsService.findOneByUserName(
+          userEmail,
+        );
+
+        if (existingUser || isExistUnionist) {
+          throw new BadRequestException(
+            `Thành viên ${userName} với email ${userEmail} đã tồn tại`,
+          );
+        }
+
+        // Tạo mới bản ghi user
+        await this.userModel.create({
+          _id: userId,
+          name: userName,
+          password: this.getHashPassword(
+            this.configService.get<string>('INIT_PASSWORD'),
+          ),
+          email: userEmail,
+          gender: userGender,
+          dateOfBirth: formattedDate,
+          CCCD: userCCCD,
+          address: userAddress,
+          note: userNote,
+          permissions: [
+            new ObjectId('648ab6e7fa16b294212e4038'), // Xem thông tin chi tiết thành viên
+            new ObjectId('648ab719fa16b294212e4042'), // Cập nhật thông tin thành viên
+            new ObjectId('6688dfd0a9b3d97d1b368c44'), // Gửi yêu cầu thay đổi email
+            new ObjectId('66890545d40c708b15d2f329'), // Xác nhận thay đổi email
+            new ObjectId('668b84dce8720bbbd18c7e77'), // Thay đổi mật khẩu
+          ],
+          createdBy: {
+            _id: user._id,
+            email: user.email,
+          },
+          isDeleted: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      } catch (error) {
+        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      }
+    }
+
+    return {
+      message: 'Tải file lên thành công',
+      totalRowsRead,
+      validRowsCount,
+    };
   }
 }

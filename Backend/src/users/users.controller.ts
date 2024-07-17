@@ -10,6 +10,8 @@ import {
   UseGuards,
   Query,
   Put,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,6 +20,7 @@ import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users') // => /users
 export class UsersController {
@@ -128,5 +131,12 @@ export class UsersController {
       changePasswordDto,
     );
     return { success: result };
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ResponseMessage('Tải lên danh sách thành viên')
+  async upload(@UploadedFile() file: Express.Multer.File, @User() user: IUser) {
+    return this.usersService.uploadFile(file, user);
   }
 }

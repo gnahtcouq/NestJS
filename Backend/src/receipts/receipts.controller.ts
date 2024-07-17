@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { UpdateReceiptDto } from './dto/update-receipt.dto';
 import { ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('receipts')
 export class ReceiptsController {
@@ -54,5 +57,12 @@ export class ReceiptsController {
   @ResponseMessage('Xóa phiếu thu')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.receiptsService.remove(id, user);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ResponseMessage('Tải lên danh sách phiếu thu')
+  async upload(@UploadedFile() file: Express.Multer.File, @User() user: IUser) {
+    return this.receiptsService.uploadFile(file, user);
   }
 }

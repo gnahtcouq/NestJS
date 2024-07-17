@@ -15,6 +15,7 @@ import {
   UnionistDocument,
 } from 'src/unionists/schemas/unionist.schema';
 import { ObjectId } from 'mongodb'; // Import the ObjectId class from the 'mongodb' module
+import { UnionistsService } from 'src/unionists/unionists.service';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
@@ -30,7 +31,7 @@ export class DatabasesService implements OnModuleInit {
 
     private configService: ConfigService,
     private userService: UsersService,
-    private unionistService: UsersService,
+    private unionistService: UnionistsService,
   ) {}
 
   async onModuleInit() {
@@ -53,11 +54,11 @@ export class DatabasesService implements OnModuleInit {
             password: this.userService.getHashPassword(
               this.configService.get<string>('INIT_PASSWORD'),
             ),
-            dateOfBirth: null,
-            gender: null,
-            address: null,
-            CCCD: null,
-            note: null,
+            dateOfBirth: '2002-10-29T00:00:00.00+00:00',
+            gender: 'MALE',
+            address: 'Nha Trang',
+            CCCD: '056202011199',
+            note: 'ADMIN',
             permissions: [
               new ObjectId('6694902bda1f6560724cb094'),
               new ObjectId('648ab415f4328bd3153ee211'),
@@ -142,63 +143,25 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
             ],
           },
-          {
-            name: 'Trần Nguyễn Thanh Sang',
-            email: 'dh52007102@student.stu.edu.vn',
-            password: this.userService.getHashPassword(
-              this.configService.get<string>('INIT_PASSWORD'),
-            ),
-            dateOfBirth: '2002-07-17T00:00:00.00+00:00',
-            gender: 'MALE',
-            address: 'Nha Trang',
-            CCCD: '056202007313',
-            note: 'Saigon Technology University',
-            permissions: [
-              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
-              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
-              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
-              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
-              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
-            ],
-          },
-          {
-            name: 'Trần A Huy',
-            email: 'dh52007056@student.stu.edu.vn',
-            password: this.userService.getHashPassword(
-              this.configService.get<string>('INIT_PASSWORD'),
-            ),
-            dateOfBirth: '2002-07-24T00:00:00.00+00:00',
-            gender: 'MALE',
-            address: 'Đồng Nai',
-            CCCD: '080202004633',
-            note: 'Saigon Technology University',
-            permissions: [
-              new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
-              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
-              new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
-              new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
-              new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
-            ],
-          },
         ]);
       }
 
       if (countUnionist === 0) {
         await this.unionistModel.insertMany([
           {
-            name: 'Unionist',
+            name: 'UNIONIST',
             email: 'unionist@stu.id.vn',
             password: this.unionistService.getHashPassword(
               this.configService.get<string>('INIT_PASSWORD'),
             ),
-            dateOfBirth: null,
-            gender: null,
-            address: null,
-            CCCD: null,
-            joiningDate: null,
-            leavingDate: null,
-            unionEntryDate: null,
-            note: null,
+            dateOfBirth: '2002-10-29T00:00:00.00+00:00',
+            gender: 'MALE',
+            address: 'Nha Trang',
+            CCCD: '056202011199',
+            note: 'Saigon Technology University',
+            joiningDate: '2002-10-29T00:00:00.00+00:00',
+            leavingDate: '2002-10-29T00:00:00.00+00:00',
+            unionEntryDate: '2002-10-29T00:00:00.00+00:00',
             permissions: [
               new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
               new ObjectId('666f3680006c1579a34d5ec2'), //Cập nhật thông tin công đoàn viên
