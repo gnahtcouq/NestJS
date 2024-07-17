@@ -19,6 +19,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FeesModule } from './fees/fees.module';
 import { ReceiptsModule } from './receipts/receipts.module';
 import { IncomeCategoriesModule } from './income-categories/income-categories.module';
+import { ExpensesModule } from './expenses/expenses.module';
+import { ExpenseCategoriesModule } from './expense-categories/expense-categories.module';
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { IncomeCategoriesModule } from './income-categories/income-categories.mo
     FeesModule,
     ReceiptsModule,
     IncomeCategoriesModule,
+    ExpensesModule,
+    ExpenseCategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
