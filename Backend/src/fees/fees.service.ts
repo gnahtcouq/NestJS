@@ -8,6 +8,7 @@ import { Fee, FeeDocument } from 'src/fees/schemas/fee.schema';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import * as xlsx from 'xlsx';
 
 @Injectable()
 export class FeesService {
@@ -110,5 +111,75 @@ export class FeesService {
     return this.feeModel.softDelete({
       _id: id,
     });
+  }
+
+  async uploadFile(file: Express.Multer.File, user: IUser) {
+    // Kiểm tra xem file có tồn tại không
+    if (!file) {
+      throw new BadRequestException('Không tìm thấy file để tải lên');
+    }
+
+    // Kiểm tra loại file
+    const allowedTypes = [
+      'application/vnd.ms-excel', // for .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // for .xlsx
+    ];
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Chỉ cho phép nhập từ file Excel');
+    }
+
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet, {
+      header: 1,
+      defval: null,
+    });
+
+    // Filter out empty rows
+    const filteredData = data.filter((row: Array<any>) =>
+      row.some((cell: any) => cell !== null && cell !== ''),
+    );
+
+    // Process filtered data
+    const processedData = filteredData.slice(1).map((row) => ({
+      unionist: {
+        _id: row[0],
+        name: row[1],
+      },
+      monthYear: row[2],
+      fee: row[3],
+    }));
+
+    // Save data to the database
+    for (const record of processedData) {
+      const { unionist, monthYear, fee } = record;
+
+      // Check if the fee record already exists
+      const isExist = await this.feeModel.findOne({
+        monthYear,
+        'unionist._id': unionist._id,
+      });
+      if (isExist) {
+        throw new BadRequestException(
+          `Lệ phí ${monthYear} cho công đoàn viên ${unionist.name} đã tồn tại`,
+        );
+      }
+
+      await this.feeModel.create({
+        unionist,
+        monthYear,
+        fee,
+        createdBy: {
+          _id: user._id,
+          email: user.email,
+        },
+        isDeleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    return { message: 'Tải file lên thành công' };
   }
 }

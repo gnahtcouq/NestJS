@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { FeesService } from './fees.service';
 import { CreateFeeDto } from './dto/create-fee.dto';
 import { UpdateFeeDto } from './dto/update-fee.dto';
-import { Public, ResponseMessage, User } from 'src/decorator/customize';
+import { ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('fees')
 export class FeesController {
@@ -54,5 +57,12 @@ export class FeesController {
   @ResponseMessage('Xóa công đoàn phí')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.feesService.remove(id, user);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ResponseMessage('Tải lên danh sách công đoàn phí')
+  async upload(@UploadedFile() file: Express.Multer.File, @User() user: IUser) {
+    return this.feesService.uploadFile(file, user);
   }
 }
