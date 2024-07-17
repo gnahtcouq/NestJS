@@ -62,6 +62,7 @@ export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
   })
   amount: string;
 
+  @IsOptional()
   @IsNotEmpty({
     message: 'Danh mục thu không được để trống',
   })

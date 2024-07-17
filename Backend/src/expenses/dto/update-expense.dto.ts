@@ -62,6 +62,7 @@ export class UpdateExpenseDto extends OmitType(CreateExpenseDto, []) {
   })
   amount: string;
 
+  @IsOptional()
   @IsNotEmpty({
     message: 'Danh mục chi không được để trống',
   })
