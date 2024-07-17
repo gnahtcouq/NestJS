@@ -128,6 +128,7 @@ export class FeesService {
       throw new BadRequestException('Chỉ cho phép nhập từ file Excel');
     }
 
+    // Đọc dữ liệu từ file Excel
     const workbook = xlsx.read(file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
@@ -135,49 +136,83 @@ export class FeesService {
       header: 1,
       defval: null,
     });
-
-    // Filter out empty rows
-    const filteredData = data.filter((row: Array<any>) =>
-      row.some((cell: any) => cell !== null && cell !== ''),
-    );
-
-    // Process filtered data
-    const processedData = filteredData.slice(1).map((row) => ({
-      unionist: {
-        _id: row[0],
-        name: row[1],
-      },
-      monthYear: row[2],
-      fee: row[3],
-    }));
-
-    // Save data to the database
-    for (const record of processedData) {
-      const { unionist, monthYear, fee } = record;
-
-      // Check if the fee record already exists
-      const isExist = await this.feeModel.findOne({
-        monthYear,
-        'unionist._id': unionist._id,
-      });
-      if (isExist) {
-        throw new BadRequestException(
-          `Lệ phí ${monthYear} cho công đoàn viên ${unionist.name} đã tồn tại`,
-        );
+    // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
+    const filteredData = data.slice(1).filter((row, index) => {
+      // Kiểm tra dòng có đủ các cột cần thiết không
+      if ((row as any[]).length < 4) {
+        return false;
       }
 
-      await this.feeModel.create({
-        unionist,
-        monthYear,
-        fee,
-        createdBy: {
-          _id: user._id,
-          email: user.email,
-        },
-        isDeleted: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      // Kiểm tra các giá trị cột có hợp lệ không
+      const unionistId = row[0];
+      const unionistName = row[1];
+      const monthYear = row[2];
+      const fee = row[3];
+
+      if (
+        !unionistId ||
+        !unionistName ||
+        !monthYear ||
+        isNaN(fee) ||
+        fee < 0 ||
+        fee >= 10000000000
+      ) {
+        return false;
+      }
+
+      // Kiểm tra monthYear theo định dạng yyyy/mm
+      const yearMonthRegex = /^\d{4}\/(0[1-9]|1[0-2])$/;
+      if (!yearMonthRegex.test(monthYear)) {
+        return false;
+      }
+
+      // Kiểm tra fee có phải là số không âm
+      if (isNaN(parseFloat(fee)) || parseFloat(fee) < 0) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Lưu dữ liệu vào cơ sở dữ liệu
+    for (const row of filteredData) {
+      const unionistId = row[0];
+      const unionistName = row[1];
+      const monthYear = row[2];
+      const fee = parseFloat(row[3]);
+
+      try {
+        // Kiểm tra xem bản ghi đã tồn tại chưa
+        const existingFee = await this.feeModel.findOne({
+          monthYear,
+          'unionist._id': unionistId,
+        });
+
+        if (existingFee) {
+          throw new BadRequestException(
+            `Lệ phí ${monthYear} cho công đoàn viên ${unionistName} đã tồn tại`,
+          );
+        }
+
+        // Tạo mới bản ghi lệ phí
+        await this.feeModel.create({
+          unionist: {
+            _id: unionistId,
+            name: unionistName,
+          },
+          monthYear,
+          fee,
+          createdBy: {
+            _id: user._id,
+            email: user.email,
+          },
+          isDeleted: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      } catch (error) {
+        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      }
     }
 
     return { message: 'Tải file lên thành công' };
