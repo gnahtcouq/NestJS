@@ -13,7 +13,7 @@ import {
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { UpdateReceiptDto } from './dto/update-receipt.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -35,6 +35,16 @@ export class ReceiptsController {
     @Query() qs: string,
   ) {
     return this.receiptsService.findAll(+currentPage, +limit, qs);
+  }
+
+  @Public()
+  @Get('by-month-year')
+  @ResponseMessage('Lấy danh sách phiếu thu theo tháng và năm')
+  async findByMonthAndYear(
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    return this.receiptsService.findByMonthAndYear(month, year);
   }
 
   @Get(':id')

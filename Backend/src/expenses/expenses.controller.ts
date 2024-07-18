@@ -13,7 +13,7 @@ import {
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -35,6 +35,16 @@ export class ExpensesController {
     @Query() qs: string,
   ) {
     return this.expensesService.findAll(+currentPage, +limit, qs);
+  }
+
+  @Public()
+  @Get('by-month-year')
+  @ResponseMessage('Lấy danh sách phiếu chi theo tháng và năm')
+  async findByMonthAndYear(
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    return this.expensesService.findByMonthAndYear(month, year);
   }
 
   @Get(':id')

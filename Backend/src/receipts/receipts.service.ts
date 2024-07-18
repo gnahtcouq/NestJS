@@ -71,6 +71,29 @@ export class ReceiptsService {
     };
   }
 
+  async findByMonthAndYear(month: number, year: number) {
+    // Xác định ngày bắt đầu và ngày kết thúc của tháng và năm cần tìm kiếm
+    const startDate = new Date(year, month - 1, 1); // month - 1 vì tháng trong JavaScript là từ 0 đến 11
+    const endDate = new Date(
+      year,
+      month - 1,
+      new Date(year, month, 0).getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const filter = {
+      time: {
+        $gte: startDate.toISOString(),
+        $lte: endDate.toISOString(),
+      },
+    };
+
+    return await this.receiptModel.find(filter);
+  }
+
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
       throw new BadRequestException('ID không hợp lệ');
@@ -131,7 +154,7 @@ export class ReceiptsService {
     const workbook = xlsx.read(file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const data = xlsx.utils.sheet_to_json(worksheet, {
+    let data = xlsx.utils.sheet_to_json(worksheet, {
       header: 1,
       defval: null,
     });
