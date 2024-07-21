@@ -111,13 +111,6 @@ export class ReceiptsService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { receiptId } = updateReceiptDto;
-    const existingReceipt = await this.receiptModel.findOne({ receiptId });
-
-    if (existingReceipt) {
-      throw new BadRequestException(`Mã phiếu thu ${receiptId} đã tồn tại`);
-    }
-
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
       {

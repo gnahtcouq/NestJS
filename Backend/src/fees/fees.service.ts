@@ -18,15 +18,17 @@ export class FeesService {
   ) {}
 
   async create(createFeeDto: CreateFeeDto, user: IUser) {
-    const { unionist, monthYear, fee } = createFeeDto;
+    const { unionistId, monthYear, fee } = createFeeDto;
 
-    const isExist = await this.feeModel.findOne({ monthYear });
+    const isExist = await this.feeModel.findOne({ unionistId, monthYear });
     if (isExist) {
-      throw new BadRequestException(`Lệ phí ${monthYear} đã tồn tại`);
+      throw new BadRequestException(
+        `Lệ phí ${monthYear} cho công đoàn viên ${unionistId} đã tồn tại`,
+      );
     }
 
     const newFee = await this.feeModel.create({
-      unionist,
+      unionistId,
       monthYear,
       fee,
       createdBy: {
@@ -81,6 +83,15 @@ export class FeesService {
   async update(_id: string, updateFeeDto: UpdateFeeDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
+
+    const { unionistId, monthYear } = updateFeeDto;
+
+    const isExist = await this.feeModel.findOne({ unionistId, monthYear });
+    if (isExist) {
+      throw new BadRequestException(
+        `Lệ phí ${monthYear} cho công đoàn viên ${unionistId} đã tồn tại`,
+      );
+    }
 
     const updated = await this.feeModel.updateOne(
       { _id: updateFeeDto._id },
@@ -203,8 +214,8 @@ export class FeesService {
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingFee = await this.feeModel.findOne({
-          monthYear,
           unionistId,
+          monthYear,
         });
 
         if (existingFee) {

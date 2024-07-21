@@ -108,7 +108,6 @@ export class IncomeCategoriesService {
       $or: [
         { description, year, _id: { $ne: _id } },
         { description, year, incomeCategoryId, _id: { $ne: _id } },
-        { incomeCategoryId, year, _id: { $ne: _id } },
       ],
     });
 

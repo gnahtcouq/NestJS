@@ -1,26 +1,10 @@
-import { Type } from 'class-transformer';
-import {
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
-  ValidateNested,
-} from 'class-validator';
-import mongoose from 'mongoose';
-
-class Unionist {
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsNotEmpty()
-  name: string;
-}
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateFeeDto {
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => Unionist)
-  unionist: Unionist;
+  @IsNotEmpty({
+    message: 'Mã công đoàn viên không được để trống',
+  })
+  unionistId: string;
 
   @IsNotEmpty({
     message: 'Tháng và năm không được để trống',

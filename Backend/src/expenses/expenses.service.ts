@@ -111,13 +111,6 @@ export class ExpensesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { expenseId } = updateExpenseDto;
-    const existingExpense = await this.expenseModel.findOne({ expenseId });
-
-    if (existingExpense) {
-      throw new BadRequestException(`Mã phiếu chi ${expenseId} đã tồn tại`);
-    }
-
     const updated = await this.expenseModel.updateOne(
       { _id: updateExpenseDto._id },
       {

@@ -110,7 +110,6 @@ export class ExpenseCategoriesService {
       $or: [
         { description, year, _id: { $ne: _id } },
         { description, year, expenseCategoryId, _id: { $ne: _id } },
-        { expenseCategoryId, year, _id: { $ne: _id } },
       ],
     });
 

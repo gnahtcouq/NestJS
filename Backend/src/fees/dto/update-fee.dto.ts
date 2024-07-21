@@ -1,24 +1,6 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateFeeDto } from './create-fee.dto';
-import {
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
-  IsOptional,
-  ValidateNested,
-} from 'class-validator';
-import mongoose from 'mongoose';
-import { Type } from 'class-transformer';
-
-class Unionist {
-  @IsOptional()
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsOptional()
-  @IsNotEmpty()
-  name: string;
-}
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateFeeDto extends OmitType(CreateFeeDto, []) {
   @IsNotEmpty({ message: 'ID không được để trống' })
@@ -26,13 +8,9 @@ export class UpdateFeeDto extends OmitType(CreateFeeDto, []) {
 
   @IsOptional()
   @IsNotEmpty({
-    message: 'Công đoàn viên không được để trống',
+    message: 'Mã công đoàn viên không được để trống',
   })
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => Unionist)
-  unionist: Unionist;
+  unionistId: string;
 
   @IsOptional()
   @IsNotEmpty({

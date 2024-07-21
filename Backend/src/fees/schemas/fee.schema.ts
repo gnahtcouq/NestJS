@@ -6,11 +6,8 @@ export type FeeDocument = HydratedDocument<Fee>;
 
 @Schema({ timestamps: true })
 export class Fee {
-  @Prop({ type: Object })
-  unionist: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
+  @Prop()
+  unionistId: string;
 
   @Prop()
   monthYear: string;

@@ -489,14 +489,30 @@ export class UnionistsService {
 
     const invalidRows = [];
 
+    // Định nghĩa regex cho ngày tháng
+    const dayMonthYearRegex =
+      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+
+    // Hàm kiểm tra ngày hợp lệ
+    const isValidDate = (day: number, month: number, year: number): boolean => {
+      const date = new Date(year, month - 1, day);
+      return (
+        date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
+      );
+    };
+
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 8) {
+      if ((row as any[]).length < 11) {
+        // Cần ít nhất 11 cột
+        invalidRows.push(index + 2);
         return false;
       }
 
-      // Kiểm tra các giá trị cột có hợp lệ không
+      // Lấy giá trị cột
       const unionistId = row[0];
       const unionistEmail = row[1];
       const unionistName = row[2];
@@ -508,6 +524,7 @@ export class UnionistsService {
       const unionistLeavingDate = row[9] || null;
       const unionistUnionEntryDate = row[10] || null;
 
+      // Kiểm tra các giá trị cần thiết
       if (
         !unionistId ||
         !unionistName ||
@@ -532,27 +549,12 @@ export class UnionistsService {
       }
 
       // Kiểm tra ngày sinh
-      const dayMonthYearRegex =
-        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
       if (!dayMonthYearRegex.test(unionistBirthday)) {
         invalidRows.push(index + 2);
         return false;
       }
 
       const [day, month, year] = unionistBirthday.split('/').map(Number);
-      const isValidDate = (
-        day: number,
-        month: number,
-        year: number,
-      ): boolean => {
-        const date = new Date(year, month - 1, day);
-        return (
-          date.getFullYear() === year &&
-          date.getMonth() === month - 1 &&
-          date.getDate() === day
-        );
-      };
-
       if (!isValidDate(day, month, year)) {
         invalidRows.push(index + 2);
         return false;
@@ -565,24 +567,45 @@ export class UnionistsService {
       }
 
       // Kiểm tra ngày tham gia nếu có
-      if (unionistJoiningDate && !dayMonthYearRegex.test(unionistJoiningDate)) {
-        invalidRows.push(index + 2);
-        return false;
+      if (unionistJoiningDate) {
+        const [jDay, jMonth, jYear] = unionistJoiningDate
+          .split('/')
+          .map(Number);
+        if (
+          !dayMonthYearRegex.test(unionistJoiningDate) ||
+          !isValidDate(jDay, jMonth, jYear)
+        ) {
+          invalidRows.push(index + 2);
+          return false;
+        }
       }
 
       // Kiểm tra ngày rời khỏi nếu có
-      if (unionistLeavingDate && !dayMonthYearRegex.test(unionistLeavingDate)) {
-        invalidRows.push(index + 2);
-        return false;
+      if (unionistLeavingDate) {
+        const [lDay, lMonth, lYear] = unionistLeavingDate
+          .split('/')
+          .map(Number);
+        if (
+          !dayMonthYearRegex.test(unionistLeavingDate) ||
+          !isValidDate(lDay, lMonth, lYear)
+        ) {
+          invalidRows.push(index + 2);
+          return false;
+        }
       }
 
       // Kiểm tra ngày gia nhập công đoàn nếu có
-      if (
-        unionistUnionEntryDate &&
-        !dayMonthYearRegex.test(unionistUnionEntryDate)
-      ) {
-        invalidRows.push(index + 2);
-        return false;
+      if (unionistUnionEntryDate) {
+        const [ueDay, ueMonth, ueYear] = unionistUnionEntryDate
+          .split('/')
+          .map(Number);
+        if (
+          !dayMonthYearRegex.test(unionistUnionEntryDate) ||
+          !isValidDate(ueDay, ueMonth, ueYear)
+        ) {
+          invalidRows.push(index + 2);
+          return false;
+        }
       }
 
       return true;
@@ -619,7 +642,41 @@ export class UnionistsService {
         'dd/MM/yyyy',
         new Date(),
       );
-      const formattedDate = formatISO(parsedDate);
+      const formattedDateBirthday = formatISO(parsedDate);
+
+      let formattedDateJoining = null;
+      let formattedDateLeaving = null;
+      let formattedDateUnionEntry = null;
+
+      if (unionistJoiningDate) {
+        const [jDay, jMonth, jYear] = unionistJoiningDate.split('/');
+        const parsedJoiningDate = parse(
+          `${jDay}/${jMonth}/${jYear}`,
+          'dd/MM/yyyy',
+          new Date(),
+        );
+        formattedDateJoining = formatISO(parsedJoiningDate);
+      }
+
+      if (unionistLeavingDate) {
+        const [lDay, lMonth, lYear] = unionistLeavingDate.split('/');
+        const parsedLeavingDate = parse(
+          `${lDay}/${lMonth}/${lYear}`,
+          'dd/MM/yyyy',
+          new Date(),
+        );
+        formattedDateLeaving = formatISO(parsedLeavingDate);
+      }
+
+      if (unionistUnionEntryDate) {
+        const [ueDay, ueMonth, ueYear] = unionistUnionEntryDate.split('/');
+        const parsedUnionEntryDate = parse(
+          `${ueDay}/${ueMonth}/${ueYear}`,
+          'dd/MM/yyyy',
+          new Date(),
+        );
+        formattedDateUnionEntry = formatISO(parsedUnionEntryDate);
+      }
 
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
@@ -648,20 +705,20 @@ export class UnionistsService {
           ),
           email: unionistEmail,
           gender: unionistGender,
-          dateOfBirth: formattedDate,
+          dateOfBirth: formattedDateBirthday,
           CCCD: unionistCCCD,
           address: unionistAddress,
           note: unionistNote,
           permissions: [
-            new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
-            new ObjectId('666f3680006c1579a34d5ec2'), //Cập nhật thông tin công đoàn viên
-            new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
-            new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
-            new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
+            new ObjectId('666f3672d8d4bd537d4407ef'), // Xem thông tin chi tiết công đoàn viên
+            new ObjectId('666f3680006c1579a34d5ec2'), // Cập nhật thông tin công đoàn viên
+            new ObjectId('6694cc16fda6b0a670cd3e42'), // Gửi yêu cầu thay đổi email
+            new ObjectId('6694cc7cfda6b0a670cd3e4b'), // Xác nhận thay đổi email
+            new ObjectId('6694cc9d047108a8053a8cce'), // Thay đổi mật khẩu
           ],
-          joiningDate: unionistJoiningDate,
-          leavingDate: unionistLeavingDate,
-          unionEntryDate: unionistUnionEntryDate,
+          joiningDate: formattedDateJoining,
+          leavingDate: formattedDateLeaving,
+          unionEntryDate: formattedDateUnionEntry,
           createdBy: {
             _id: user._id,
             email: user.email,
