@@ -3,6 +3,11 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreateExpenseCategoryDto {
   @IsNotEmpty({
+    message: 'Mã danh mục chi không được để trống',
+  })
+  expenseCategoryId: string;
+
+  @IsNotEmpty({
     message: 'Nội dung danh mục chi không được để trống',
   })
   description: string;

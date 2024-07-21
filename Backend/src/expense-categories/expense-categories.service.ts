@@ -24,9 +24,26 @@ export class ExpenseCategoriesService {
     createExpenseCategoryDto: CreateExpenseCategoryDto,
     user: IUser,
   ) {
-    const { description, budget, year } = createExpenseCategoryDto;
+    const { expenseCategoryId, description, budget, year } =
+      createExpenseCategoryDto;
+
+    // Kiểm tra trùng lặp
+    const existingCategory = await this.expenseCategoryModel.findOne({
+      $or: [
+        { description, year },
+        { description, year, expenseCategoryId },
+        { expenseCategoryId, year },
+      ],
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException(
+        'Nội dung và năm hoặc mã danh mục chi đã tồn tại',
+      );
+    }
 
     const newExpenseCategory = await this.expenseCategoryModel.create({
+      expenseCategoryId,
       description,
       budget,
       year,
@@ -86,6 +103,22 @@ export class ExpenseCategoriesService {
   ) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
+
+    const { expenseCategoryId, description, year } = updateExpenseCategoryDto;
+    // Kiểm tra trùng lặp
+    const existingCategory = await this.expenseCategoryModel.findOne({
+      $or: [
+        { description, year, _id: { $ne: _id } },
+        { description, year, expenseCategoryId, _id: { $ne: _id } },
+        { expenseCategoryId, year, _id: { $ne: _id } },
+      ],
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException(
+        'Mô tả và năm hoặc mã danh mục chi đã tồn tại',
+      );
+    }
 
     const updated = await this.expenseCategoryModel.updateOne(
       { _id: updateExpenseCategoryDto._id },
@@ -149,21 +182,28 @@ export class ExpenseCategoriesService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 3) {
+      if ((row as any[]).length < 4) {
+        return false;
+      }
+      // Kiểm tra các giá trị cột có hợp lệ không
+      const expenseCategoryId = row[0];
+      const expenseCategoryDescription = row[1];
+      const expenseCategoryBudget = row[2];
+      const expenseCategoryYear = row[3];
+      if (
+        !expenseCategoryId ||
+        !expenseCategoryDescription ||
+        !expenseCategoryBudget ||
+        !expenseCategoryYear
+      ) {
+        invalidRows.push(index + 2);
         return false;
       }
 
-      // Kiểm tra các giá trị cột có hợp lệ không
-      const expenseCategoryDescription = row[0];
-      const expenseCategoryBudget = row[1];
-      const expenseCategoryYear = row[2];
-      if (
-        !expenseCategoryDescription ||
-        isNaN(expenseCategoryBudget) ||
-        expenseCategoryBudget < 0 ||
-        expenseCategoryBudget >= 10000000000 ||
-        !expenseCategoryYear
-      ) {
+      // Kiểm tra mã danh mục chi
+      const receiptIdRegex =
+        /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!receiptIdRegex.test(expenseCategoryId)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -200,27 +240,32 @@ export class ExpenseCategoriesService {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
-      const expenseCategoryDescription = row[0];
-      const expenseCategoryBudget = row[1];
-      const expenseCategoryYear = row[2];
+      const expenseCategoryId = row[0];
+      const expenseCategoryDescription = row[1];
+      const expenseCategoryBudget = row[2];
+      const expenseCategoryYear = row[3];
 
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingExpenseCategory = await this.expenseCategoryModel.findOne(
-          {
-            description: expenseCategoryDescription,
-            year: expenseCategoryYear,
-          },
-        );
+        const existingCategory = await this.expenseCategoryModel.findOne({
+          $or: [
+            {
+              description: expenseCategoryDescription,
+              year: expenseCategoryYear,
+            },
+            { expenseCategoryId, year: expenseCategoryYear },
+          ],
+        });
 
-        if (existingExpenseCategory) {
+        if (existingCategory) {
           throw new BadRequestException(
-            `${expenseCategoryDescription} (${expenseCategoryYear}) đã tồn tại`,
+            `Nội dung  ${expenseCategoryDescription} và năm ${expenseCategoryYear} hoặc mã danh mục chi (${expenseCategoryYear}) đã tồn tại`,
           );
         }
 
         // Tạo mới bản ghi phiếu thu
         await this.expenseCategoryModel.create({
+          expenseCategoryId: expenseCategoryId,
           description: expenseCategoryDescription,
           budget: expenseCategoryBudget,
           year: expenseCategoryYear,

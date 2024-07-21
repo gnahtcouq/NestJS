@@ -1,48 +1,20 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateExpenseDto } from './create-expense.dto';
-import {
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
-  IsOptional,
-  ValidateNested,
-} from 'class-validator';
-import mongoose from 'mongoose';
-import { Type } from 'class-transformer';
-
-class User {
-  @IsOptional()
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsOptional()
-  @IsNotEmpty()
-  name: string;
-}
-
-class Expense {
-  @IsOptional()
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsOptional()
-  @IsNotEmpty()
-  description: string;
-}
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateExpenseDto extends OmitType(CreateExpenseDto, []) {
   @IsNotEmpty({ message: 'ID không được để trống' })
   _id: string;
 
   @IsOptional()
+  @IsNotEmpty({ message: 'Mã phiếu chi không được để trống' })
+  expenseId: string;
+
+  @IsOptional()
   @IsNotEmpty({
-    message: 'Thành viên không được để trống',
+    message: 'Mã thành viên không được để trống',
   })
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => User)
-  user: User;
+  userId: string;
 
   @IsOptional()
   @IsNotEmpty({
@@ -64,11 +36,7 @@ export class UpdateExpenseDto extends OmitType(CreateExpenseDto, []) {
 
   @IsOptional()
   @IsNotEmpty({
-    message: 'Danh mục chi không được để trống',
+    message: 'Mã danh mục chi không được để trống',
   })
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => Expense)
-  expense: Expense;
+  expenseCategoryId: string;
 }

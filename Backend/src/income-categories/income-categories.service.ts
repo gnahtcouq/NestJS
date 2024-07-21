@@ -21,9 +21,26 @@ export class IncomeCategoriesService {
   ) {}
 
   async create(createIncomeCategoryDto: CreateIncomeCategoryDto, user: IUser) {
-    const { description, budget, year } = createIncomeCategoryDto;
+    const { incomeCategoryId, description, budget, year } =
+      createIncomeCategoryDto;
+
+    // Kiểm tra trùng lặp
+    const existingCategory = await this.incomeCategoryModel.findOne({
+      $or: [
+        { description, year },
+        { description, year, incomeCategoryId },
+        { incomeCategoryId, year },
+      ],
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException(
+        'Nội dung và năm hoặc mã danh mục thu đã tồn tại',
+      );
+    }
 
     const newIncomeCategory = await this.incomeCategoryModel.create({
+      incomeCategoryId,
       description,
       budget,
       year,
@@ -83,6 +100,23 @@ export class IncomeCategoriesService {
   ) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
+
+    const { incomeCategoryId, description, year } = updateIncomeCategoryDto;
+
+    // Kiểm tra trùng lặp
+    const existingCategory = await this.incomeCategoryModel.findOne({
+      $or: [
+        { description, year, _id: { $ne: _id } },
+        { description, year, incomeCategoryId, _id: { $ne: _id } },
+        { incomeCategoryId, year, _id: { $ne: _id } },
+      ],
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException(
+        'Mô tả và năm hoặc mã danh mục thu đã tồn tại',
+      );
+    }
 
     const updated = await this.incomeCategoryModel.updateOne(
       { _id: updateIncomeCategoryDto._id },
@@ -146,19 +180,29 @@ export class IncomeCategoriesService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 3) {
+      if ((row as any[]).length < 4) {
         return false;
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
-      const incomeCategoryDescription = row[0];
-      const incomeCategoryBudget = row[1];
-      const incomeCategoryYear = row[2];
+      const incomeCategoryId = row[0];
+      const incomeCategoryDescription = row[1];
+      const incomeCategoryBudget = row[2];
+      const incomeCategoryYear = row[3];
       if (
+        !incomeCategoryId ||
         !incomeCategoryDescription ||
         !incomeCategoryBudget ||
         !incomeCategoryYear
       ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra mã danh mục thu
+      const receiptIdRegex =
+        /^DMT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!receiptIdRegex.test(incomeCategoryId)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -195,25 +239,32 @@ export class IncomeCategoriesService {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
-      const incomeCategoryDescription = row[0];
-      const incomeCategoryBudget = row[1];
-      const incomeCategoryYear = row[2];
+      const incomeCategoryId = row[0];
+      const incomeCategoryDescription = row[1];
+      const incomeCategoryBudget = row[2];
+      const incomeCategoryYear = row[3];
 
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingUnionist = await this.incomeCategoryModel.findOne({
-          description: incomeCategoryDescription,
-          year: incomeCategoryYear,
+        const existingCategory = await this.incomeCategoryModel.findOne({
+          $or: [
+            {
+              description: incomeCategoryDescription,
+              year: incomeCategoryYear,
+            },
+            { incomeCategoryId, year: incomeCategoryYear },
+          ],
         });
 
-        if (existingUnionist) {
+        if (existingCategory) {
           throw new BadRequestException(
-            `${incomeCategoryDescription} (${incomeCategoryYear}) đã tồn tại`,
+            `Nội dung  ${incomeCategoryDescription} và năm ${incomeCategoryYear} hoặc mã danh mục thu (${incomeCategoryYear}) đã tồn tại`,
           );
         }
 
         // Tạo mới bản ghi phiếu thu
         await this.incomeCategoryModel.create({
+          incomeCategoryId: incomeCategoryId,
           description: incomeCategoryDescription,
           budget: incomeCategoryBudget,
           year: incomeCategoryYear,

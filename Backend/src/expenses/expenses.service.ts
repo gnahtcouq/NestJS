@@ -19,15 +19,22 @@ export class ExpensesService {
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto, userM: IUser) {
-    const { user, description, time, amount, expenseCategory } =
+    const { expenseId, description, time, amount, userId, expenseCategoryId } =
       createExpenseDto;
 
+    const existingExpense = await this.expenseModel.findOne({ expenseId });
+
+    if (existingExpense) {
+      throw new BadRequestException(`Mã phiếu chi ${expenseId} đã tồn tại`);
+    }
+
     const newExpense = await this.expenseModel.create({
-      user,
+      expenseId,
       description,
       time,
       amount,
-      expenseCategory,
+      userId,
+      expenseCategoryId,
       createdBy: {
         _id: userM._id,
         email: userM.email,
@@ -104,6 +111,13 @@ export class ExpensesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
+    const { expenseId } = updateExpenseDto;
+    const existingExpense = await this.expenseModel.findOne({ expenseId });
+
+    if (existingExpense) {
+      throw new BadRequestException(`Mã phiếu chi ${expenseId} đã tồn tại`);
+    }
+
     const updated = await this.expenseModel.updateOne(
       { _id: updateExpenseDto._id },
       {
@@ -166,25 +180,34 @@ export class ExpensesService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 5) {
+      if ((row as any[]).length < 6) {
         return false;
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
       const expenseUserId = row[0];
-      const expenseUserName = row[1];
+      const expenseId = row[1];
       const expenseDescription = row[2];
-      const expenseTime = row[3];
-      const expenseAmount = row[4];
+      const expenseIncomeCategoryId = row[3];
+      const expenseTime = row[4];
+      const expenseAmount = row[5];
       if (
         !expenseUserId ||
-        !expenseUserName ||
+        !expenseId ||
         !expenseDescription ||
+        !expenseIncomeCategoryId ||
         !expenseTime ||
         isNaN(expenseAmount) ||
         expenseAmount < 0 ||
         expenseAmount >= 10000000000
       ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra mã phiếu chi
+      const expenseIdRegex = /^PC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!expenseIdRegex.test(expenseId)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -239,10 +262,11 @@ export class ExpensesService {
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
       const expenseUserId = row[0];
-      const expenseUserName = row[1];
+      const expenseId = row[1];
       const expenseDescription = row[2];
-      const expenseTime = row[3];
-      const expenseAmount = row[4];
+      const expenseIncomeCategoryId = row[3];
+      const expenseTime = row[4];
+      const expenseAmount = row[5];
 
       const [day, month, year] = expenseTime.split('/');
       const parsedDate = parse(
@@ -255,24 +279,19 @@ export class ExpensesService {
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingUnionist = await this.expenseModel.findOne({
-          description: expenseDescription,
-          time: formattedDate,
-          amount: expenseAmount,
+          expenseId: expenseId,
         });
 
         if (existingUnionist) {
-          throw new BadRequestException(
-            `${expenseDescription} (${expenseTime}) đã tồn tại`,
-          );
+          throw new BadRequestException(`Mã phiếu chi ${expenseId} đã tồn tại`);
         }
 
-        // Tạo mới bản ghi phiếu thu
+        // Tạo mới bản ghi phiếu chi
         await this.expenseModel.create({
-          user: {
-            _id: expenseUserId,
-            name: expenseUserName,
-          },
+          userId: expenseUserId,
+          expenseId: expenseId,
           description: expenseDescription,
+          expenseCategoryId: expenseIncomeCategoryId,
           time: formattedDate,
           amount: expenseAmount,
           createdBy: {

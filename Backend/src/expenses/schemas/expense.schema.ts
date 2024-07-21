@@ -6,11 +6,11 @@ export type ExpenseDocument = HydratedDocument<Expense>;
 
 @Schema({ timestamps: true })
 export class Expense {
-  @Prop({ type: Object })
-  user: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
+  @Prop()
+  userId: string;
+
+  @Prop()
+  expenseId: string;
 
   @Prop()
   description: string;
@@ -21,11 +21,8 @@ export class Expense {
   @Prop()
   amount: string;
 
-  @Prop({ type: Object })
-  expenseCategory: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
+  @Prop()
+  expenseCategoryId: string;
 
   @Prop({ type: Object })
   createdBy: {

@@ -1,16 +1,17 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { User } from 'src/users/schemas/user.schema';
 
 export type ReceiptDocument = HydratedDocument<Receipt>;
 
 @Schema({ timestamps: true })
 export class Receipt {
-  @Prop({ type: Object })
-  user: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
+  @Prop()
+  userId: string;
+
+  @Prop()
+  receiptId: string;
 
   @Prop()
   description: string;
@@ -21,11 +22,8 @@ export class Receipt {
   @Prop()
   amount: string;
 
-  @Prop({ type: Object })
-  incomeCategory: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
+  @Prop()
+  incomeCategoryId: string;
 
   @Prop({ type: Object })
   createdBy: {

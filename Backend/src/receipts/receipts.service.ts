@@ -19,15 +19,22 @@ export class ReceiptsService {
   ) {}
 
   async create(createReceiptDto: CreateReceiptDto, userM: IUser) {
-    const { user, description, time, amount, incomeCategory } =
+    const { userId, receiptId, description, time, amount, incomeCategoryId } =
       createReceiptDto;
 
+    const existingReceipt = await this.receiptModel.findOne({ receiptId });
+
+    if (existingReceipt) {
+      throw new BadRequestException(`Mã phiếu thu ${receiptId} đã tồn tại`);
+    }
+
     const newReceipt = await this.receiptModel.create({
-      user,
+      userId,
+      receiptId,
       description,
       time,
       amount,
-      incomeCategory,
+      incomeCategoryId,
       createdBy: {
         _id: userM._id,
         email: userM.email,
@@ -104,6 +111,13 @@ export class ReceiptsService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
+    const { receiptId } = updateReceiptDto;
+    const existingReceipt = await this.receiptModel.findOne({ receiptId });
+
+    if (existingReceipt) {
+      throw new BadRequestException(`Mã phiếu thu ${receiptId} đã tồn tại`);
+    }
+
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
       {
@@ -166,25 +180,34 @@ export class ReceiptsService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 5) {
+      if ((row as any[]).length < 6) {
         return false;
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
       const receiptUserId = row[0];
-      const receiptUserName = row[1];
+      const receiptId = row[1];
       const receiptDescription = row[2];
-      const receiptTime = row[3];
-      const receiptAmount = row[4];
+      const receiptIncomeCategoryId = row[3];
+      const receiptTime = row[4];
+      const receiptAmount = row[5];
       if (
         !receiptUserId ||
-        !receiptUserName ||
+        !receiptId ||
         !receiptDescription ||
+        !receiptIncomeCategoryId ||
         !receiptTime ||
         isNaN(receiptAmount) ||
         receiptAmount < 0 ||
         receiptAmount >= 10000000000
       ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra mã phiếu thu
+      const receiptIdRegex = /^PT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!receiptIdRegex.test(receiptId)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -239,10 +262,11 @@ export class ReceiptsService {
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
       const receiptUserId = row[0];
-      const receiptUserName = row[1];
+      const receiptId = row[1];
       const receiptDescription = row[2];
-      const receiptTime = row[3];
-      const receiptAmount = row[4];
+      const receiptIncomeCategoryId = row[3];
+      const receiptTime = row[4];
+      const receiptAmount = row[5];
 
       const [day, month, year] = receiptTime.split('/');
       const parsedDate = parse(
@@ -254,25 +278,20 @@ export class ReceiptsService {
 
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingUnionist = await this.receiptModel.findOne({
-          description: receiptDescription,
-          time: formattedDate,
-          amount: receiptAmount,
+        const existingReceipt = await this.receiptModel.findOne({
+          receiptId: receiptId,
         });
 
-        if (existingUnionist) {
-          throw new BadRequestException(
-            `${receiptDescription} (${receiptTime}) đã tồn tại`,
-          );
+        if (existingReceipt) {
+          throw new BadRequestException(`Mã phiếu thu ${receiptId} đã tồn tại`);
         }
 
         // Tạo mới bản ghi phiếu thu
         await this.receiptModel.create({
-          user: {
-            _id: receiptUserId,
-            name: receiptUserName,
-          },
+          userId: receiptUserId,
+          receiptId: receiptId,
           description: receiptDescription,
+          incomeCategoryId: receiptIncomeCategoryId,
           time: formattedDate,
           amount: receiptAmount,
           createdBy: {

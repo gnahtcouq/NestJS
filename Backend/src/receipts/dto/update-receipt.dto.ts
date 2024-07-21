@@ -1,48 +1,20 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateReceiptDto } from './create-receipt.dto';
-import {
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
-  IsOptional,
-  ValidateNested,
-} from 'class-validator';
-import mongoose from 'mongoose';
-import { Type } from 'class-transformer';
-
-class User {
-  @IsOptional()
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsOptional()
-  @IsNotEmpty()
-  name: string;
-}
-
-class Receipt {
-  @IsOptional()
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsOptional()
-  @IsNotEmpty()
-  description: string;
-}
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
   @IsNotEmpty({ message: 'ID không được để trống' })
   _id: string;
 
   @IsOptional()
+  @IsNotEmpty({ message: 'Mã phiếu thu không được để trống' })
+  receiptId: string;
+
+  @IsOptional()
   @IsNotEmpty({
-    message: 'Thành viên không được để trống',
+    message: 'ID Thành viên không được để trống',
   })
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => User)
-  user: User;
+  userId: string;
 
   @IsOptional()
   @IsNotEmpty({
@@ -64,11 +36,7 @@ export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
 
   @IsOptional()
   @IsNotEmpty({
-    message: 'Danh mục thu không được để trống',
+    message: 'Mã danh mục thu không được để trống',
   })
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => Receipt)
-  receipt: Receipt;
+  incomeCategoryId: string;
 }
