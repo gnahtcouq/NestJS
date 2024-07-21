@@ -111,6 +111,13 @@ export class ExpensesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
+    const { amount } = updateExpenseDto;
+
+    // Kiểm tra và loại bỏ trường amount nếu có mặt
+    if (amount !== undefined) {
+      throw new BadRequestException('Không thể cập nhật số tiền của phiếu chi');
+    }
+
     const updated = await this.expenseModel.updateOne(
       { _id: updateExpenseDto._id },
       {

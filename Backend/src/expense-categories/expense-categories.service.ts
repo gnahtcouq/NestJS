@@ -104,7 +104,8 @@ export class ExpenseCategoriesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { expenseCategoryId, description, year } = updateExpenseCategoryDto;
+    const { expenseCategoryId, description, year, budget } =
+      updateExpenseCategoryDto;
     // Kiểm tra trùng lặp
     const existingCategory = await this.expenseCategoryModel.findOne({
       $or: [
@@ -117,6 +118,11 @@ export class ExpenseCategoriesService {
       throw new BadRequestException(
         'Mô tả và năm hoặc mã danh mục chi đã tồn tại',
       );
+    }
+
+    // Kiểm tra và loại bỏ trường budget nếu có mặt
+    if (budget !== undefined) {
+      throw new BadRequestException('Không thể cập nhật giá trị dự toán');
     }
 
     const updated = await this.expenseCategoryModel.updateOne(

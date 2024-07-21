@@ -101,7 +101,8 @@ export class IncomeCategoriesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { incomeCategoryId, description, year } = updateIncomeCategoryDto;
+    const { incomeCategoryId, description, year, budget } =
+      updateIncomeCategoryDto;
 
     // Kiểm tra trùng lặp
     const existingCategory = await this.incomeCategoryModel.findOne({
@@ -115,6 +116,11 @@ export class IncomeCategoriesService {
       throw new BadRequestException(
         'Mô tả và năm hoặc mã danh mục thu đã tồn tại',
       );
+    }
+
+    // Kiểm tra và loại bỏ trường budget nếu có mặt
+    if (budget !== undefined) {
+      throw new BadRequestException('Không thể cập nhật giá trị dự toán');
     }
 
     const updated = await this.incomeCategoryModel.updateOne(

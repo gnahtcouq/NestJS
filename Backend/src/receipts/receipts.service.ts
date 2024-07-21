@@ -111,6 +111,13 @@ export class ReceiptsService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
+    const { amount } = updateReceiptDto;
+
+    // Kiểm tra và loại bỏ trường amount nếu có mặt
+    if (amount !== undefined) {
+      throw new BadRequestException('Không thể cập nhật số tiền của phiếu thu');
+    }
+
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
       {
