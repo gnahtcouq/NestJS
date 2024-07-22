@@ -265,7 +265,7 @@ export class IncomeCategoriesService {
     for (const row of filteredData) {
       const incomeCategoryId = row[0];
       const incomeCategoryDescription = row[1];
-      const incomeCategoryBudget = row[2];
+      const incomeCategoryBudget = parseFloat(row[2]);
       const incomeCategoryYear = row[3];
 
       try {

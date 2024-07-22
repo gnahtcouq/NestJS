@@ -277,7 +277,7 @@ export class ReceiptsService {
       const receiptDescription = row[2];
       const receiptIncomeCategoryId = row[3];
       const receiptTime = row[4];
-      const receiptAmount = row[5];
+      const receiptAmount = parseFloat(row[5]);
 
       const [day, month, year] = receiptTime.split('/');
       const parsedDate = parse(

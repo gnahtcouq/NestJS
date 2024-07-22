@@ -267,7 +267,7 @@ export class ExpenseCategoriesService {
     for (const row of filteredData) {
       const expenseCategoryId = row[0];
       const expenseCategoryDescription = row[1];
-      const expenseCategoryBudget = row[2];
+      const expenseCategoryBudget = parseFloat(row[2]);
       const expenseCategoryYear = row[3];
 
       try {

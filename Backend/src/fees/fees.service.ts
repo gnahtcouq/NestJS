@@ -84,14 +84,26 @@ export class FeesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { unionistId, monthYear } = updateFeeDto;
+    const { unionistId, monthYear, fee } = updateFeeDto;
 
-    const isExist = await this.feeModel.findOne({ unionistId, monthYear });
-    if (isExist) {
+    if (unionistId !== undefined) {
       throw new BadRequestException(
-        `Lệ phí ${monthYear} cho công đoàn viên ${unionistId} đã tồn tại`,
+        'Không thể cập nhật công đoàn viên đóng phí',
       );
     }
+
+    // Kiểm tra monthYear theo định dạng yyyy/mm
+    const yearMonthRegex = /^\d{4}\/(0[1-9]|1[0-2])$/;
+    if (!yearMonthRegex.test(monthYear)) {
+      throw new BadRequestException('Tháng/năm không hợp lệ');
+    }
+
+    // Kiểm tra amount
+    const parsedFee = parseFloat(fee);
+    if (isNaN(parsedFee) || parsedFee < 1000 || parsedFee >= 10000000000)
+      throw new BadRequestException(
+        'Số tiền không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
+      );
 
     const updated = await this.feeModel.updateOne(
       { _id: updateFeeDto._id },
@@ -163,15 +175,15 @@ export class FeesService {
       const unionistId = row[0];
       const unionistName = row[1];
       const monthYear = row[2];
-      const fee = row[3];
+      const parseFee = parseFloat(row[3]);
 
       if (
         !unionistId ||
         !unionistName ||
         !monthYear ||
-        isNaN(fee) ||
-        fee < 0 ||
-        fee >= 10000000000
+        isNaN(parseFee) ||
+        parseFee < 1000 ||
+        parseFee >= 10000000000
       ) {
         invalidRows.push(index + 2);
         return false;
@@ -180,12 +192,6 @@ export class FeesService {
       // Kiểm tra monthYear theo định dạng yyyy/mm
       const yearMonthRegex = /^\d{4}\/(0[1-9]|1[0-2])$/;
       if (!yearMonthRegex.test(monthYear)) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
-      // Kiểm tra fee có phải là số không âm
-      if (isNaN(parseFloat(fee)) || parseFloat(fee) < 0) {
         invalidRows.push(index + 2);
         return false;
       }

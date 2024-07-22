@@ -277,7 +277,7 @@ export class ExpensesService {
       const expenseDescription = row[2];
       const expenseIncomeCategoryId = row[3];
       const expenseTime = row[4];
-      const expenseAmount = row[5];
+      const expenseAmount = parseFloat(row[5]);
 
       const [day, month, year] = expenseTime.split('/');
       const parsedDate = parse(
