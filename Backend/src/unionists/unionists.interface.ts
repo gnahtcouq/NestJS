@@ -9,4 +9,5 @@ export interface IUnionist {
     apiPath: string;
     module: string;
   }[];
+  type: 'unionist';
 }

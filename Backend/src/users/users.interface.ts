@@ -9,4 +9,5 @@ export interface IUser {
     apiPath: string;
     module: string;
   }[];
+  type: 'user';
 }

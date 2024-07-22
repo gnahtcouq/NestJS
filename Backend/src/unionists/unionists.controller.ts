@@ -16,7 +16,12 @@ import { UnionistsService } from './unionists.service';
 import { CreateUnionistDto } from './dto/create-unionist.dto';
 import { UpdateUnionistDto } from './dto/update-unionist.dto';
 import { IUnionist } from 'src/unionists/unionists.interface';
-import { Public, ResponseMessage, Unionist } from 'src/decorator/customize';
+import {
+  Public,
+  ResponseMessage,
+  Unionist,
+  User,
+} from 'src/decorator/customize';
 import { UpdateUnionistPermissionsDto } from 'src/unionists/dto/update-unionist-permissions';
 import { ChangePasswordDto } from 'src/unionists/dto/change-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -30,7 +35,7 @@ export class UnionistsController {
   @ResponseMessage('Tạo công đoàn viên')
   async create(
     @Body() createUnionistDto: CreateUnionistDto,
-    @Unionist() user: IUnionist | IUser,
+    @User() user: IUser,
   ) {
     let newUnionist = await this.unionistsService.create(
       createUnionistDto,
@@ -64,7 +69,7 @@ export class UnionistsController {
   async update(
     @Param('id') id: string,
     @Body() updateUnionistDto: UpdateUnionistDto,
-    @Unionist() user: IUnionist | IUser,
+    @User() user: IUser,
   ) {
     let updatedUnionist = await this.unionistsService.update(
       id,
@@ -79,7 +84,7 @@ export class UnionistsController {
   updateUnionistPermissions(
     @Param('id') id: string,
     @Body() updateUnionistPermissionsDto: UpdateUnionistPermissionsDto,
-    @Unionist() user: IUnionist | IUser,
+    @User() user: IUser,
   ) {
     return this.unionistsService.updateUnionistPermissions(
       id,
@@ -90,7 +95,7 @@ export class UnionistsController {
 
   @Delete(':id')
   @ResponseMessage('Xóa công đoàn viên')
-  remove(@Param('id') id: string, @Unionist() user: IUnionist | IUser) {
+  remove(@Param('id') id: string, @User() user: IUser) {
     return this.unionistsService.remove(id, user);
   }
 
@@ -146,10 +151,7 @@ export class UnionistsController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   @ResponseMessage('Tải lên danh sách công đoàn viên')
-  async upload(
-    @UploadedFile() file: Express.Multer.File,
-    @Unionist() user: IUnionist | IUser,
-  ) {
+  async upload(@UploadedFile() file: Express.Multer.File, @User() user: IUser) {
     return this.unionistsService.uploadFile(file, user);
   }
 }

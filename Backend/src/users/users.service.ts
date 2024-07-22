@@ -230,6 +230,21 @@ export class UsersService {
   }
 
   async update(_id: string, updateUserDto: UpdateUserDto, user: IUser) {
+    //logic check email exist
+    const { email } = updateUserDto;
+    const currentEmail = await this.userModel.findOne({ _id });
+
+    if (email !== currentEmail.email) {
+      const isExistUser = await this.userModel.findOne({ email });
+      const isExistUnionist = await this.unionistsService.findOneByUserName(
+        email,
+      );
+      if (isExistUser || isExistUnionist)
+        throw new BadRequestException(
+          `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
+        );
+    }
+
     const updated = await this.userModel.updateOne(
       {
         _id: updateUserDto._id,

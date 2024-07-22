@@ -11,7 +11,14 @@ import {
 import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
-import { Public, ResponseMessage, User } from 'src/decorator/customize';
+import {
+  Public,
+  ResponseMessage,
+  Unionist,
+  User,
+} from 'src/decorator/customize';
+import { IUnionist } from 'src/unionists/unionists.interface';
+import { UnionistsService } from 'src/unionists/unionists.service';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
@@ -21,6 +28,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private unionistsService: UnionistsService,
   ) {}
 
   @Public()
@@ -28,7 +36,7 @@ export class AuthController {
   @Post('/login')
   @ResponseMessage('Đăng nhập thành công')
   handleLogin(@Req() req, @Res({ passthrough: true }) response: Response) {
-    return this.authService.login(req.user, response);
+    return this.authService.login(req.user || req.unionist, response);
   }
 
   @Public() //không dùng JWT để xác thực

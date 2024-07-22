@@ -31,6 +31,7 @@ export class AuthService {
         const objUser = {
           ...user.toObject(),
           permissions: temp?.permissions ?? [],
+          type: 'user',
         };
 
         return objUser;
@@ -55,6 +56,7 @@ export class AuthService {
         const objUser = {
           ...unionist.toObject(),
           permissions: temp?.permissions ?? [],
+          type: 'unionist',
         };
 
         return objUser;
@@ -65,20 +67,24 @@ export class AuthService {
   }
 
   async login(user: IUser | IUnionist, response: Response) {
-    const { _id, name, email, permissions } = user;
+    const { _id, name, email, permissions, type } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
       _id,
       name,
       email,
+      type,
     };
 
     const refresh_token = this.createRefreshToken(payload);
 
-    //update user with refresh token
-    await this?.usersService?.updateUserToken(refresh_token, _id);
-    await this?.unionistsService?.updateUnionistToken(refresh_token, _id);
+    // Update user with refresh token
+    if (type === 'user') {
+      await this?.usersService?.updateUserToken(refresh_token, _id);
+    } else if (type === 'unionist') {
+      await this?.unionistsService?.updateUnionistToken(refresh_token, _id);
+    }
 
     //set refresh_token as cookies
     response.cookie('refresh_token', refresh_token, {
@@ -93,6 +99,7 @@ export class AuthService {
         name,
         email,
         permissions,
+        type,
       },
     };
   }
@@ -125,7 +132,6 @@ export class AuthService {
       if (!user) {
         user = await this.unionistsService.findUnionistByToken(refreshToken);
       }
-      // console.log(user);
       if (user) {
         //update refresh_token
         const { _id, name, email } = user;

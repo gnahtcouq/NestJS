@@ -22,7 +22,7 @@ export const User = createParamDecorator(
 export const Unionist = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    return request.user;
+    return request.unionist;
   },
 );
 

@@ -58,10 +58,7 @@ export class UnionistsService {
     return hash;
   };
 
-  async create(
-    createUnionistDto: CreateUnionistDto,
-    @User() unionist: IUnionist,
-  ) {
+  async create(createUnionistDto: CreateUnionistDto, @User() user: IUser) {
     const {
       name,
       email,
@@ -81,9 +78,10 @@ export class UnionistsService {
       throw new BadRequestException('Email mới không hợp lệ');
     }
 
-    //logic check email exist
-    const isExist = await this.unionistModel.findOne({ email });
-    if (isExist)
+    const isExistUnionist = await this.unionistModel.findOne({ email });
+    const isExistUser = await this.usersService.findOneByUserName(email);
+
+    if (isExistUser || isExistUnionist)
       throw new BadRequestException(
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
@@ -124,8 +122,8 @@ export class UnionistsService {
       unionEntryDate,
       note,
       createdBy: {
-        _id: unionist._id,
-        email: unionist.email,
+        _id: user._id,
+        email: user.email,
       },
     });
     return newUnionist;
@@ -201,7 +199,7 @@ export class UnionistsService {
     return compareSync(password, hashPassword);
   }
 
-  async remove(id: string, unionist: IUnionist) {
+  async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
 
     const foundUser = await this.unionistModel.findById(id);
@@ -217,8 +215,8 @@ export class UnionistsService {
       },
       {
         deletedBy: {
-          _id: unionist._id,
-          email: unionist.email,
+          _id: user._id,
+          email: user.email,
         },
       },
     );
@@ -228,11 +226,20 @@ export class UnionistsService {
     });
   }
 
-  async update(
-    _id: string,
-    updateUnionistDto: UpdateUnionistDto,
-    unionist: IUnionist,
-  ) {
+  async update(_id: string, updateUnionistDto: UpdateUnionistDto, user: IUser) {
+    //logic check email exist
+    const { email } = updateUnionistDto;
+    const currentEmail = await this.unionistModel.findOne({ _id });
+
+    if (email !== currentEmail.email) {
+      const isExistUnionist = await this.unionistModel.findOne({ email });
+      const isExistUser = await this.usersService.findOneByUserName(email);
+      if (isExistUser || isExistUnionist)
+        throw new BadRequestException(
+          `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
+        );
+    }
+
     const updated = await this.unionistModel.updateOne(
       {
         _id: updateUnionistDto._id,
@@ -240,8 +247,8 @@ export class UnionistsService {
       {
         ...updateUnionistDto,
         updatedBy: {
-          _id: unionist._id,
-          email: unionist.email,
+          _id: user._id,
+          email: user.email,
         },
       },
     );
@@ -252,7 +259,7 @@ export class UnionistsService {
   async updateUnionistPermissions(
     _id: string,
     updateUnionistPermissionsDto: UpdateUnionistPermissionsDto,
-    unionist: IUnionist,
+    user: IUser,
   ) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ!');
@@ -264,8 +271,8 @@ export class UnionistsService {
       {
         permissions,
         updatedBy: {
-          _id: unionist._id,
-          email: unionist.email,
+          _id: user._id,
+          email: user.email,
         },
       },
     );
