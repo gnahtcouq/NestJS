@@ -113,6 +113,22 @@ export class ExpenseCategoriesService {
 
     const { expenseCategoryId, description, year, budget } =
       updateExpenseCategoryDto;
+
+    if (expenseCategoryId !== undefined) {
+      throw new BadRequestException('Không thể cập nhật mã danh mục chi');
+    }
+
+    // Kiểm tra budget
+    const parsedBudget = parseFloat(budget);
+    if (
+      isNaN(parsedBudget) ||
+      parsedBudget < 1000 ||
+      parsedBudget >= 10000000000
+    )
+      throw new BadRequestException(
+        'Dự toán không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
+      );
+
     // Kiểm tra trùng lặp
     const existingCategory = await this.expenseCategoryModel.findOne({
       $or: [
@@ -195,12 +211,14 @@ export class ExpenseCategoriesService {
       // Kiểm tra các giá trị cột có hợp lệ không
       const expenseCategoryId = row[0];
       const expenseCategoryDescription = row[1];
-      const expenseCategoryBudget = row[2];
+      const parsedBudget = parseFloat(row[2]);
       const expenseCategoryYear = row[3];
       if (
         !expenseCategoryId ||
         !expenseCategoryDescription ||
-        !expenseCategoryBudget ||
+        isNaN(parsedBudget) ||
+        parsedBudget < 1000 ||
+        parsedBudget >= 10000000000 ||
         !expenseCategoryYear
       ) {
         invalidRows.push(index + 2);
@@ -222,11 +240,11 @@ export class ExpenseCategoriesService {
         return false;
       }
 
-      // Kiểm tra expenseCategoryBudget có phải là số không âm
-      if (
-        isNaN(parseFloat(expenseCategoryBudget)) ||
-        parseFloat(expenseCategoryBudget) < 0
-      ) {
+      const year = Number(expenseCategoryYear);
+
+      // Kiểm tra năm hợp lệ
+      const currentYear = new Date().getFullYear();
+      if (year < 1900 || year > currentYear) {
         invalidRows.push(index + 2);
         return false;
       }

@@ -24,7 +24,7 @@ export class ExpenseCategoriesController {
   ) {}
 
   @Post()
-  @ResponseMessage('Tạo mới danh mục thu')
+  @ResponseMessage('Tạo mới danh mục chi')
   create(
     @Body() createExpenseCategoryDto: CreateExpenseCategoryDto,
     @User() user: IUser,
@@ -33,7 +33,7 @@ export class ExpenseCategoriesController {
   }
 
   @Get()
-  @ResponseMessage('Danh sách danh mục thu')
+  @ResponseMessage('Danh sách danh mục chi')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -43,13 +43,13 @@ export class ExpenseCategoriesController {
   }
 
   @Get(':id')
-  @ResponseMessage('Lấy thông tin danh mục thu')
+  @ResponseMessage('Lấy thông tin danh mục chi')
   findOne(@Param('id') id: string) {
     return this.expenseCategoriesService.findOne(id);
   }
 
   @Patch(':id')
-  @ResponseMessage('Cập nhật danh mục thu')
+  @ResponseMessage('Cập nhật danh mục chi')
   update(
     @Param('id') id: string,
     @Body() updateExpenseCategoryDto: UpdateExpenseCategoryDto,
@@ -63,7 +63,7 @@ export class ExpenseCategoriesController {
   }
 
   @Delete(':id')
-  @ResponseMessage('Xóa danh mục thu')
+  @ResponseMessage('Xóa danh mục chi')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.expenseCategoriesService.remove(id, user);
   }

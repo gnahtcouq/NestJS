@@ -117,6 +117,23 @@ export class ExpensesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
+    const { expenseId, amount } = updateExpenseDto;
+
+    if (expenseId !== undefined) {
+      throw new BadRequestException('Không thể cập nhật mã phiếu chi');
+    }
+
+    // Kiểm tra amount
+    const parsedAmount = parseFloat(amount);
+    if (
+      isNaN(parsedAmount) ||
+      parsedAmount < 1000 ||
+      parsedAmount >= 10000000000
+    )
+      throw new BadRequestException(
+        'Số tiền không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
+      );
+
     const updated = await this.expenseModel.updateOne(
       { _id: updateExpenseDto._id },
       {
@@ -189,16 +206,17 @@ export class ExpensesService {
       const expenseDescription = row[2];
       const expenseIncomeCategoryId = row[3];
       const expenseTime = row[4];
-      const expenseAmount = row[5];
+      const parsedAmount = parseFloat(row[5]);
+
       if (
         !expenseUserId ||
         !expenseId ||
         !expenseDescription ||
         !expenseIncomeCategoryId ||
         !expenseTime ||
-        isNaN(expenseAmount) ||
-        expenseAmount < 0 ||
-        expenseAmount >= 10000000000
+        isNaN(parsedAmount) ||
+        parsedAmount < 1000 ||
+        parsedAmount >= 10000000000
       ) {
         invalidRows.push(index + 2);
         return false;
@@ -234,12 +252,6 @@ export class ExpensesService {
       };
 
       if (!isValidDate(day, month, year)) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
-      // Kiểm tra expenseAmount có phải là số không âm
-      if (isNaN(parseFloat(expenseAmount)) || parseFloat(expenseAmount) < 0) {
         invalidRows.push(index + 2);
         return false;
       }

@@ -117,6 +117,23 @@ export class ReceiptsService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
+    const { receiptId, amount } = updateReceiptDto;
+
+    if (receiptId !== undefined) {
+      throw new BadRequestException('Không thể cập nhật mã phiếu thu');
+    }
+
+    // Kiểm tra amount
+    const parsedAmount = parseFloat(amount);
+    if (
+      isNaN(parsedAmount) ||
+      parsedAmount < 1000 ||
+      parsedAmount >= 10000000000
+    )
+      throw new BadRequestException(
+        'Số tiền không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
+      );
+
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
       {
@@ -189,16 +206,17 @@ export class ReceiptsService {
       const receiptDescription = row[2];
       const receiptIncomeCategoryId = row[3];
       const receiptTime = row[4];
-      const receiptAmount = row[5];
+      const parsedAmount = parseFloat(row[5]);
+
       if (
         !receiptUserId ||
         !receiptId ||
         !receiptDescription ||
         !receiptIncomeCategoryId ||
         !receiptTime ||
-        isNaN(receiptAmount) ||
-        receiptAmount < 0 ||
-        receiptAmount >= 10000000000
+        isNaN(parsedAmount) ||
+        parsedAmount < 1000 ||
+        parsedAmount >= 10000000000
       ) {
         invalidRows.push(index + 2);
         return false;
@@ -234,12 +252,6 @@ export class ReceiptsService {
       };
 
       if (!isValidDate(day, month, year)) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
-      // Kiểm tra receiptAmount có phải là số không âm
-      if (isNaN(parseFloat(receiptAmount)) || parseFloat(receiptAmount) < 0) {
         invalidRows.push(index + 2);
         return false;
       }

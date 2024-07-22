@@ -108,7 +108,23 @@ export class IncomeCategoriesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { incomeCategoryId, description, year } = updateIncomeCategoryDto;
+    const { incomeCategoryId, description, year, budget } =
+      updateIncomeCategoryDto;
+
+    if (incomeCategoryId !== undefined) {
+      throw new BadRequestException('Không thể cập nhật mã danh mục thu');
+    }
+
+    // Kiểm tra budget
+    const parsedBudget = parseFloat(budget);
+    if (
+      isNaN(parsedBudget) ||
+      parsedBudget < 1000 ||
+      parsedBudget >= 10000000000
+    )
+      throw new BadRequestException(
+        'Dự toán không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
+      );
 
     // Kiểm tra trùng lặp
     const existingCategory = await this.incomeCategoryModel.findOne({
@@ -193,12 +209,14 @@ export class IncomeCategoriesService {
       // Kiểm tra các giá trị cột có hợp lệ không
       const incomeCategoryId = row[0];
       const incomeCategoryDescription = row[1];
-      const incomeCategoryBudget = row[2];
+      const parsedBudget = parseFloat(row[2]);
       const incomeCategoryYear = row[3];
       if (
         !incomeCategoryId ||
         !incomeCategoryDescription ||
-        !incomeCategoryBudget ||
+        !isNaN(parsedBudget) ||
+        parsedBudget < 1000 ||
+        parsedBudget >= 10000000000 ||
         !incomeCategoryYear
       ) {
         invalidRows.push(index + 2);
