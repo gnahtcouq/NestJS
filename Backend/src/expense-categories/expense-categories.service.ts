@@ -91,9 +91,16 @@ export class ExpenseCategoriesService {
   }
 
   async findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id))
+    // if (!mongoose.Types.ObjectId.isValid(id))
+    //   throw new BadRequestException('ID không hợp lệ');
+
+    // Kiểm tra mã danh mục chi
+    const expenseCategoryIdRegex =
+      /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+    if (!expenseCategoryIdRegex.test(id))
       throw new BadRequestException('ID không hợp lệ');
-    return await this.expenseCategoryModel.findById(id);
+
+    return await this.expenseCategoryModel.findOne({ expenseCategoryId: id });
   }
 
   async update(
@@ -118,11 +125,6 @@ export class ExpenseCategoriesService {
       throw new BadRequestException(
         'Mô tả và năm hoặc mã danh mục chi đã tồn tại',
       );
-    }
-
-    // Kiểm tra và loại bỏ trường budget nếu có mặt
-    if (budget !== undefined) {
-      throw new BadRequestException('Không thể cập nhật giá trị dự toán');
     }
 
     const updated = await this.expenseCategoryModel.updateOne(
@@ -206,9 +208,9 @@ export class ExpenseCategoriesService {
       }
 
       // Kiểm tra mã danh mục chi
-      const receiptIdRegex =
+      const expenseCategoryIdRegex =
         /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!receiptIdRegex.test(expenseCategoryId)) {
+      if (!expenseCategoryIdRegex.test(expenseCategoryId)) {
         invalidRows.push(index + 2);
         return false;
       }

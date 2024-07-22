@@ -102,21 +102,20 @@ export class ReceiptsService {
   }
 
   async findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id))
+    // if (!mongoose.Types.ObjectId.isValid(id))
+    //   throw new BadRequestException('ID không hợp lệ');
+
+    // Kiểm tra mã phiếu thu
+    const receiptIdRegex = /^PT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+    if (!receiptIdRegex.test(id))
       throw new BadRequestException('ID không hợp lệ');
-    return await this.receiptModel.findById(id);
+
+    return await this.receiptModel.findOne({ receiptId: id });
   }
 
   async update(_id: string, updateReceiptDto: UpdateReceiptDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
-
-    const { amount } = updateReceiptDto;
-
-    // Kiểm tra và loại bỏ trường amount nếu có mặt
-    if (amount !== undefined) {
-      throw new BadRequestException('Không thể cập nhật số tiền của phiếu thu');
-    }
 
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
@@ -274,6 +273,12 @@ export class ReceiptsService {
         'dd/MM/yyyy',
         new Date(),
       );
+      // Thêm giờ phút giây hiện tại vào ngày
+      const currentDateTime = new Date();
+      parsedDate.setHours(currentDateTime.getHours());
+      parsedDate.setMinutes(currentDateTime.getMinutes());
+      parsedDate.setSeconds(currentDateTime.getSeconds());
+      parsedDate.setMilliseconds(currentDateTime.getMilliseconds());
       const formattedDate = formatISO(parsedDate);
 
       try {
