@@ -154,7 +154,7 @@ export class DatabasesService implements OnModuleInit {
             gender: 'MALE',
             address: 'Nha Trang',
             CCCD: '056202011199',
-            note: 'Công Đoàn Trường ĐHCNS',
+            note: 'Công Đoàn Trường ĐHCNSG',
             permissions: [
               new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
               new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
@@ -173,7 +173,7 @@ export class DatabasesService implements OnModuleInit {
             gender: 'MALE',
             address: 'Huế',
             CCCD: '046202003204',
-            note: 'Công Đoàn Trường ĐHCNS',
+            note: 'Công Đoàn Trường ĐHCNSG',
             permissions: [
               new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
               new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
@@ -197,7 +197,7 @@ export class DatabasesService implements OnModuleInit {
             gender: 'MALE',
             address: 'Nha Trang',
             CCCD: '056202011199',
-            note: 'Công Đoàn Trường ĐHCNS',
+            note: 'Công Đoàn Trường ĐHCNSG',
             joiningDate: '2002-10-29T00:00:00.00+00:00',
             leavingDate: '2002-10-29T00:00:00.00+00:00',
             unionEntryDate: '2002-10-29T00:00:00.00+00:00',

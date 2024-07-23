@@ -484,7 +484,7 @@ export class UsersService {
   ) {
     await this.mailerService.sendMail({
       to: email,
-      from: '"Công Đoàn Trường ĐHCNS" <support@stu.id.vn>',
+      from: '"Công Đoàn Trường ĐHCNSG" <support@stu.id.vn>',
       subject: 'Xác Nhận Yêu Cầu Thay Đổi Email',
       template: 'change-mail',
       context: {
@@ -598,7 +598,7 @@ export class UsersService {
   ) {
     await this.mailerService.sendMail({
       to: email,
-      from: '"Công Đoàn Trường ĐHCNS" <support@stu.id.vn>',
+      from: '"Công Đoàn Trường ĐHCNSG" <support@stu.id.vn>',
       subject: 'Xác Nhận Yêu Cầu Đặt Lại Mật Khẩu',
       template: 'forgot-password',
       context: {
