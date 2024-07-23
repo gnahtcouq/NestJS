@@ -62,7 +62,7 @@ export class MailController {
 
         await this.mailerService.sendMail({
           to: subs.email,
-          from: '"Saigon Technology University" <support@stu.id.vn>',
+          from: '"Công Đoàn Trường ĐHCNS" <support@stu.id.vn>',
           subject: 'Thông báo mới từ Đại học Công nghệ Sài Gòn',
           template: 'new-post',
           context: {

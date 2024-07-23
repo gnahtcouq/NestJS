@@ -21,6 +21,7 @@ import { IUser } from 'src/users/users.interface';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Exclude } from 'class-transformer';
 
 @Controller('users') // => /users
 export class UsersController {
@@ -118,6 +119,37 @@ export class UsersController {
       newEmail,
     );
     return { email: result };
+  }
+
+  @Post('request-forgot-password/:id')
+  @ResponseMessage('Gửi yêu cầu đặt lại mật khẩu')
+  async requestForgotPassword(
+    @Param('id') id: string,
+    @Body('email') email: string,
+    @Body('newPassword') newPassword: string,
+    @User() user: IUser,
+  ) {
+    const result = await this.usersService.requestForgotPassword(
+      id,
+      email,
+      newPassword,
+      user,
+    );
+    return { success: result };
+  }
+
+  @Post('confirm-forgot-password/:id')
+  @ResponseMessage('Xác nhận đặt lại mật khẩu')
+  async confirmForgotPassword(
+    @Param('id') id: string,
+    @Body('verificationCodePassword') verificationCodePassword: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return await this.usersService.confirmForgotPassword(
+      id,
+      verificationCodePassword,
+      newPassword,
+    );
   }
 
   @Post('change-password/:id')

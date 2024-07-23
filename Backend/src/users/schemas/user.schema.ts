@@ -43,6 +43,12 @@ export class User {
   @Prop()
   verificationExpires: Date;
 
+  @Prop()
+  verificationCodePassword: string;
+
+  @Prop()
+  verificationExpiresPassword: Date;
+
   @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;
