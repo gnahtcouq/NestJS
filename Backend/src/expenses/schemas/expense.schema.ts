@@ -16,7 +16,7 @@ export class Expense {
   description: string;
 
   @Prop()
-  time: string;
+  time: Date;
 
   @Prop()
   amount: string;

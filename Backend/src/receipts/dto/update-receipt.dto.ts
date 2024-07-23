@@ -26,7 +26,7 @@ export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
   @IsNotEmpty({
     message: 'Thời gian thu không được để trống',
   })
-  time: string;
+  time: Date;
 
   @IsOptional()
   @IsNotEmpty({

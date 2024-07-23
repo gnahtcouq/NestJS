@@ -15,7 +15,7 @@ export class CreateReceiptDto {
   @IsNotEmpty({
     message: 'Thời gian thu không được để trống',
   })
-  time: string;
+  time: Date;
 
   @IsNotEmpty({
     message: 'Số tiền thu không được để trống',

@@ -252,7 +252,7 @@ export const INIT_PERMISSIONS = [
     _id: '66890545d40c708b15d2f329',
     name: 'Xác nhận thay đổi email',
     apiPath: '/api/v1/users/confirm-change-email/:id',
-    method: 'GET',
+    method: 'POST',
     module: 'USERS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',
@@ -412,7 +412,7 @@ export const INIT_PERMISSIONS = [
     _id: '6694cc7cfda6b0a670cd3e4b',
     name: 'Xác nhận thay đổi email',
     apiPath: '/api/v1/unionists/confirm-change-email/:id',
-    method: 'GET',
+    method: 'POST',
     module: 'UNIONISTS',
     createdBy: {
       _id: '647b5108a8a243e8191855b5',

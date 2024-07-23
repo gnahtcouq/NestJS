@@ -10,6 +10,8 @@ import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
+import { isValidateDate } from 'src/util/utils';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class ReceiptsService {
@@ -27,6 +29,9 @@ export class ReceiptsService {
     if (existingReceipt) {
       throw new BadRequestException(`Mã phiếu thu ${receiptId} đã tồn tại`);
     }
+
+    if (!isValidateDate(time))
+      throw new BadRequestException('Thời gian thu không hợp lệ');
 
     const newReceipt = await this.receiptModel.create({
       userId,
@@ -117,7 +122,7 @@ export class ReceiptsService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { receiptId, amount } = updateReceiptDto;
+    const { receiptId, amount, time } = updateReceiptDto;
 
     if (receiptId !== undefined) {
       throw new BadRequestException('Không thể cập nhật mã phiếu thu');
@@ -133,6 +138,9 @@ export class ReceiptsService {
       throw new BadRequestException(
         'Số tiền không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
       );
+
+    if (!isValidateDate(time))
+      throw new BadRequestException('Thời gian thu không hợp lệ');
 
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
@@ -238,6 +246,12 @@ export class ReceiptsService {
       }
 
       const [day, month, year] = receiptTime.split('/').map(Number);
+      // Kiểm tra năm không nhỏ hơn 1900
+      if (year < 1900) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
       const isValidDate = (
         day: number,
         month: number,
@@ -252,6 +266,12 @@ export class ReceiptsService {
       };
 
       if (!isValidDate(day, month, year)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra ngày không nằm sau ngày hiện tại
+      if (dayjs(new Date(year, month - 1, day)).isAfter(dayjs())) {
         invalidRows.push(index + 2);
         return false;
       }

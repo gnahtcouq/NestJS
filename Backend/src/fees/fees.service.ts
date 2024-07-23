@@ -9,6 +9,7 @@ import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class FeesService {
@@ -26,6 +27,37 @@ export class FeesService {
         `Lệ phí ${monthYear} cho công đoàn viên ${unionistId} đã tồn tại`,
       );
     }
+
+    // Kiểm tra định dạng monthYear
+    const yearMonthRegex = /^\d{4}\/(0[1-9]|1[0-2])$/;
+    if (!yearMonthRegex.test(monthYear)) {
+      throw new BadRequestException(
+        'Định dạng tháng/năm không hợp lệ. Sử dụng YYYY/MM',
+      );
+    }
+
+    const [year, month] = monthYear.split('/').map(Number);
+
+    // Kiểm tra năm không lớn hơn năm hiện tại
+    const currentYear = dayjs().year();
+    const currentMonth = dayjs().month() + 1; // month() trả về 0-based index, nên thêm 1
+
+    if (
+      year < 1900 ||
+      year > currentYear ||
+      (year === currentYear && month > currentMonth)
+    ) {
+      throw new BadRequestException(
+        'Tháng và năm không được lớn hơn tháng và năm hiện tại và không nhỏ hơn năm 1900',
+      );
+    }
+
+    // Kiểm tra amount
+    const parsedFee = parseFloat(fee);
+    if (isNaN(parsedFee) || parsedFee < 1000 || parsedFee >= 10000000000)
+      throw new BadRequestException(
+        'Số tiền không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
+      );
 
     const newFee = await this.feeModel.create({
       unionistId,
@@ -92,10 +124,28 @@ export class FeesService {
       );
     }
 
-    // Kiểm tra monthYear theo định dạng yyyy/mm
+    // Kiểm tra định dạng monthYear
     const yearMonthRegex = /^\d{4}\/(0[1-9]|1[0-2])$/;
     if (!yearMonthRegex.test(monthYear)) {
-      throw new BadRequestException('Tháng/năm không hợp lệ');
+      throw new BadRequestException(
+        'Định dạng tháng/năm không hợp lệ. Sử dụng YYYY/MM',
+      );
+    }
+
+    const [year, month] = monthYear.split('/').map(Number);
+
+    // Kiểm tra năm không lớn hơn năm hiện tại
+    const currentYear = dayjs().year();
+    const currentMonth = dayjs().month() + 1; // month() trả về 0-based index, nên thêm 1
+
+    if (
+      year < 1900 ||
+      year > currentYear ||
+      (year === currentYear && month > currentMonth)
+    ) {
+      throw new BadRequestException(
+        'Tháng và năm không được lớn hơn tháng và năm hiện tại và không nhỏ hơn năm 1900',
+      );
     }
 
     // Kiểm tra amount

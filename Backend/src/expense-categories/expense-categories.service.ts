@@ -12,6 +12,7 @@ import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
+import { parse } from 'date-fns';
 
 @Injectable()
 export class ExpenseCategoriesService {
@@ -141,6 +142,13 @@ export class ExpenseCategoriesService {
       throw new BadRequestException(
         'Mô tả và năm hoặc mã danh mục chi đã tồn tại',
       );
+    }
+
+    // Kiểm tra năm hợp lệ
+    const currentYear = new Date().getFullYear();
+    const parseYear = Number(year);
+    if (parseYear < 1900 || parseYear > currentYear) {
+      throw new BadRequestException('Năm không hợp lệ');
     }
 
     const updated = await this.expenseCategoryModel.updateOne(

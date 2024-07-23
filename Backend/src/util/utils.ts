@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+import { BadRequestException } from '@nestjs/common';
+import dayjs from 'dayjs';
 export const nonAccentVietnamese = (str: string) => {
   str = str.replace(/A|Á|À|Ã|Ạ|Â|Ấ|Ầ|Ẫ|Ậ|Ă|Ắ|Ằ|Ẵ|Ặ/g, 'A');
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
@@ -40,4 +42,23 @@ export const convertSlug = (str: string) => {
     .replace(/-+/g, '-'); // collapse dashes
 
   return str;
+};
+
+export const isValidDateOfBirth = (dateOfBirth: Date): boolean => {
+  const date = dayjs(dateOfBirth);
+  const today = dayjs();
+  const age = today.diff(date, 'year');
+  const minYear = 1900;
+  return date.isValid() && date.year() >= minYear && age >= 18;
+};
+
+export const isValidateDate = (date: Date): boolean => {
+  const parsedDate = dayjs(date).startOf('day');
+  const today = dayjs().startOf('day');
+  const minYear = 1900;
+  return (
+    parsedDate.isValid() &&
+    parsedDate.year() >= minYear &&
+    !parsedDate.isAfter(today)
+  );
 };

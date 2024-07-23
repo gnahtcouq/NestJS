@@ -140,6 +140,13 @@ export class IncomeCategoriesService {
       );
     }
 
+    // Kiểm tra năm hợp lệ
+    const currentYear = new Date().getFullYear();
+    const parseYear = Number(year);
+    if (parseYear < 1900 || parseYear > currentYear) {
+      throw new BadRequestException('Năm không hợp lệ');
+    }
+
     const updated = await this.incomeCategoryModel.updateOne(
       { _id: updateIncomeCategoryDto._id },
       {

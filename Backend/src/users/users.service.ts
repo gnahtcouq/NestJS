@@ -27,6 +27,8 @@ import { ObjectId } from 'mongodb'; // Import the ObjectId class from the 'mongo
 import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
 import { UnionistsService } from 'src/unionists/unionists.service';
+import { isValidDateOfBirth } from 'src/util/utils';
+import dayjs from 'dayjs';
 @Injectable()
 export class UsersService {
   private readonly encryptionKey: Buffer;
@@ -81,6 +83,33 @@ export class UsersService {
       );
     }
 
+    if (!isValidDateOfBirth(dateOfBirth)) {
+      throw new BadRequestException(
+        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
+      );
+    }
+
+    if (
+      gender &&
+      gender !== 'MALE' &&
+      gender !== 'FEMALE' &&
+      gender !== 'OTHER'
+    ) {
+      throw new BadRequestException('Giới tính không hợp lệ');
+    }
+
+    if (address && address.length > 50) {
+      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
+    }
+
+    if (CCCD && !/^\d{12}$/.test(CCCD)) {
+      throw new BadRequestException('CCCD không hợp lệ');
+    }
+
+    if (note && note.length > 30) {
+      throw new BadRequestException('Ghi chú không được vượt quá 30 ký tự');
+    }
+
     const hashPassword = this.getHashPassword(password);
 
     let newUser = await this.userModel.create({
@@ -125,18 +154,37 @@ export class UsersService {
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
 
-    // if (
-    //   !(
-    //     /[a-z]/.test(password) &&
-    //     /[A-Z]/.test(password) &&
-    //     /\d/.test(password) &&
-    //     password.length >= 8
-    //   )
-    // ) {
-    //   throw new BadRequestException(
-    //     'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
-    //   );
-    // }
+    if (
+      !(
+        /[a-z]/.test(password) &&
+        /[A-Z]/.test(password) &&
+        /\d/.test(password) &&
+        password.length >= 8
+      )
+    ) {
+      throw new BadRequestException(
+        'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
+      );
+    }
+
+    if (!isValidDateOfBirth(dateOfBirth)) {
+      throw new BadRequestException(
+        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
+      );
+    }
+
+    if (
+      gender &&
+      gender !== 'MALE' &&
+      gender !== 'FEMALE' &&
+      gender !== 'OTHER'
+    ) {
+      throw new BadRequestException('Giới tính không hợp lệ');
+    }
+
+    if (address && address.length > 50) {
+      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
+    }
 
     const hashPassword = this.getHashPassword(password);
     let newRegister = await this.userModel.create({
@@ -231,7 +279,7 @@ export class UsersService {
 
   async update(_id: string, updateUserDto: UpdateUserDto, user: IUser) {
     //logic check email exist
-    const { email } = updateUserDto;
+    const { email, dateOfBirth, gender, address, CCCD, note } = updateUserDto;
     const currentEmail = await this.userModel.findOne({ _id });
 
     if (email !== currentEmail.email) {
@@ -243,6 +291,33 @@ export class UsersService {
         throw new BadRequestException(
           `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
         );
+    }
+
+    if (!isValidDateOfBirth(dateOfBirth)) {
+      throw new BadRequestException(
+        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
+      );
+    }
+
+    if (
+      gender &&
+      gender !== 'MALE' &&
+      gender !== 'FEMALE' &&
+      gender !== 'OTHER'
+    ) {
+      throw new BadRequestException('Giới tính không hợp lệ');
+    }
+
+    if (address && address.length > 50) {
+      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
+    }
+
+    if (CCCD && !/^\d{12}$/.test(CCCD)) {
+      throw new BadRequestException('CCCD không hợp lệ');
+    }
+
+    if (note && note.length > 30) {
+      throw new BadRequestException('Ghi chú không được vượt quá 30 ký tự');
     }
 
     const updated = await this.userModel.updateOne(
@@ -529,6 +604,8 @@ export class UsersService {
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
       if ((row as any[]).length < 8) {
+        // Cần ít nhất 8 cột
+        invalidRows.push(index + 2);
         return false;
       }
 
@@ -541,6 +618,7 @@ export class UsersService {
       const userCCCD = row[5] || null;
       const userAddress = row[6];
 
+      // Kiểm tra các giá trị cần thiết
       if (
         !userId ||
         !userName ||
@@ -559,7 +637,11 @@ export class UsersService {
       }
 
       // Kiểm tra giới tính
-      if (userGender !== 'MALE' && userGender !== 'FEMALE') {
+      if (
+        userGender !== 'MALE' &&
+        userGender !== 'FEMALE' &&
+        userGender !== 'OTHER'
+      ) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -573,6 +655,12 @@ export class UsersService {
       }
 
       const [day, month, year] = userBirthday.split('/').map(Number);
+      // Kiểm tra năm sinh không nhỏ hơn 1900
+      if (year < 1900) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
       const isValidDate = (
         day: number,
         month: number,
@@ -587,6 +675,15 @@ export class UsersService {
       };
 
       if (!isValidDate(day, month, year)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra tuổi
+      const dateOfBirth = dayjs(new Date(year, month - 1, day));
+      const today = dayjs();
+      const age = today.diff(dateOfBirth, 'year');
+      if (age < 18) {
         invalidRows.push(index + 2);
         return false;
       }

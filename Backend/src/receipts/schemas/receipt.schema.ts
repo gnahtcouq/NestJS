@@ -17,7 +17,7 @@ export class Receipt {
   description: string;
 
   @Prop()
-  time: string;
+  time: Date;
 
   @Prop()
   amount: string;

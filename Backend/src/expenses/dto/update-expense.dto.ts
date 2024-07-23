@@ -26,7 +26,7 @@ export class UpdateExpenseDto extends OmitType(CreateExpenseDto, []) {
   @IsNotEmpty({
     message: 'Thời gian chi không được để trống',
   })
-  time: string;
+  time: Date;
 
   @IsOptional()
   @IsNotEmpty({

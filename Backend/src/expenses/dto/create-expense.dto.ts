@@ -15,7 +15,7 @@ export class CreateExpenseDto {
   @IsNotEmpty({
     message: 'Thời gian chi không được để trống',
   })
-  time: string;
+  time: Date;
 
   @IsNotEmpty({
     message: 'Số tiền chi không được để trống',
