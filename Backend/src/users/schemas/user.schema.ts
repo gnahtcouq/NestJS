@@ -1,12 +1,15 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Model } from 'mongoose';
 import { Permission } from 'src/permissions/schemas/permission.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
+  @Prop({ unique: true })
+  id: string;
+
   @Prop()
   name: string;
 
@@ -81,3 +84,24 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.pre('save', async function (next) {
+  try {
+    if (this.isNew) {
+      const UserModel = this.constructor as Model<UserDocument>;
+      const lastUser = await UserModel.findOne().sort({ id: -1 });
+      const lastId =
+        lastUser && lastUser.id ? parseInt(lastUser.id.slice(3), 10) : 0;
+
+      this.id = `STU${(lastId + 1).toString().padStart(5, '0')}`;
+    }
+
+    if (!this.id) {
+      throw new Error('Mã thành viên không được để trống');
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});

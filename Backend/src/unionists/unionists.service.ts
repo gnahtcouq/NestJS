@@ -176,11 +176,11 @@ export class UnionistsService {
     };
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
       throw new BadRequestException('ID không hợp lệ!');
 
-    return this.unionistModel
+    const unionist = await this.unionistModel
       .findOne({
         _id: id,
       })
@@ -189,26 +189,37 @@ export class UnionistsService {
         path: 'permissions',
         select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
       });
+
+    return unionist;
   }
 
-  private findOneWithPassword(id: string) {
+  async findUnionistNameWithUnionistId(id: string) {
+    const unionistIdRegex = /^CD\d{5}$/;
+    if (!unionistIdRegex.test(id))
+      throw new BadRequestException('ID không hợp lệ!');
+
+    const unionist = await this.unionistModel.findOne({ id }).select('name'); // trả về name
+
+    return unionist;
+  }
+
+  private async findOneWithPassword(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
       throw new BadRequestException('ID không hợp lệ!');
 
-    return this.unionistModel
+    const unionist = await this.unionistModel
       .findOne({
         _id: id,
       })
-      .populate({
-        path: 'permissions',
-        select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
-      });
+      .select('password');
+    return unionist;
   }
 
-  findOneByUserName(unionistname: string) {
-    return this.unionistModel.findOne({
+  async findOneByUserName(unionistname: string) {
+    const unionist = await this.unionistModel.findOne({
       email: unionistname,
     });
+    return unionist;
   }
 
   isValidPassword(password: string, hashPassword: string) {
@@ -561,27 +572,27 @@ export class UnionistsService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 11) {
+      if ((row as any[]).length < 10) {
         // Cần ít nhất 11 cột
         invalidRows.push(index + 2);
         return false;
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
-      const unionistId = row[0];
-      const unionistEmail = row[1];
-      const unionistName = row[2];
-      const unionistGender = row[3];
-      const unionistBirthday = row[4];
-      const unionistCCCD = row[5];
-      const unionistAddress = row[6];
-      const unionistJoiningDate = row[8] || null;
-      const unionistLeavingDate = row[9] || null;
-      const unionistUnionEntryDate = row[10] || null;
+      const unionistEmail = row[0];
+      const unionistName = row[1];
+      const unionistGender = row[2];
+      const unionistBirthday = row[3];
+      const unionistCCCD = row[4] || null;
+      const unionistAddress = row[5];
+      // const unionistNote = row[6] || null;
+      const unionistJoiningDate = row[7] || null;
+      const unionistLeavingDate = row[8] || null;
+      const unionistUnionEntryDate = row[9] || null;
 
       // Kiểm tra các giá trị cần thiết
       if (
-        !unionistId ||
+        !unionistEmail ||
         !unionistName ||
         !unionistGender ||
         !unionistBirthday ||
@@ -734,17 +745,16 @@ export class UnionistsService {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
-      const unionistId = row[0];
-      const unionistEmail = row[1];
-      const unionistName = row[2];
-      const unionistGender = row[3];
-      const unionistBirthday = row[4];
-      const unionistCCCD = row[5] || null;
-      const unionistAddress = row[6];
-      const unionistNote = row[7] || null;
-      const unionistJoiningDate = row[8] || null;
-      const unionistLeavingDate = row[9] || null;
-      const unionistUnionEntryDate = row[10] || null;
+      const unionistEmail = row[0];
+      const unionistName = row[1];
+      const unionistGender = row[2];
+      const unionistBirthday = row[3];
+      const unionistCCCD = row[4] || null;
+      const unionistAddress = row[5];
+      const unionistNote = row[6] || null;
+      const unionistJoiningDate = row[7] || null;
+      const unionistLeavingDate = row[8] || null;
+      const unionistUnionEntryDate = row[9] || null;
 
       const [day, month, year] = unionistBirthday.split('/');
       const parsedDate = parse(
@@ -791,7 +801,6 @@ export class UnionistsService {
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingUnionist = await this.unionistModel.findOne({
-          _id: unionistId,
           name: unionistName,
           email: unionistEmail,
         });
@@ -808,7 +817,6 @@ export class UnionistsService {
 
         // Tạo mới bản ghi unionist
         await this.unionistModel.create({
-          _id: unionistId,
           name: unionistName,
           password: this.getHashPassword(
             this.configService.get<string>('INIT_PASSWORD'),

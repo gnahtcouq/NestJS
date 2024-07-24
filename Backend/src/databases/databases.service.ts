@@ -49,6 +49,7 @@ export class DatabasesService implements OnModuleInit {
       if (countUser === 0) {
         await this.userModel.insertMany([
           {
+            id: 'STU00001',
             name: 'ADMIN',
             email: 'admin@stu.id.vn',
             password: this.userService.getHashPassword(
@@ -145,6 +146,7 @@ export class DatabasesService implements OnModuleInit {
             ],
           },
           {
+            id: 'STU00002',
             name: 'Trần Văn Quốc Thắng',
             email: 'comehere.thang@gmail.com',
             password: this.userService.getHashPassword(
@@ -164,6 +166,7 @@ export class DatabasesService implements OnModuleInit {
             ],
           },
           {
+            id: 'STU00003',
             name: 'Lại Văn Toàn',
             email: 'dh52006741@student.stu.edu.vn',
             password: this.userService.getHashPassword(
@@ -188,6 +191,7 @@ export class DatabasesService implements OnModuleInit {
       if (countUnionist === 0) {
         await this.unionistModel.insertMany([
           {
+            id: 'CD00001',
             name: 'UNIONIST',
             email: 'unionist@stu.id.vn',
             password: this.unionistService.getHashPassword(
@@ -212,7 +216,7 @@ export class DatabasesService implements OnModuleInit {
         ]);
       }
 
-      if (countUser > 0 && countPermission > 0) {
+      if (countUser > 0 && countUnionist > 0 && countPermission > 0) {
         this.logger.log('>>> ALREADY INIT SAMPLE DATA...');
       }
     }

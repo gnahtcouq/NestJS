@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: IUser | IUnionist) {
-    const { _id, name, email, type } = payload;
+    const { _id, id, name, email, type } = payload;
 
     //cần gắn thêm permissions vào req.user
     const temp1 = await this?.usersService?.findOne(_id);
@@ -33,6 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     //req.user
     return {
       _id,
+      id,
       name,
       email,
       permissions,

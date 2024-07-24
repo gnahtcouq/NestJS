@@ -1,12 +1,15 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Model } from 'mongoose';
 import { Permission } from 'src/permissions/schemas/permission.schema';
 
 export type UnionistDocument = HydratedDocument<Unionist>;
 
 @Schema({ timestamps: true })
 export class Unionist {
+  @Prop({ unique: true })
+  id: string;
+
   @Prop()
   name: string;
 
@@ -96,3 +99,26 @@ export class Unionist {
 }
 
 export const UnionistSchema = SchemaFactory.createForClass(Unionist);
+
+UnionistSchema.pre('save', async function (next) {
+  try {
+    if (this.isNew) {
+      const UnionistModel = this.constructor as Model<UnionistDocument>;
+      const lastUnionist = await UnionistModel.findOne().sort({ id: -1 });
+      const lastId =
+        lastUnionist && lastUnionist.id
+          ? parseInt(lastUnionist.id.slice(2), 10)
+          : 0;
+
+      this.id = `CD${(lastId + 1).toString().padStart(5, '0')}`;
+    }
+
+    if (!this.id) {
+      throw new Error('Mã công đoàn viên không được để trống');
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});

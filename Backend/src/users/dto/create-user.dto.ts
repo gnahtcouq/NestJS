@@ -1,27 +1,13 @@
 /* eslint-disable prettier/prettier */
-import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
-  IsDate,
   IsEmail,
   IsMongoId,
   IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
   IsOptional,
-  ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
 
-// class Department {
-//   @IsNotEmpty()
-//   _id: mongoose.Schema.Types.ObjectId;
-
-//   @IsNotEmpty()
-//   name: string;
-// }
-
-//data transfer object for creating a user
 export class CreateUserDto {
   @IsNotEmpty({
     message: 'Tên không được để trống',

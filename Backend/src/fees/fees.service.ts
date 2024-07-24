@@ -10,12 +10,14 @@ import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
 import dayjs from 'dayjs';
+import { UnionistsService } from 'src/unionists/unionists.service';
 
 @Injectable()
 export class FeesService {
   constructor(
     @InjectModel(Fee.name)
     private feeModel: SoftDeleteModel<FeeDocument>,
+    private readonly unionistsService: UnionistsService,
   ) {}
 
   async create(createFeeDto: CreateFeeDto, user: IUser) {
@@ -217,24 +219,28 @@ export class FeesService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 4) {
+      if ((row as any[]).length < 3) {
         return false;
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
       const unionistId = row[0];
-      const unionistName = row[1];
-      const monthYear = row[2];
-      const parseFee = parseFloat(row[3]);
+      const monthYear = row[1];
+      const parseFee = parseFloat(row[2]);
 
       if (
         !unionistId ||
-        !unionistName ||
         !monthYear ||
         isNaN(parseFee) ||
         parseFee < 1000 ||
         parseFee >= 10000000000
       ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      const unionistIdRegex = /^CD\d{5}$/;
+      if (!unionistIdRegex.test(unionistId)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -263,9 +269,8 @@ export class FeesService {
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
       const unionistId = row[0];
-      const unionistName = row[1];
-      const monthYear = row[2];
-      const fee = parseFloat(row[3]);
+      const monthYear = row[1];
+      const fee = parseFloat(row[2]);
 
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
@@ -274,18 +279,26 @@ export class FeesService {
           monthYear,
         });
 
+        const isExistUnionist =
+          await this.unionistsService.findUnionistNameWithUnionistId(
+            unionistId,
+          );
+
         if (existingFee) {
           throw new BadRequestException(
-            `Lệ phí ${monthYear} cho công đoàn viên ${unionistName} đã tồn tại`,
+            `Lệ phí ${monthYear} cho công đoàn viên có mã ${unionistId} đã tồn tại`,
+          );
+        }
+
+        if (!isExistUnionist) {
+          throw new BadRequestException(
+            `Không tồn tại công đoàn viên có mã là ${unionistId}`,
           );
         }
 
         // Tạo mới bản ghi lệ phí
         await this.feeModel.create({
-          unionist: {
-            _id: unionistId,
-            name: unionistName,
-          },
+          unionistId,
           monthYear,
           fee,
           createdBy: {

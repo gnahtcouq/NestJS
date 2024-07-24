@@ -67,11 +67,12 @@ export class AuthService {
   }
 
   async login(user: IUser | IUnionist, response: Response) {
-    const { _id, name, email, permissions, type } = user;
+    const { _id, id, name, email, permissions, type } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
       _id,
+      id,
       name,
       email,
       type,
@@ -96,6 +97,7 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       user: {
         _id,
+        id,
         name,
         email,
         permissions,
@@ -134,11 +136,12 @@ export class AuthService {
       }
       if (user) {
         //update refresh_token
-        const { _id, name, email } = user;
+        const { _id, id, name, email } = user;
         const payload = {
           sub: 'token refresh',
           iss: 'from server',
           _id,
+          id,
           name,
           email,
         };
@@ -163,6 +166,7 @@ export class AuthService {
           access_token: this.jwtService.sign(payload),
           user: {
             _id,
+            id,
             name,
             email,
             permissions: temp?.permissions ?? [],

@@ -14,7 +14,7 @@ import mongoose from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
-import { Unionist, User } from 'src/decorator/customize';
+import { User } from 'src/decorator/customize';
 import aqp from 'api-query-params';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -29,7 +29,6 @@ import { parse, formatISO } from 'date-fns';
 import { UnionistsService } from 'src/unionists/unionists.service';
 import { isValidDateOfBirth } from 'src/util/utils';
 import dayjs from 'dayjs';
-import { UnionistDocument } from 'src/unionists/schemas/unionist.schema';
 @Injectable()
 export class UsersService {
   private readonly encryptionKey: Buffer;
@@ -195,7 +194,7 @@ export class UsersService {
       dateOfBirth,
       gender,
       address,
-      note: '',
+      note: null,
       permissions: [
         new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
         new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
@@ -239,12 +238,13 @@ export class UsersService {
     };
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
       throw new BadRequestException('ID không hợp lệ!');
 
-    return this.userModel
+    const user = await this.userModel
       .findOne({
+        //_id: id,
         _id: id,
       })
       .select('-password') //không trả về password
@@ -252,26 +252,40 @@ export class UsersService {
         path: 'permissions',
         select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
       });
+    return user;
   }
 
-  private findOneWithPassword(id: string) {
+  async findUserNameWithUserId(id: string) {
+    const userIdRegex = /^STU\d{5}$/;
+    if (!userIdRegex.test(id))
+      throw new BadRequestException('ID không hợp lệ!');
+
+    const user = await this.userModel
+      .findOne({
+        id: id,
+      })
+      .select('name'); //trả về name
+
+    return user;
+  }
+
+  private async findOneWithPassword(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
       throw new BadRequestException('ID không hợp lệ!');
 
-    return this.userModel
+    const user = await this.userModel
       .findOne({
         _id: id,
       })
-      .populate({
-        path: 'permissions',
-        select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
-      });
+      .select('password');
+    return user;
   }
 
-  findOneByUserName(username: string) {
-    return this.userModel.findOne({
+  async findOneByUserName(username: string) {
+    const user = await this.userModel.findOne({
       email: username,
     });
+    return user;
   }
 
   isValidPassword(password: string, hashPassword: string) {
@@ -722,24 +736,24 @@ export class UsersService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter((row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 8) {
+      if ((row as any[]).length < 7) {
         // Cần ít nhất 8 cột
         invalidRows.push(index + 2);
         return false;
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
-      const userId = row[0];
-      const userEmail = row[1];
-      const userName = row[2];
-      const userGender = row[3];
-      const userBirthday = row[4];
-      const userCCCD = row[5] || null;
-      const userAddress = row[6];
+      const userEmail = row[0];
+      const userName = row[1];
+      const userGender = row[2];
+      const userBirthday = row[3];
+      const userCCCD = row[4] || null;
+      const userAddress = row[5];
+      // const userNote = row[6] || null;
 
       // Kiểm tra các giá trị cần thiết
       if (
-        !userId ||
+        !userEmail ||
         !userName ||
         !userGender ||
         !userBirthday ||
@@ -829,14 +843,13 @@ export class UsersService {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
-      const userId = row[0];
-      const userEmail = row[1];
-      const userName = row[2];
-      const userGender = row[3];
-      const userBirthday = row[4];
-      const userCCCD = row[5] || null;
-      const userAddress = row[6];
-      const userNote = row[7] || null;
+      const userEmail = row[0];
+      const userName = row[1];
+      const userGender = row[2];
+      const userBirthday = row[3];
+      const userCCCD = row[4] || null;
+      const userAddress = row[5];
+      const userNote = row[6] || null;
 
       const [day, month, year] = userBirthday.split('/');
       const parsedDate = parse(
@@ -849,7 +862,6 @@ export class UsersService {
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingUser = await this.userModel.findOne({
-          _id: userId,
           name: userName,
           email: userEmail,
         });
@@ -866,7 +878,6 @@ export class UsersService {
 
         // Tạo mới bản ghi user
         await this.userModel.create({
-          _id: userId,
           name: userName,
           password: this.getHashPassword(
             this.configService.get<string>('INIT_PASSWORD'),

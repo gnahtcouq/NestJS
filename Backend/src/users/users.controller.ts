@@ -54,6 +54,13 @@ export class UsersController {
     return foundUser;
   }
 
+  @Get('name/:id')
+  @ResponseMessage('Lấy tên thành viên theo mã thành viên')
+  async findUserNameWithUserId(@Param('id') id: string) {
+    const foundUser = await this.usersService.findUserNameWithUserId(id);
+    return foundUser;
+  }
+
   @Patch(':id')
   @ResponseMessage('Cập nhật thông tin thành viên')
   async update(

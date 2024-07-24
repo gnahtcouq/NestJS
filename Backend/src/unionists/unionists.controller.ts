@@ -64,6 +64,14 @@ export class UnionistsController {
     return foundUnionist;
   }
 
+  @Get('name/:id')
+  @ResponseMessage('Lấy tên công đoàn viên theo mã công đoàn viên')
+  async findUnionistNameWithUnionistId(@Param('id') id: string) {
+    const foundUnionist =
+      await this.unionistsService.findUnionistNameWithUnionistId(id);
+    return foundUnionist;
+  }
+
   @Patch(':id')
   @ResponseMessage('Cập nhật công đoàn viên')
   async update(
