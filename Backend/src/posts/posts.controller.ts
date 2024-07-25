@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Put,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -19,14 +20,14 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  @ResponseMessage('Tạo bài viết')
+  @ResponseMessage('Tạo bài đăng')
   create(@Body() createPostDto: CreatePostDto, @User() user: IUser) {
     return this.postsService.create(createPostDto, user);
   }
 
   @Get()
   @Public()
-  @ResponseMessage('Lấy danh sách bài viết')
+  @ResponseMessage('Lấy danh sách bài đăng')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -37,14 +38,14 @@ export class PostsController {
 
   @Get(':id')
   @Public()
-  @ResponseMessage('Lấy thông tin bài viết')
+  @ResponseMessage('Lấy thông tin bài đăng')
   async findOne(@Param('id') id: string) {
     const foundPost = await this.postsService.findOne(id);
     return foundPost;
   }
 
   @Patch(':id')
-  @ResponseMessage('Cập nhật bài viết')
+  @ResponseMessage('Cập nhật bài đăng')
   update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
@@ -53,8 +54,18 @@ export class PostsController {
     return this.postsService.update(id, updatePostDto, user);
   }
 
+  @Put(':id')
+  @ResponseMessage('Cập nhật trạng thái bài đăng')
+  updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: string,
+    @User() user: IUser,
+  ) {
+    return this.postsService.updateStatus(id, status, user);
+  }
+
   @Delete(':id')
-  @ResponseMessage('Xóa bài viết')
+  @ResponseMessage('Xóa bài đăng')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.postsService.remove(id, user);
   }

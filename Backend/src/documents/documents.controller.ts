@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   Query,
-  Res,
   Put,
 } from '@nestjs/common';
 import { DocumentsService } from './documents.service';

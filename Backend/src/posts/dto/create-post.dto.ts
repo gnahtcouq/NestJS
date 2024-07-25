@@ -1,25 +1,4 @@
-import { Transform, Type } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsDate,
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
-import mongoose from 'mongoose';
-class Department {
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsNotEmpty()
-  name: string;
-
-  @IsNotEmpty()
-  logo: string;
-}
+import { IsArray, IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty({
@@ -38,12 +17,6 @@ export class CreatePostDto {
     message: 'Chủ đề phải có định dạng là chuỗi',
   })
   threads: string[];
-
-  // @IsNotEmptyObject()
-  // @IsObject()
-  // @ValidateNested()
-  // @Type(() => Department)
-  // department: Department;
 
   @IsNotEmpty({
     message: 'Mô tả không được để trống',
@@ -64,7 +37,6 @@ export class CreatePostDto {
   // @IsDate({ message: 'Ngày kết thúc không đúng định dạng' })
   // endDate: Date;
 
-  @IsNotEmpty({ message: 'Trạng thái không được để trống' })
-  @IsBoolean({ message: 'Trạng thái phải có định dạng là boolean' })
-  isActive: boolean;
+  // @IsNotEmpty({ message: 'Trạng thái không được để trống' })
+  // status: string;
 }

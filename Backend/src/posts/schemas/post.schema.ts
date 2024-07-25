@@ -28,7 +28,7 @@ export class Post {
   // endDate: Date;
 
   @Prop()
-  isActive: boolean;
+  status: string;
 
   @Prop({ type: Object })
   createdBy: {

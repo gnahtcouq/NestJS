@@ -1,7 +1,4 @@
-import { IsMongoId, IsNotEmpty } from 'class-validator';
-import { Schema } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
-
+import { IsNotEmpty } from 'class-validator';
 export class CreateDocumentDto {
   @IsNotEmpty({ message: 'Email không được để trống' })
   email: string;

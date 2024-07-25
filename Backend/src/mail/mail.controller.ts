@@ -43,7 +43,7 @@ export class MailController {
       const postWithMatchingThreads = await this.postModel
         .find({
           threads: { $in: subsThreads },
-          isActive: true,
+          status: 'ACTIVE',
         })
         .sort({ createdAt: -1 }) // Sort by updatedAt date in descending order
         .limit(6); // Limit to 6 posts

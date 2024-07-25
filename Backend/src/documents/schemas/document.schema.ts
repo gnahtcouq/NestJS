@@ -1,9 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Department } from 'src/departments/schemas/department.schema';
-import { Post } from 'src/posts/schemas/post.schema';
-
 export type DocumentDocument = HydratedDocument<Document>;
 
 @Schema({ timestamps: true })

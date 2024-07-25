@@ -19,11 +19,9 @@ export class PostsService {
     const {
       name,
       threads,
-      // department,
       description,
       // startDate,
       // endDate,
-      isActive,
     } = createPostDto;
 
     let newPost = await this.postModel.create({
@@ -33,7 +31,7 @@ export class PostsService {
       description,
       // startDate,
       // endDate,
-      isActive,
+      status: 'INACTIVE',
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -82,12 +80,39 @@ export class PostsService {
   }
 
   async update(_id: string, updatePostDto: UpdatePostDto, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(_id))
+      throw new BadRequestException('ID không hợp lệ!');
+
+    const currentStatus = await this.postModel.findOne({ _id });
+
+    if (currentStatus.status === 'ACTIVE')
+      throw new BadRequestException(
+        'Trạng thái bài đăng đang hoạt động, không thể chỉnh sửa. Hãy liên hệ với quản trị viên của bạn',
+      );
+
     const updated = await this.postModel.updateOne(
       {
         _id,
       },
       {
         ...updatePostDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
+    return updated;
+  }
+
+  async updateStatus(_id: string, status: string, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(_id)) {
+      throw new BadRequestException('ID không hợp lệ!');
+    }
+    const updated = await this.postModel.updateOne(
+      { _id },
+      {
+        status,
         updatedBy: {
           _id: user._id,
           email: user.email,
