@@ -5,22 +5,11 @@ import {
   IsDate,
   IsMongoId,
   IsNotEmpty,
-  IsNotEmptyObject,
   IsOptional,
-  ValidateNested,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import mongoose from 'mongoose';
 
-class Department {
-  @IsOptional()
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsOptional()
-  @IsNotEmpty()
-  name: string;
-}
 export class UpdateUnionistDto extends OmitType(CreateUnionistDto, [
   'password',
 ] as const) {
@@ -44,12 +33,9 @@ export class UpdateUnionistDto extends OmitType(CreateUnionistDto, [
 
   @IsOptional()
   @IsNotEmpty({
-    message: 'Đơn vị không được để trống',
+    message: 'ID đơn vị không được để trống',
   })
-  @IsNotEmptyObject()
-  @ValidateNested()
-  @Type(() => Department)
-  department: Department;
+  departmentId: string;
 
   @IsOptional()
   @IsNotEmpty({

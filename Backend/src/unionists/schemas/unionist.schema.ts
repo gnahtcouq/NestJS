@@ -43,11 +43,8 @@ export class Unionist {
   @Prop()
   note: string; //ghi chú
 
-  @Prop({ type: Object })
-  department: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
+  @Prop()
+  departmentId: string;
 
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Permission.name })
   permissions: Permission[];

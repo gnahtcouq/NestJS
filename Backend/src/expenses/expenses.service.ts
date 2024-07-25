@@ -21,20 +21,20 @@ export class ExpensesService {
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto, userM: IUser) {
-    const { expenseId, description, time, amount, userId, expenseCategoryId } =
+    const { id, description, time, amount, userId, expenseCategoryId } =
       createExpenseDto;
 
-    const existingExpense = await this.expenseModel.findOne({ expenseId });
+    const existingExpense = await this.expenseModel.findOne({ id });
 
     if (existingExpense) {
-      throw new BadRequestException(`Mã phiếu chi ${expenseId} đã tồn tại`);
+      throw new BadRequestException(`Mã phiếu chi ${id} đã tồn tại`);
     }
 
     if (!isValidateDate(time))
       throw new BadRequestException('Thời gian chi không hợp lệ');
 
     const newExpense = await this.expenseModel.create({
-      expenseId,
+      id,
       description,
       time,
       amount,
@@ -111,20 +111,19 @@ export class ExpensesService {
     //   throw new BadRequestException('ID không hợp lệ');
 
     // Kiểm tra mã phiếu chi
-    const expenseIdRegex = /^PC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-    if (!expenseIdRegex.test(id))
-      throw new BadRequestException('ID không hợp lệ');
+    const idRegex = /^PC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+    if (!idRegex.test(id)) throw new BadRequestException('ID không hợp lệ');
 
-    return await this.expenseModel.findById({ expenseId: id });
+    return await this.expenseModel.findById({ id: id });
   }
 
   async update(_id: string, updateExpenseDto: UpdateExpenseDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { expenseId, amount, time } = updateExpenseDto;
+    const { id, amount, time } = updateExpenseDto;
 
-    if (expenseId !== undefined) {
+    if (id !== undefined) {
       throw new BadRequestException('Không thể cập nhật mã phiếu chi');
     }
 
@@ -210,7 +209,7 @@ export class ExpensesService {
 
       // Kiểm tra các giá trị cột có hợp lệ không
       const expenseUserId = row[0];
-      const expenseId = row[1];
+      const id = row[1];
       const expenseDescription = row[2];
       const expenseIncomeCategoryId = row[3];
       const expenseTime = row[4];
@@ -218,7 +217,7 @@ export class ExpensesService {
 
       if (
         !expenseUserId ||
-        !expenseId ||
+        !id ||
         !expenseDescription ||
         !expenseIncomeCategoryId ||
         !expenseTime ||
@@ -231,8 +230,8 @@ export class ExpensesService {
       }
 
       // Kiểm tra mã phiếu chi
-      const expenseIdRegex = /^PC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!expenseIdRegex.test(expenseId)) {
+      const idRegex = /^PC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!idRegex.test(id)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -293,7 +292,7 @@ export class ExpensesService {
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
       const expenseUserId = row[0];
-      const expenseId = row[1];
+      const id = row[1];
       const expenseDescription = row[2];
       const expenseIncomeCategoryId = row[3];
       const expenseTime = row[4];
@@ -316,17 +315,17 @@ export class ExpensesService {
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingUnionist = await this.expenseModel.findOne({
-          expenseId: expenseId,
+          id: id,
         });
 
         if (existingUnionist) {
-          throw new BadRequestException(`Mã phiếu chi ${expenseId} đã tồn tại`);
+          throw new BadRequestException(`Mã phiếu chi ${id} đã tồn tại`);
         }
 
         // Tạo mới bản ghi phiếu chi
         await this.expenseModel.create({
           userId: expenseUserId,
-          expenseId: expenseId,
+          id: id,
           description: expenseDescription,
           expenseCategoryId: expenseIncomeCategoryId,
           time: formattedDate,

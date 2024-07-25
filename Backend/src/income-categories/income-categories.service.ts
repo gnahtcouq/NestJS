@@ -21,15 +21,14 @@ export class IncomeCategoriesService {
   ) {}
 
   async create(createIncomeCategoryDto: CreateIncomeCategoryDto, user: IUser) {
-    const { incomeCategoryId, description, budget, year } =
-      createIncomeCategoryDto;
+    const { id, description, budget, year } = createIncomeCategoryDto;
 
     // Kiểm tra trùng lặp
     const existingCategory = await this.incomeCategoryModel.findOne({
       $or: [
         { description, year },
-        { description, year, incomeCategoryId },
-        { incomeCategoryId, year },
+        { description, year, id },
+        { id, year },
       ],
     });
 
@@ -40,7 +39,7 @@ export class IncomeCategoriesService {
     }
 
     const newIncomeCategory = await this.incomeCategoryModel.create({
-      incomeCategoryId,
+      id,
       description,
       budget,
       year,
@@ -92,12 +91,10 @@ export class IncomeCategoriesService {
     //   throw new BadRequestException('ID không hợp lệ');
 
     // Kiểm tra mã danh mục thu
-    const incomeCategoryIdRegex =
-      /^DMT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-    if (!incomeCategoryIdRegex.test(id))
-      throw new BadRequestException('ID không hợp lệ');
+    const idRegex = /^DMT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+    if (!idRegex.test(id)) throw new BadRequestException('ID không hợp lệ');
 
-    return await this.incomeCategoryModel.findOne({ incomeCategoryId: id });
+    return await this.incomeCategoryModel.findOne({ id: id });
   }
 
   async update(
@@ -108,10 +105,9 @@ export class IncomeCategoriesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { incomeCategoryId, description, year, budget } =
-      updateIncomeCategoryDto;
+    const { id, description, year, budget } = updateIncomeCategoryDto;
 
-    if (incomeCategoryId !== undefined) {
+    if (id !== undefined) {
       throw new BadRequestException('Không thể cập nhật mã danh mục thu');
     }
 
@@ -130,7 +126,7 @@ export class IncomeCategoriesService {
     const existingCategory = await this.incomeCategoryModel.findOne({
       $or: [
         { description, year, _id: { $ne: _id } },
-        { description, year, incomeCategoryId, _id: { $ne: _id } },
+        { description, year, id, _id: { $ne: _id } },
       ],
     });
 
@@ -214,12 +210,12 @@ export class IncomeCategoriesService {
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
-      const incomeCategoryId = row[0];
+      const id = row[0];
       const incomeCategoryDescription = row[1];
       const parsedBudget = parseFloat(row[2]);
       const incomeCategoryYear = row[3];
       if (
-        !incomeCategoryId ||
+        !id ||
         !incomeCategoryDescription ||
         !isNaN(parsedBudget) ||
         parsedBudget < 1000 ||
@@ -231,9 +227,8 @@ export class IncomeCategoriesService {
       }
 
       // Kiểm tra mã danh mục thu
-      const incomeCategoryIdRegex =
-        /^DMT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!incomeCategoryIdRegex.test(incomeCategoryId)) {
+      const idRegex = /^DMT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!idRegex.test(id)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -270,7 +265,7 @@ export class IncomeCategoriesService {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
-      const incomeCategoryId = row[0];
+      const id = row[0];
       const incomeCategoryDescription = row[1];
       const incomeCategoryBudget = parseFloat(row[2]);
       const incomeCategoryYear = row[3];
@@ -283,7 +278,7 @@ export class IncomeCategoriesService {
               description: incomeCategoryDescription,
               year: incomeCategoryYear,
             },
-            { incomeCategoryId, year: incomeCategoryYear },
+            { id, year: incomeCategoryYear },
           ],
         });
 
@@ -295,7 +290,7 @@ export class IncomeCategoriesService {
 
         // Tạo mới bản ghi phiếu thu
         await this.incomeCategoryModel.create({
-          incomeCategoryId: incomeCategoryId,
+          id: id,
           description: incomeCategoryDescription,
           budget: incomeCategoryBudget,
           year: incomeCategoryYear,

@@ -8,13 +8,7 @@ export class UpdateExpenseDto extends OmitType(CreateExpenseDto, []) {
 
   @IsOptional()
   @IsNotEmpty({ message: 'Mã phiếu chi không được để trống' })
-  expenseId: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Mã thành viên không được để trống',
-  })
-  userId: string;
+  id: string;
 
   @IsOptional()
   @IsNotEmpty({
@@ -33,6 +27,12 @@ export class UpdateExpenseDto extends OmitType(CreateExpenseDto, []) {
     message: 'Số tiền chi không được để trống',
   })
   amount: string;
+
+  @IsOptional()
+  @IsNotEmpty({
+    message: 'Mã thành viên không được để trống',
+  })
+  userId: string;
 
   @IsOptional()
   @IsNotEmpty({

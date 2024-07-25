@@ -56,8 +56,11 @@ export class UsersService {
   };
 
   async create(createUserDto: CreateUserDto, @User() user: IUser) {
-    const { name, email, password, dateOfBirth, gender, address, CCCD, note } =
+    let { name, email, password, dateOfBirth, gender, address, CCCD, note } =
       createUserDto;
+
+    // Convert email to lowercase
+    email = email.toLowerCase();
 
     if (!this.isValidEmail(email)) {
       throw new BadRequestException('Email mới không hợp lệ');
@@ -137,7 +140,10 @@ export class UsersService {
   }
 
   async register(user: RegisterUserDto) {
-    const { name, email, password, dateOfBirth, gender, address } = user;
+    let { name, email, password, dateOfBirth, gender, address } = user;
+
+    // Convert email to lowercase
+    email = email.toLowerCase();
 
     if (!this.isValidEmail(email)) {
       throw new BadRequestException('Email mới không hợp lệ');
@@ -294,8 +300,11 @@ export class UsersService {
 
   async update(_id: string, updateUserDto: UpdateUserDto, user: IUser) {
     //logic check email exist
-    const { email, dateOfBirth, gender, address, CCCD, note } = updateUserDto;
+    let { email, name, dateOfBirth, gender, address, CCCD, note } =
+      updateUserDto;
     const currentEmail = await this.userModel.findOne({ _id });
+    // Convert email to lowercase
+    email = email.toLowerCase();
 
     if (email !== currentEmail.email) {
       const isExistUser = await this.userModel.findOne({ email });
@@ -323,8 +332,16 @@ export class UsersService {
       throw new BadRequestException('Giới tính không hợp lệ');
     }
 
+    if (name && name.length > 50) {
+      throw new BadRequestException('Họ và tên không được vượt quá 30 ký tự');
+    }
+
     if (address && address.length > 50) {
       throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
+    }
+
+    if (note && note.length > 50) {
+      throw new BadRequestException('Ghi chú không được vượt quá 50 ký tự');
     }
 
     if (CCCD && !/^\d{12}$/.test(CCCD)) {
@@ -749,7 +766,7 @@ export class UsersService {
       const userBirthday = row[3];
       const userCCCD = row[4] || null;
       const userAddress = row[5];
-      // const userNote = row[6] || null;
+      const userNote = row[6] || null;
 
       // Kiểm tra các giá trị cần thiết
       if (
@@ -823,6 +840,21 @@ export class UsersService {
 
       // Kiểm tra CCCD nếu có
       if (userCCCD && !/^\d{12}$/.test(userCCCD)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      if (userName && userName.length > 30) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      if (userNote && userNote.length > 50) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      if (userAddress && userAddress.length > 50) {
         invalidRows.push(index + 2);
         return false;
       }

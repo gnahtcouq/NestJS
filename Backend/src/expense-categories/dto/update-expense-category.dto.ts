@@ -13,7 +13,7 @@ export class UpdateExpenseCategoryDto extends OmitType(
   @IsNotEmpty({
     message: 'Mã danh mục chi không được để trống',
   })
-  expenseCategoryId: string;
+  id: string;
 
   @IsOptional()
   @IsNotEmpty({

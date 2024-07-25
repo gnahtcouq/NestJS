@@ -13,16 +13,6 @@ import {
 import mongoose from 'mongoose';
 import { Transform, Type } from 'class-transformer';
 
-class Department {
-  @IsOptional()
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsOptional()
-  @IsNotEmpty()
-  name: string;
-}
-
 // export class UpdateUnionistDto extends PartialType(CreateUnionistDto) {}
 export class UpdateUnionistPermissionsDto extends OmitType(CreateUnionistDto, [
   'password',
@@ -83,8 +73,6 @@ export class UpdateUnionistPermissionsDto extends OmitType(CreateUnionistDto, [
   permissions: mongoose.Schema.Types.ObjectId[];
 
   @IsOptional()
-  @IsNotEmptyObject()
-  @ValidateNested()
-  @Type(() => Department)
-  department: Department;
+  @IsNotEmpty({ message: 'ID đơn vị không được để trống' })
+  departmentId: string;
 }

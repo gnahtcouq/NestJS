@@ -7,10 +7,7 @@ export type ExpenseDocument = HydratedDocument<Expense>;
 @Schema({ timestamps: true })
 export class Expense {
   @Prop()
-  userId: string;
-
-  @Prop()
-  expenseId: string;
+  id: string;
 
   @Prop()
   description: string;
@@ -20,6 +17,9 @@ export class Expense {
 
   @Prop()
   amount: string;
+
+  @Prop()
+  userId: string;
 
   @Prop()
   expenseCategoryId: string;

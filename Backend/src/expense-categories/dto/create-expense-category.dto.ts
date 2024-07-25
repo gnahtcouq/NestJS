@@ -5,7 +5,7 @@ export class CreateExpenseCategoryDto {
   @IsNotEmpty({
     message: 'Mã danh mục chi không được để trống',
   })
-  expenseCategoryId: string;
+  id: string;
 
   @IsNotEmpty({
     message: 'Nội dung danh mục chi không được để trống',

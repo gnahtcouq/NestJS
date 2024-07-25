@@ -13,7 +13,7 @@ export class UpdateIncomeCategoryDto extends OmitType(
   @IsNotEmpty({
     message: 'Mã danh mục thu không được để trống',
   })
-  incomeCategoryId: string;
+  id: string;
 
   @IsOptional()
   @IsNotEmpty({

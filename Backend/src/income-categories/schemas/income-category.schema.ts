@@ -7,7 +7,7 @@ export type IncomeCategoryDocument = HydratedDocument<IncomeCategory>;
 @Schema({ timestamps: true })
 export class IncomeCategory {
   @Prop()
-  incomeCategoryId: string;
+  id: string;
 
   @Prop()
   description: string;

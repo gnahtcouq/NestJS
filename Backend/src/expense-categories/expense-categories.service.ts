@@ -25,15 +25,14 @@ export class ExpenseCategoriesService {
     createExpenseCategoryDto: CreateExpenseCategoryDto,
     user: IUser,
   ) {
-    const { expenseCategoryId, description, budget, year } =
-      createExpenseCategoryDto;
+    const { id, description, budget, year } = createExpenseCategoryDto;
 
     // Kiểm tra trùng lặp
     const existingCategory = await this.expenseCategoryModel.findOne({
       $or: [
         { description, year },
-        { description, year, expenseCategoryId },
-        { expenseCategoryId, year },
+        { description, year, id },
+        { id, year },
       ],
     });
 
@@ -44,7 +43,7 @@ export class ExpenseCategoriesService {
     }
 
     const newExpenseCategory = await this.expenseCategoryModel.create({
-      expenseCategoryId,
+      id,
       description,
       budget,
       year,
@@ -96,12 +95,10 @@ export class ExpenseCategoriesService {
     //   throw new BadRequestException('ID không hợp lệ');
 
     // Kiểm tra mã danh mục chi
-    const expenseCategoryIdRegex =
-      /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-    if (!expenseCategoryIdRegex.test(id))
-      throw new BadRequestException('ID không hợp lệ');
+    const idRegex = /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+    if (!idRegex.test(id)) throw new BadRequestException('ID không hợp lệ');
 
-    return await this.expenseCategoryModel.findOne({ expenseCategoryId: id });
+    return await this.expenseCategoryModel.findOne({ id: id });
   }
 
   async update(
@@ -112,10 +109,9 @@ export class ExpenseCategoriesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { expenseCategoryId, description, year, budget } =
-      updateExpenseCategoryDto;
+    const { id, description, year, budget } = updateExpenseCategoryDto;
 
-    if (expenseCategoryId !== undefined) {
+    if (id !== undefined) {
       throw new BadRequestException('Không thể cập nhật mã danh mục chi');
     }
 
@@ -134,7 +130,7 @@ export class ExpenseCategoriesService {
     const existingCategory = await this.expenseCategoryModel.findOne({
       $or: [
         { description, year, _id: { $ne: _id } },
-        { description, year, expenseCategoryId, _id: { $ne: _id } },
+        { description, year, id, _id: { $ne: _id } },
       ],
     });
 
@@ -217,12 +213,12 @@ export class ExpenseCategoriesService {
         return false;
       }
       // Kiểm tra các giá trị cột có hợp lệ không
-      const expenseCategoryId = row[0];
+      const id = row[0];
       const expenseCategoryDescription = row[1];
       const parsedBudget = parseFloat(row[2]);
       const expenseCategoryYear = row[3];
       if (
-        !expenseCategoryId ||
+        !id ||
         !expenseCategoryDescription ||
         isNaN(parsedBudget) ||
         parsedBudget < 1000 ||
@@ -234,9 +230,8 @@ export class ExpenseCategoriesService {
       }
 
       // Kiểm tra mã danh mục chi
-      const expenseCategoryIdRegex =
-        /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!expenseCategoryIdRegex.test(expenseCategoryId)) {
+      const idRegex = /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!idRegex.test(id)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -273,7 +268,7 @@ export class ExpenseCategoriesService {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
-      const expenseCategoryId = row[0];
+      const id = row[0];
       const expenseCategoryDescription = row[1];
       const expenseCategoryBudget = parseFloat(row[2]);
       const expenseCategoryYear = row[3];
@@ -286,7 +281,7 @@ export class ExpenseCategoriesService {
               description: expenseCategoryDescription,
               year: expenseCategoryYear,
             },
-            { expenseCategoryId, year: expenseCategoryYear },
+            { id, year: expenseCategoryYear },
           ],
         });
 
@@ -298,7 +293,7 @@ export class ExpenseCategoriesService {
 
         // Tạo mới bản ghi phiếu thu
         await this.expenseCategoryModel.create({
-          expenseCategoryId: expenseCategoryId,
+          id: id,
           description: expenseCategoryDescription,
           budget: expenseCategoryBudget,
           year: expenseCategoryYear,

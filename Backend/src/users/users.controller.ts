@@ -54,6 +54,7 @@ export class UsersController {
     return foundUser;
   }
 
+  @Public()
   @Get('name/:id')
   @ResponseMessage('Lấy tên thành viên theo mã thành viên')
   async findUserNameWithUserId(@Param('id') id: string) {

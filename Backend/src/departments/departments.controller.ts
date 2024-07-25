@@ -38,11 +38,35 @@ export class DepartmentsController {
     return this.departmentsService.findAll(+currentPage, +limit, qs);
   }
 
+  @Get('without-description')
+  @Public()
+  @ResponseMessage('Lấy danh sách đơn vị không có mô tả')
+  findAllWithoutDescription(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.departmentsService.findAllWithoutDescription(
+      +currentPage,
+      +limit,
+      qs,
+    );
+  }
+
   @Get(':id')
   @Public()
   @ResponseMessage('Lấy thông tin đơn vị')
   async findOne(@Param('id') id: string) {
     const foundDepartment = await this.departmentsService.findOne(id);
+    return foundDepartment;
+  }
+
+  @Public()
+  @Get('name/:id')
+  @ResponseMessage('Lấy tên đơn vị theo mã đơn vị')
+  async findDepartmentNameWithDepartmentId(@Param('id') id: string) {
+    const foundDepartment =
+      await this.departmentsService.findDepartmentNameWithDepartmentId(id);
     return foundDepartment;
   }
 

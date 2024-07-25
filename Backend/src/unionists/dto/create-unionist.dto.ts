@@ -12,14 +12,6 @@ import {
 } from 'class-validator';
 import mongoose from 'mongoose';
 
-class Department {
-  @IsNotEmpty()
-  _id: mongoose.Schema.Types.ObjectId;
-
-  @IsNotEmpty()
-  name: string;
-}
-
 export class CreateUnionistDto {
   @IsNotEmpty({
     message: 'Tên không được để trống',
@@ -72,13 +64,9 @@ export class CreateUnionistDto {
   permissions: mongoose.Schema.Types.ObjectId[];
 
   @IsNotEmpty({
-    message: 'Đơn vị không được để trống',
+    message: 'ID đơn vị không được để trống',
   })
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => Department)
-  department: Department;
+  departmentId: string;
 
   @IsNotEmpty({
     message: 'Ngày chuyển đến không được để trống',

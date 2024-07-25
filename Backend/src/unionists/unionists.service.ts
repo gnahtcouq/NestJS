@@ -61,7 +61,7 @@ export class UnionistsService {
   };
 
   async create(createUnionistDto: CreateUnionistDto, @User() user: IUser) {
-    const {
+    let {
       name,
       email,
       password,
@@ -69,12 +69,15 @@ export class UnionistsService {
       gender,
       address,
       CCCD,
-      department,
+      departmentId,
       joiningDate,
       leavingDate,
       unionEntryDate,
       note,
     } = createUnionistDto;
+
+    // Convert email to lowercase
+    email = email.toLowerCase();
 
     if (!this.isValidEmail(email)) {
       throw new BadRequestException('Email mới không hợp lệ');
@@ -106,6 +109,10 @@ export class UnionistsService {
         'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
       );
 
+    if (address && address.length > 50) {
+      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
+    }
+
     if (!isValidateDate(joiningDate))
       throw new BadRequestException('Ngày chuyển đến không hợp lệ');
 
@@ -132,7 +139,7 @@ export class UnionistsService {
         new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
       ],
       CCCD,
-      department,
+      departmentId,
       joiningDate,
       leavingDate,
       unionEntryDate,
@@ -255,8 +262,9 @@ export class UnionistsService {
 
   async update(_id: string, updateUnionistDto: UpdateUnionistDto, user: IUser) {
     //logic check email exist
-    const {
+    let {
       email,
+      name,
       dateOfBirth,
       gender,
       address,
@@ -267,6 +275,8 @@ export class UnionistsService {
       unionEntryDate,
     } = updateUnionistDto;
     const currentEmail = await this.unionistModel.findOne({ _id });
+    // Convert email to lowercase
+    email = email.toLowerCase();
 
     if (email !== currentEmail.email) {
       const isExistUnionist = await this.unionistModel.findOne({ email });
@@ -290,6 +300,10 @@ export class UnionistsService {
       gender !== 'OTHER'
     ) {
       throw new BadRequestException('Giới tính không hợp lệ');
+    }
+
+    if (name && name.length > 50) {
+      throw new BadRequestException('Họ và tên không được vượt quá 30 ký tự');
     }
 
     if (address && address.length > 50) {
@@ -585,7 +599,7 @@ export class UnionistsService {
       const unionistBirthday = row[3];
       const unionistCCCD = row[4] || null;
       const unionistAddress = row[5];
-      // const unionistNote = row[6] || null;
+      const unionistNote = row[6] || null;
       const unionistJoiningDate = row[7] || null;
       const unionistLeavingDate = row[8] || null;
       const unionistUnionEntryDate = row[9] || null;
@@ -662,6 +676,21 @@ export class UnionistsService {
 
       // Kiểm tra CCCD nếu có
       if (unionistCCCD && !/^\d{12}$/.test(unionistCCCD)) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      if (unionistName && unionistName.length > 30) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      if (unionistNote && unionistNote.length > 50) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      if (unionistAddress && unionistAddress.length > 50) {
         invalidRows.push(index + 2);
         return false;
       }

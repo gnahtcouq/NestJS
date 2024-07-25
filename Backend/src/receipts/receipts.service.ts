@@ -21,13 +21,13 @@ export class ReceiptsService {
   ) {}
 
   async create(createReceiptDto: CreateReceiptDto, userM: IUser) {
-    const { userId, receiptId, description, time, amount, incomeCategoryId } =
+    const { userId, id, description, time, amount, incomeCategoryId } =
       createReceiptDto;
 
-    const existingReceipt = await this.receiptModel.findOne({ receiptId });
+    const existingReceipt = await this.receiptModel.findOne({ id });
 
     if (existingReceipt) {
-      throw new BadRequestException(`Mã phiếu thu ${receiptId} đã tồn tại`);
+      throw new BadRequestException(`Mã phiếu thu ${id} đã tồn tại`);
     }
 
     if (!isValidateDate(time))
@@ -35,7 +35,7 @@ export class ReceiptsService {
 
     const newReceipt = await this.receiptModel.create({
       userId,
-      receiptId,
+      id,
       description,
       time,
       amount,
@@ -111,20 +111,19 @@ export class ReceiptsService {
     //   throw new BadRequestException('ID không hợp lệ');
 
     // Kiểm tra mã phiếu thu
-    const receiptIdRegex = /^PT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-    if (!receiptIdRegex.test(id))
-      throw new BadRequestException('ID không hợp lệ');
+    const idRegex = /^PT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+    if (!idRegex.test(id)) throw new BadRequestException('ID không hợp lệ');
 
-    return await this.receiptModel.findOne({ receiptId: id });
+    return await this.receiptModel.findOne({ id: id });
   }
 
   async update(_id: string, updateReceiptDto: UpdateReceiptDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { receiptId, amount, time } = updateReceiptDto;
+    const { id, amount, time } = updateReceiptDto;
 
-    if (receiptId !== undefined) {
+    if (id !== undefined) {
       throw new BadRequestException('Không thể cập nhật mã phiếu thu');
     }
 
@@ -210,7 +209,7 @@ export class ReceiptsService {
 
       // Kiểm tra các giá trị cột có hợp lệ không
       const receiptUserId = row[0];
-      const receiptId = row[1];
+      const id = row[1];
       const receiptDescription = row[2];
       const receiptIncomeCategoryId = row[3];
       const receiptTime = row[4];
@@ -218,7 +217,7 @@ export class ReceiptsService {
 
       if (
         !receiptUserId ||
-        !receiptId ||
+        !id ||
         !receiptDescription ||
         !receiptIncomeCategoryId ||
         !receiptTime ||
@@ -231,8 +230,8 @@ export class ReceiptsService {
       }
 
       // Kiểm tra mã phiếu thu
-      const receiptIdRegex = /^PT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!receiptIdRegex.test(receiptId)) {
+      const idRegex = /^PT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
+      if (!idRegex.test(id)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -293,7 +292,7 @@ export class ReceiptsService {
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
       const receiptUserId = row[0];
-      const receiptId = row[1];
+      const id = row[1];
       const receiptDescription = row[2];
       const receiptIncomeCategoryId = row[3];
       const receiptTime = row[4];
@@ -316,17 +315,17 @@ export class ReceiptsService {
       try {
         // Kiểm tra xem bản ghi đã tồn tại chưa
         const existingReceipt = await this.receiptModel.findOne({
-          receiptId: receiptId,
+          id: id,
         });
 
         if (existingReceipt) {
-          throw new BadRequestException(`Mã phiếu thu ${receiptId} đã tồn tại`);
+          throw new BadRequestException(`Mã phiếu thu ${id} đã tồn tại`);
         }
 
         // Tạo mới bản ghi phiếu thu
         await this.receiptModel.create({
           userId: receiptUserId,
-          receiptId: receiptId,
+          id: id,
           description: receiptDescription,
           incomeCategoryId: receiptIncomeCategoryId,
           time: formattedDate,

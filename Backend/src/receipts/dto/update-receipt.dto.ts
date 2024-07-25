@@ -8,13 +8,7 @@ export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
 
   @IsOptional()
   @IsNotEmpty({ message: 'Mã phiếu thu không được để trống' })
-  receiptId: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'ID Thành viên không được để trống',
-  })
-  userId: string;
+  id: string;
 
   @IsOptional()
   @IsNotEmpty({
@@ -33,6 +27,12 @@ export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
     message: 'Số tiền thu không được để trống',
   })
   amount: string;
+
+  @IsOptional()
+  @IsNotEmpty({
+    message: 'Mã thành viên không được để trống',
+  })
+  userId: string;
 
   @IsOptional()
   @IsNotEmpty({

@@ -64,6 +64,7 @@ export class UnionistsController {
     return foundUnionist;
   }
 
+  @Public()
   @Get('name/:id')
   @ResponseMessage('Lấy tên công đoàn viên theo mã công đoàn viên')
   async findUnionistNameWithUnionistId(@Param('id') id: string) {
