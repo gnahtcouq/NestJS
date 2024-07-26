@@ -24,6 +24,18 @@ export class Receipt {
   @Prop()
   incomeCategoryId: string;
 
+  @Prop({ type: mongoose.Schema.Types.Array })
+  history: {
+    description: string;
+    time: Date;
+    amount: string;
+    updatedAt: Date;
+    updatedBy: {
+      _id: mongoose.Schema.Types.ObjectId;
+      email: string;
+    };
+  }[];
+
   @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;

@@ -47,6 +47,18 @@ export class IncomeCategoriesService {
         _id: user._id,
         email: user.email,
       },
+      history: [
+        {
+          description: `${description} (Nguyên bản)`,
+          year: year,
+          budget: budget,
+          updatedAt: new Date(),
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+      ],
     });
 
     return {
@@ -146,10 +158,24 @@ export class IncomeCategoriesService {
     const updated = await this.incomeCategoryModel.updateOne(
       { _id: updateIncomeCategoryDto._id },
       {
-        ...updateIncomeCategoryDto,
-        updatedBy: {
-          _id: user._id,
-          email: user.email,
+        $set: {
+          ...updateIncomeCategoryDto,
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+        $push: {
+          history: {
+            description: updateIncomeCategoryDto.description,
+            year: updateIncomeCategoryDto.year,
+            budget: updateIncomeCategoryDto.budget,
+            updatedAt: new Date(),
+            updatedBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          },
         },
       },
     );

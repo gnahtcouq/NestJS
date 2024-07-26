@@ -18,6 +18,18 @@ export class ExpenseCategory {
   @Prop()
   year: string;
 
+  @Prop({ type: mongoose.Schema.Types.Array })
+  history: {
+    description: string;
+    year: Date;
+    budget: string;
+    updatedAt: Date;
+    updatedBy: {
+      _id: mongoose.Schema.Types.ObjectId;
+      email: string;
+    };
+  }[];
+
   @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;

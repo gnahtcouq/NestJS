@@ -44,6 +44,18 @@ export class ReceiptsService {
         _id: userM._id,
         email: userM.email,
       },
+      history: [
+        {
+          description: `${description} (Nguyên bản)`,
+          time: time,
+          amount: amount,
+          updatedAt: new Date(),
+          updatedBy: {
+            _id: userM._id,
+            email: userM.email,
+          },
+        },
+      ],
     });
 
     return {
@@ -144,10 +156,24 @@ export class ReceiptsService {
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
       {
-        ...updateReceiptDto,
-        updatedBy: {
-          _id: user._id,
-          email: user.email,
+        $set: {
+          ...updateReceiptDto,
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+        $push: {
+          history: {
+            description: updateReceiptDto.description,
+            time: updateReceiptDto.time,
+            amount: updateReceiptDto.amount,
+            updatedAt: new Date(),
+            updatedBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          },
         },
       },
     );

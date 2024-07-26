@@ -12,7 +12,6 @@ import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
-import { parse } from 'date-fns';
 
 @Injectable()
 export class ExpenseCategoriesService {
@@ -51,6 +50,18 @@ export class ExpenseCategoriesService {
         _id: user._id,
         email: user.email,
       },
+      history: [
+        {
+          description: `${description} (Nguyên bản)`,
+          year: year,
+          budget: budget,
+          updatedAt: new Date(),
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+      ],
     });
 
     return {
@@ -150,10 +161,24 @@ export class ExpenseCategoriesService {
     const updated = await this.expenseCategoryModel.updateOne(
       { _id: updateExpenseCategoryDto._id },
       {
-        ...updateExpenseCategoryDto,
-        updatedBy: {
-          _id: user._id,
-          email: user.email,
+        $set: {
+          ...updateExpenseCategoryDto,
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+        $push: {
+          history: {
+            description: updateExpenseCategoryDto.description,
+            year: updateExpenseCategoryDto.year,
+            budget: updateExpenseCategoryDto.budget,
+            updatedAt: new Date(),
+            updatedBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          },
         },
       },
     );

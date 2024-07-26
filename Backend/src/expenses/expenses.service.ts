@@ -44,6 +44,18 @@ export class ExpensesService {
         _id: userM._id,
         email: userM.email,
       },
+      history: [
+        {
+          description: `${description} (Nguyên bản)`,
+          time: time,
+          amount: amount,
+          updatedAt: new Date(),
+          updatedBy: {
+            _id: userM._id,
+            email: userM.email,
+          },
+        },
+      ],
     });
 
     return {
@@ -144,10 +156,24 @@ export class ExpensesService {
     const updated = await this.expenseModel.updateOne(
       { _id: updateExpenseDto._id },
       {
-        ...updateExpenseDto,
-        updatedBy: {
-          _id: user._id,
-          email: user.email,
+        $set: {
+          ...updateExpenseDto,
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+        $push: {
+          history: {
+            description: updateExpenseDto.description,
+            time: updateExpenseDto.time,
+            amount: updateExpenseDto.amount,
+            updatedAt: new Date(),
+            updatedBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          },
         },
       },
     );

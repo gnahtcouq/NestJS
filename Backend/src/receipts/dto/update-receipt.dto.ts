@@ -1,6 +1,42 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateReceiptDto } from './create-receipt.dto';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { Types } from 'mongoose';
+
+class UpdatedBy {
+  @IsNotEmpty()
+  _id: Types.ObjectId;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+}
+
+class History {
+  @IsNotEmpty()
+  description: string;
+
+  @IsNotEmpty()
+  time: Date;
+
+  @IsNotEmpty()
+  amount: string;
+
+  @IsNotEmpty()
+  updatedAt: Date;
+
+  @ValidateNested()
+  @IsNotEmpty()
+  @Type(() => UpdatedBy)
+  updatedBy: UpdatedBy;
+}
 
 export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
   @IsNotEmpty({ message: 'ID không được để trống' })
@@ -39,4 +75,11 @@ export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
     message: 'Mã danh mục thu không được để trống',
   })
   incomeCategoryId: string;
+
+  @IsOptional()
+  @IsNotEmpty({ message: 'Lịch sử không được để trống' })
+  @IsArray({ message: 'Lịch sử có định dạng là mảng' })
+  @ValidateNested()
+  @Type(() => History)
+  history: History[];
 }

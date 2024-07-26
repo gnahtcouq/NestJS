@@ -69,6 +69,17 @@ export class FeesService {
         _id: user._id,
         email: user.email,
       },
+      history: [
+        {
+          monthYear: `${monthYear} (Nguyên bản)`,
+          fee: fee,
+          updatedAt: new Date(),
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+      ],
     });
 
     return {
@@ -160,10 +171,23 @@ export class FeesService {
     const updated = await this.feeModel.updateOne(
       { _id: updateFeeDto._id },
       {
-        ...updateFeeDto,
-        updatedBy: {
-          _id: user._id,
-          email: user.email,
+        $set: {
+          ...updateFeeDto,
+          updatedBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        },
+        $push: {
+          history: {
+            monthYear: updateFeeDto.monthYear,
+            fee: updateFeeDto.fee,
+            updatedAt: new Date(),
+            updatedBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          },
         },
       },
     );
