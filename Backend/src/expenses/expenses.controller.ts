@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -37,7 +38,6 @@ export class ExpensesController {
     return this.expensesService.findAll(+currentPage, +limit, qs);
   }
 
-  @Public()
   @Get('by-month-year')
   @ResponseMessage('Lấy danh sách phiếu chi theo tháng và năm')
   async findByMonthAndYear(

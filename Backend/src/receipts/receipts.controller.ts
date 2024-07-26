@@ -38,7 +38,6 @@ export class ReceiptsController {
     return this.receiptsService.findAll(+currentPage, +limit, qs);
   }
 
-  @Public()
   @Get('by-month-year')
   @ResponseMessage('Lấy danh sách phiếu thu theo tháng và năm')
   async findByMonthAndYear(
