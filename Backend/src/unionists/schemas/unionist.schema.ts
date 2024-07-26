@@ -110,10 +110,6 @@ UnionistSchema.pre('save', async function (next) {
       this.id = `CD${(lastId + 1).toString().padStart(5, '0')}`;
     }
 
-    if (!this.id) {
-      throw new Error('Mã công đoàn viên không được để trống');
-    }
-
     next();
   } catch (error) {
     next(error);

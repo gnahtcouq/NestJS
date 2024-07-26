@@ -98,7 +98,7 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('6694cc9d047108a8053a8cce'), // thay đổi mật khẩu
               new ObjectId('648ab750fa16b294212e404c'), // Upload file
               new ObjectId('648ad488dafdb9754f40b846'), // thêm mới bài đăng
-              new ObjectId('648ad499dafdb9754f40b84b'), // xem thông tin chi tiết bài đăng
+              // new ObjectId('648ad499dafdb9754f40b84b'), // xem thông tin chi tiết bài đăng
               new ObjectId('648ad4a6dafdb9754f40b850'), // cập nhật thông tin bài đăng
               new ObjectId('66a1e2040e45e02baa2a89dd'), // cập nhật trạng thái bài đăng
               new ObjectId('648ad4ccdafdb9754f40b859'), // xem danh sách bài đăng

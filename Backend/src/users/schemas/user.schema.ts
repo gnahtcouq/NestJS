@@ -96,10 +96,6 @@ UserSchema.pre('save', async function (next) {
       this.id = `STU${(lastId + 1).toString().padStart(5, '0')}`;
     }
 
-    if (!this.id) {
-      throw new Error('Mã thành viên không được để trống');
-    }
-
     next();
   } catch (error) {
     next(error);
