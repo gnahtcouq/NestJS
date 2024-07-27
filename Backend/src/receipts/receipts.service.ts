@@ -46,7 +46,7 @@ export class ReceiptsService {
       },
       history: [
         {
-          description: `${description} (Nguyên bản)`,
+          description: `${description} (Đầu tiên)`,
           time: time,
           amount: amount,
           updatedAt: new Date(),

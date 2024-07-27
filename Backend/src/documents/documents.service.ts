@@ -36,6 +36,7 @@ export class DocumentsService {
       createdBy: { _id, email },
       history: [
         {
+          name: `${name} (Đầu tiên)`,
           status: 'ACTIVE',
           updatedAt: new Date(),
           updatedBy: {

@@ -7,11 +7,16 @@ import {
   Department,
   DepartmentSchema,
 } from 'src/departments/schemas/department.schema';
+import {
+  Unionist,
+  UnionistSchema,
+} from 'src/unionists/schemas/unionist.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Department.name, schema: DepartmentSchema },
+      { name: Unionist.name, schema: UnionistSchema },
     ]),
   ],
   controllers: [DepartmentsController],

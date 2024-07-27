@@ -71,7 +71,7 @@ export class FeesService {
       },
       history: [
         {
-          monthYear: `${monthYear} (Nguyên bản)`,
+          monthYear: `${monthYear} (Đầu tiên)`,
           fee: fee,
           updatedAt: new Date(),
           updatedBy: {

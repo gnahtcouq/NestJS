@@ -11,13 +11,19 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
+import {
+  Unionist,
+  UnionistDocument,
+} from 'src/unionists/schemas/unionist.schema';
 
 @Injectable()
 export class DepartmentsService {
   constructor(
     @InjectModel(Department.name)
     private departmentModel: SoftDeleteModel<DepartmentDocument>,
+    @InjectModel(Unionist.name)
+    private unionistModel: Model<UnionistDocument>,
   ) {}
 
   create(createDepartmentDto: CreateDepartmentDto, user: IUser) {
@@ -136,8 +142,16 @@ export class DepartmentsService {
   }
 
   async remove(id: string, user: IUser) {
+    const unionists = await this.unionistModel.find({ departmentId: id });
+
+    if (unionists.length > 0) {
+      throw new BadRequestException(
+        'Không thể xoá đơn vị vì vẫn còn công đoàn viên liên kết',
+      );
+    }
+
     await this.departmentModel.updateOne(
-      { _id: id },
+      { id: id },
       {
         deletedBy: {
           _id: user._id,
@@ -147,7 +161,7 @@ export class DepartmentsService {
     );
 
     return this.departmentModel.softDelete({
-      _id: id,
+      id: id,
     });
   }
 

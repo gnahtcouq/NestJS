@@ -52,7 +52,7 @@ export class ExpenseCategoriesService {
       },
       history: [
         {
-          description: `${description} (Nguyên bản)`,
+          description: `${description} (Đầu tiên)`,
           year: year,
           budget: budget,
           updatedAt: new Date(),
