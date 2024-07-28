@@ -63,31 +63,26 @@ export class CreateUnionistDto {
   @IsArray({ message: 'Quyền hạn phải có định dạng là mảng' })
   permissions: mongoose.Schema.Types.ObjectId[];
 
+  @IsOptional()
   @IsNotEmpty({
     message: 'ID đơn vị không được để trống',
   })
   departmentId: string;
 
-  @IsNotEmpty({
-    message: 'Ngày chuyển đến không được để trống',
-  })
+  @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
-  joiningDate: Date;
+  joiningDate?: Date;
 
-  @IsNotEmpty({
-    message: 'Ngày chuyển đi không được để trống',
-  })
+  @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
-  leavingDate: Date;
+  leavingDate?: Date;
 
-  @IsNotEmpty({
-    message: 'Ngày vào công đoàn không được để trống',
-  })
+  @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
-  unionEntryDate: Date;
+  unionEntryDate?: Date;
 
   @IsOptional()
   note?: string;
