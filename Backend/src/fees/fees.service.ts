@@ -125,6 +125,62 @@ export class FeesService {
     return await this.feeModel.findById(id);
   }
 
+  async findFeesByUnionist(
+    user: IUser,
+    currentPage: number,
+    limit: number,
+    qs: string,
+  ) {
+    const { filter, population, projection } = aqp(qs);
+    delete filter.current;
+    delete filter.pageSize;
+
+    filter.unionistId = user.id;
+
+    // Kiểm tra xem query string có chứa year hay không
+    if (filter.year) {
+      const year = filter.year;
+      delete filter.year; // Xóa year khỏi filter để tránh ảnh hưởng đến query khác
+      filter.monthYear = { $regex: `^${year}/` };
+    }
+
+    const offset = (currentPage - 1) * limit;
+    let defaultLimit = +limit ? +limit : 10;
+
+    const totalItems = (await this.feeModel.find(filter)).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const result = await this.feeModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort('-monthYear')
+      .populate(population)
+      .select(projection as any)
+      .exec();
+
+    const totalFee = await this.feeModel.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $toDouble: '$fee' } }, // Chuyển đổi fee thành số thực trước khi tính tổng
+        },
+      },
+    ]);
+
+    return {
+      meta: {
+        current: currentPage, // trang hiện tại
+        pageSize: limit, // số lượng bản ghi đã lấy
+        pages: totalPages, // tổng số trang
+        total: totalItems, // tổng số bản ghi
+        totalFee: totalFee[0]?.total || 0, // tổng số tiền
+      },
+      result, // kết quả query
+    };
+  }
+
   async update(_id: string, updateFeeDto: UpdateFeeDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');

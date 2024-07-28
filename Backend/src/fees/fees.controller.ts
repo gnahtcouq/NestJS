@@ -37,6 +37,17 @@ export class FeesController {
     return this.feesService.findAll(+currentPage, +limit, qs);
   }
 
+  @Get('by-unionist')
+  @ResponseMessage('Lấy thông tin đóng công đoàn phí theo công đoàn viên')
+  getFeesByUnionist(
+    @User() user: IUser,
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.feesService.findFeesByUnionist(user, +currentPage, +limit, qs);
+  }
+
   @Get(':id')
   @ResponseMessage('Lấy thông tin công đoàn phí')
   findOne(@Param('id') id: string) {
