@@ -12,5 +12,6 @@ import { UnionistsModule } from 'src/unionists/unionists.module';
   ],
   controllers: [FeesController],
   providers: [FeesService],
+  exports: [FeesService],
 })
 export class FeesModule {}

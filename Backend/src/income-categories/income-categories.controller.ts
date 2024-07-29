@@ -42,6 +42,20 @@ export class IncomeCategoriesController {
     return this.incomeCategoriesService.findAll(+currentPage, +limit, qs);
   }
 
+  @Get('by-time')
+  @ResponseMessage('Lấy thông tin danh mục thu theo thời gian')
+  findIncomeCategoriesByTime(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.incomeCategoriesService.findIncomeCategoriesByTime(
+      +currentPage,
+      +limit,
+      qs,
+    );
+  }
+
   @Get(':id')
   @ResponseMessage('Lấy thông tin danh mục thu')
   findOne(@Param('id') id: string) {

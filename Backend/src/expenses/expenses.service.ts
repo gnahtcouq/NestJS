@@ -95,6 +95,82 @@ export class ExpensesService {
     };
   }
 
+  async findExpenseWithTime(currentPage: number, limit: number, qs: string) {
+    const { filter, population } = aqp(qs);
+    delete filter.current;
+    delete filter.pageSize;
+
+    let dateFilter = {};
+    if (filter.year) {
+      // Tìm kiếm theo năm
+      const year = filter.year;
+      const start = new Date(`${year}-01-01T00:00:00.000Z`);
+      const end = new Date(`${year}-12-31T23:59:59.999Z`);
+      dateFilter = { $gte: start, $lte: end };
+      delete filter.year;
+    } else if (filter.monthYear) {
+      // Tìm kiếm theo tháng/năm
+      const [year, month] = filter.monthYear.split('/');
+      const start = new Date(`${year}-${month}-01T00:00:00.000Z`);
+      const end = new Date(new Date(start).setMonth(start.getMonth() + 1) - 1);
+      dateFilter = { $gte: start, $lte: end };
+      delete filter.monthYear;
+    } else if (filter.startMonthYear && filter.endMonthYear) {
+      // Tìm kiếm từ tháng/năm đến tháng/năm
+      const [startYear, startMonth] = filter.startMonthYear.split('/');
+      const [endYear, endMonth] = filter.endMonthYear.split('/');
+      const start = new Date(`${startYear}-${startMonth}-01T00:00:00.000Z`);
+      const end = new Date(
+        new Date(`${endYear}-${endMonth}-01T00:00:00.000Z`).setMonth(
+          parseInt(endMonth),
+        ) - 1,
+      );
+      dateFilter = { $gte: start, $lte: end };
+      delete filter.startMonthYear;
+      delete filter.endMonthYear;
+    }
+
+    if (Object.keys(dateFilter).length) {
+      filter.time = dateFilter;
+    }
+
+    const offset = (currentPage - 1) * limit;
+    let defaultLimit = +limit ? +limit : 10;
+
+    const totalItems = await this.expenseModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const result = await this.expenseModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort('-time')
+      .populate(population)
+      .select('-history')
+      .exec();
+
+    const totalFee = await this.expenseModel.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $toDouble: '$amount' } },
+        },
+      },
+    ]);
+
+    return {
+      meta: {
+        current: currentPage,
+        pageSize: limit,
+        pages: totalPages,
+        total: totalItems,
+        totalAmount: totalFee[0]?.total || 0,
+      },
+      result,
+    };
+  }
+
   async findByMonthAndYear(month: number, year: number) {
     // Xác định ngày bắt đầu và ngày kết thúc của tháng và năm cần tìm kiếm
     const startDate = new Date(year, month - 1, 1); // month - 1 vì tháng trong JavaScript là từ 0 đến 11

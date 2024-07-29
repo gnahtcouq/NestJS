@@ -39,7 +39,7 @@ export class FeesController {
 
   @Get('by-unionist')
   @ResponseMessage('Lấy thông tin đóng công đoàn phí theo công đoàn viên')
-  getFeesByUnionist(
+  findFeesByUnionist(
     @User() user: IUser,
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,

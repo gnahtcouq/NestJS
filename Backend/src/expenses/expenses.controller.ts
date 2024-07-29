@@ -38,6 +38,16 @@ export class ExpensesController {
     return this.expensesService.findAll(+currentPage, +limit, qs);
   }
 
+  @Get('by-time')
+  @ResponseMessage('Lấy thông tin phiếu chi theo thời gian')
+  findExpenseWithTime(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.expensesService.findExpenseWithTime(+currentPage, +limit, qs);
+  }
+
   @Get('by-month-year')
   @ResponseMessage('Lấy danh sách phiếu chi theo tháng và năm')
   async findByMonthAndYear(

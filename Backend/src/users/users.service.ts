@@ -10,7 +10,7 @@ import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User as UserM, UserDocument } from 'src/users/schemas/user.schema';
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
@@ -37,8 +37,8 @@ export class UsersService {
     @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
     @Inject(forwardRef(() => UnionistsService))
     private readonly unionistsService: UnionistsService,
-    private configService: ConfigService,
     private readonly mailerService: MailerService,
+    private configService: ConfigService,
   ) {
     const key = this.configService.get<string>('ENCRYPTION_KEY');
     if (!key || key.length !== 64) {
@@ -393,7 +393,13 @@ export class UsersService {
   }
 
   async remove(id: string, user: IUser) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `ID không hợp lệ`;
+    // const receipts = await this.receiptService.findReceiptsByUserId(id);
+
+    // if (receipts.length > 0) {
+    //   throw new BadRequestException(
+    //     'Không thể xoá thành viên vì vẫn còn phiếu thu liên kết',
+    //   );
+    // }
 
     const foundUser = await this.userModel.findById(id);
     if (

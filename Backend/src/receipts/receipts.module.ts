@@ -10,5 +10,6 @@ import { Receipt, ReceiptSchema } from 'src/receipts/schemas/receipt.schema';
   ],
   controllers: [ReceiptsController],
   providers: [ReceiptsService],
+  exports: [ReceiptsService],
 })
 export class ReceiptsModule {}

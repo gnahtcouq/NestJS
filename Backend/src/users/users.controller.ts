@@ -21,7 +21,6 @@ import { IUser } from 'src/users/users.interface';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Exclude } from 'class-transformer';
 
 @Controller('users') // => /users
 export class UsersController {

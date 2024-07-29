@@ -98,7 +98,6 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('6694cc9d047108a8053a8cce'), // thay đổi mật khẩu
               new ObjectId('648ab750fa16b294212e404c'), // Upload file
               new ObjectId('648ad488dafdb9754f40b846'), // thêm mới bài đăng
-              // new ObjectId('648ad499dafdb9754f40b84b'), // xem thông tin chi tiết bài đăng
               new ObjectId('648ad4a6dafdb9754f40b850'), // cập nhật thông tin bài đăng
               new ObjectId('66a1e2040e45e02baa2a89dd'), // cập nhật trạng thái bài đăng
               new ObjectId('648ad4ccdafdb9754f40b859'), // xem danh sách bài đăng
@@ -120,18 +119,18 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('669718d20418310dcc6f2703'), // tải lên danh sách công đoàn phí
               new ObjectId('6696d059eb2b81a905bd3132'), // tạo mới phiếu thu
               new ObjectId('6696d084eb2b81a905bd313b'), // xem danh sách phiếu thu
+              new ObjectId('66a7651f2beed38d9fd58878'), // lấy thông tin phiếu thu theo thời gian
               new ObjectId('6696d0b1eb2b81a905bd3144'), // xem thông tin chi tiết phiếu thu
               new ObjectId('6696d0f8eb2b81a905bd3155'), // cập nhật thông tin phiếu thu
               new ObjectId('6696d124eb2b81a905bd315e'), // xoá phiếu thu
               new ObjectId('66982ece2bec1e24eb383e7b'), // tải lên danh sách phiếu thu
-              new ObjectId('6698b48a86d0d641c2df2f30'), // lấy danh sách phiếu thu theo tháng và năm
               new ObjectId('6696d059eb2b81a911bd3132'), // tạo mới phiếu chi
               new ObjectId('6696d084eb2b81a912bd313b'), // xem danh sách phiếu chi
+              new ObjectId('66a7653e2beed38d9fd58883'), // lấy thông tin phiếu chi theo thời gian
               new ObjectId('6696d0b1eb2b81a913bd3144'), // xem thông tin chi tiết phiếu chi
               new ObjectId('6696d0f8eb2b81a914bd3155'), // cập nhật thông tin phiếu chi
               new ObjectId('6696d124eb2b81a915bd315e'), // xoá phiếu chi
               new ObjectId('669833998a337a4d50aeb7f9'), // tải lên danh sách phiếu chi
-              new ObjectId('6698b4ad86d0d641c2df2f39'), // lấy danh sách phiếu chi theo tháng và năm
               new ObjectId('6696d7d601d85c000b573a7d'), // tạo mới danh mục thu
               new ObjectId('6696d7ff01d85c000b573a86'), // xem danh sách danh mục thu
               new ObjectId('6696d82301d85c000b573a8f'), // xem thông tin chi tiết danh mục thu
@@ -212,6 +211,7 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
               new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
               new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
+              new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
             ],
           },
         ]);
