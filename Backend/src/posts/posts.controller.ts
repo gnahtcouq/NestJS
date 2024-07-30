@@ -36,6 +36,17 @@ export class PostsController {
     return this.postsService.findAll(+currentPage, +limit, qs);
   }
 
+  @Public()
+  @Get('by-time')
+  @ResponseMessage('Lấy thông tin bài đăng theo thời gian')
+  findPostWithTime(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+  ) {
+    return this.postsService.findPostWithTime(+currentPage, +limit, qs);
+  }
+
   @Get(':id')
   @Public()
   @ResponseMessage('Lấy thông tin bài đăng')

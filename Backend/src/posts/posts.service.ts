@@ -70,6 +70,70 @@ export class PostsService {
     };
   }
 
+  async findPostWithTime(currentPage: number, limit: number, qs: string) {
+    const { filter, population } = aqp(qs);
+    delete filter.current;
+    delete filter.pageSize;
+
+    let dateFilter = {};
+
+    if (filter.createdAt) {
+      try {
+        // Parse the date string and create a start and end date for the filter
+        const date = new Date(filter.createdAt);
+        if (isNaN(date.getTime())) {
+          throw new Error('Invalid date format');
+        }
+        const start = new Date(date.setUTCHours(0, 0, 0, 0));
+        const end = new Date(date.setUTCHours(23, 59, 59, 999));
+        dateFilter = { $gte: start, $lte: end };
+      } catch (error) {
+        throw new Error('Invalid date format');
+      }
+      delete filter.createdAt;
+    }
+
+    if (Object.keys(dateFilter).length) {
+      filter.createdAt = dateFilter;
+    }
+
+    const offset = (currentPage - 1) * limit;
+    let defaultLimit = +limit ? +limit : 10;
+
+    const totalItems = await this.postModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const result = await this.postModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort('-createdAt')
+      .populate(population)
+      .select('-history')
+      .exec();
+
+    const totalAmount = await this.postModel.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $toDouble: '$amount' } },
+        },
+      },
+    ]);
+
+    return {
+      meta: {
+        current: currentPage,
+        pageSize: limit,
+        pages: totalPages,
+        total: totalItems,
+        totalAmount: totalAmount[0]?.total || 0,
+      },
+      result,
+    };
+  }
+
   findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id))
       throw new BadRequestException('ID không hợp lệ!');

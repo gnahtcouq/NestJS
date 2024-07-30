@@ -26,4 +26,9 @@ export class CreateReceiptDto {
     message: 'Mã danh mục thu không được để trống',
   })
   incomeCategoryId: string;
+
+  @IsNotEmpty({
+    message: 'Mã văn bản không được để trống',
+  })
+  documentId: string;
 }

@@ -24,6 +24,9 @@ export class Receipt {
   @Prop()
   incomeCategoryId: string;
 
+  @Prop()
+  documentId: string;
+
   @Prop({ type: mongoose.Schema.Types.Array })
   history: {
     description: string;

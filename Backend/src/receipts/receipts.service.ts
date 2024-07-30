@@ -21,8 +21,15 @@ export class ReceiptsService {
   ) {}
 
   async create(createReceiptDto: CreateReceiptDto, userM: IUser) {
-    const { userId, id, description, time, amount, incomeCategoryId } =
-      createReceiptDto;
+    const {
+      userId,
+      id,
+      description,
+      time,
+      amount,
+      incomeCategoryId,
+      documentId,
+    } = createReceiptDto;
 
     const existingReceipt = await this.receiptModel.findOne({ id });
 
@@ -40,6 +47,7 @@ export class ReceiptsService {
       time,
       amount,
       incomeCategoryId,
+      documentId,
       createdBy: {
         _id: userM._id,
         email: userM.email,

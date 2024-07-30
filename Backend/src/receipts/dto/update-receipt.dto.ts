@@ -77,6 +77,12 @@ export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
   incomeCategoryId: string;
 
   @IsOptional()
+  @IsNotEmpty({
+    message: 'Mã văn bản không được để trống',
+  })
+  documentId: string;
+
+  @IsOptional()
   @IsNotEmpty({ message: 'Lịch sử không được để trống' })
   @IsArray({ message: 'Lịch sử có định dạng là mảng' })
   @ValidateNested()
