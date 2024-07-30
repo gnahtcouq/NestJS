@@ -570,12 +570,7 @@ export class UsersService {
     return newEmail;
   }
 
-  async requestForgotPassword(
-    userId: string,
-    email: string,
-    newPassword: string,
-    user: IUser,
-  ) {
+  async requestForgotPassword(email: string) {
     // Validate email format
     if (email && !this.isValidEmail(email)) {
       throw new BadRequestException('Email không hợp lệ');
@@ -589,10 +584,6 @@ export class UsersService {
       );
     }
 
-    if (!newPassword) {
-      throw new BadRequestException(`Mật khẩu mới không được để trống`);
-    }
-
     // tạo mã xác nhận và thời gian hết hạn
     const uuid = uuidv4().replace(/-/g, '');
     const verificationCodePassword = uuid.slice(0, 5);
@@ -602,7 +593,7 @@ export class UsersService {
 
     if (isExist) {
       result = await this.userModel.updateOne(
-        { _id: userId },
+        { email: email },
         {
           verificationCodePassword,
           verificationExpiresPassword,
@@ -610,18 +601,15 @@ export class UsersService {
       );
     }
 
-    // Encrypt new password
-    const encryptedNewPassword = this.encrypt(newPassword);
-
     // Lấy email hiện tại từ cơ sở dữ liệu
-    const currentUser = await this.userModel.findById(userId).select('email');
+    const currentUser = await this.userModel
+      .findOne({ email: email })
+      .select('email');
 
     // Send confirmation email to current email
     await this.sendForgotPasswordConfirmationEmail(
       currentUser.email,
-      encryptedNewPassword,
       verificationCodePassword,
-      user,
     );
 
     return result;
@@ -629,41 +617,38 @@ export class UsersService {
 
   async sendForgotPasswordConfirmationEmail(
     email: string,
-    encryptedNewPassword: string,
-    verificationCode: string,
-    user: IUser,
+    verificationCodePassword: string,
   ) {
+    const currentUser = await this.userModel.findOne({ email: email });
+
     await this.mailerService.sendMail({
       to: email,
       from: '"Công Đoàn Trường ĐHCNSG" <support@stu.id.vn>',
       subject: 'Xác Nhận Yêu Cầu Đặt Lại Mật Khẩu',
       template: 'forgot-password',
       context: {
-        receiver: user.name,
-        verificationCode,
+        receiver: currentUser.name,
+        verificationCodePassword,
         url: `${this.configService.get<string>(
           'FRONTEND_URL',
-        )}/forgot-password/${user._id}?newPassword=${encryptedNewPassword}`,
+        )}/confirm-forgot-password/${currentUser._id}`,
       },
     });
   }
 
   async confirmForgotPassword(
-    userId: string,
+    id: string,
     verificationCodePassword: string,
-    encryptedNewPassword: string,
+    newPassword: string,
   ) {
     // Kiểm tra định dạng mật khẩu mới
-    if (!encryptedNewPassword) {
+    if (!newPassword) {
       throw new BadRequestException('Mật khẩu mới không hợp lệ');
     }
 
-    // Decrypt password mới
-    const newPassword = this.decrypt(encryptedNewPassword);
-
     // Tìm kiếm user theo userId và verificationCodePassword
     const findUser = await this.userModel.findOne({
-      _id: userId,
+      _id: id,
       verificationCodePassword,
       verificationExpiresPassword: { $gt: new Date() }, // verificationCode phải hợp lệ
     });
@@ -673,15 +658,18 @@ export class UsersService {
     }
 
     // Cập nhật password và xóa verificationCodePassword, verificationExpiresPassword
-    await this.userModel.findByIdAndUpdate(userId, {
-      password: this.getHashPassword(newPassword),
-      $unset: {
-        verificationCodePassword: 1,
-        verificationExpiresPassword: 1,
+    const result = await this.userModel.findOneAndUpdate(
+      { _id: id },
+      {
+        password: this.getHashPassword(newPassword),
+        $unset: {
+          verificationCodePassword: 1,
+          verificationExpiresPassword: 1,
+        },
       },
-    });
+    );
 
-    return 'Xác nhận đặt lại mật khẩu thành công';
+    return result;
   }
 
   private isValidEmail(email: string): boolean {

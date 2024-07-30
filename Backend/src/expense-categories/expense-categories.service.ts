@@ -101,6 +101,46 @@ export class ExpenseCategoriesService {
     };
   }
 
+  async findExpenseCategoriesByTime(qs: string) {
+    const { filter, population } = aqp(qs);
+    delete filter.current;
+    delete filter.pageSize;
+
+    // Kiểm tra xem query string có chứa year hay không
+    if (filter.year) {
+      const year = filter.year;
+      delete filter.year; // Xóa year khỏi filter để tránh ảnh hưởng đến query khác
+      filter.year = year.toString();
+    }
+
+    const totalItems = (await this.expenseCategoryModel.find(filter)).length;
+
+    const result = await this.expenseCategoryModel
+      .find(filter)
+      .sort('-year')
+      .populate(population)
+      .select('budget')
+      .exec();
+
+    const totalBudget = await this.expenseCategoryModel.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $toDouble: '$budget' } },
+        },
+      },
+    ]);
+
+    return {
+      meta: {
+        total: totalItems, // tổng số bản ghi
+        totalBudget: totalBudget[0]?.total || 0, // tổng số tiền
+      },
+      result, // kết quả query
+    };
+  }
+
   async findOne(id: string) {
     // if (!mongoose.Types.ObjectId.isValid(id))
     //   throw new BadRequestException('ID không hợp lệ');

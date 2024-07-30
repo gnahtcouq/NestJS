@@ -48,15 +48,6 @@ export class ExpensesController {
     return this.expensesService.findExpenseWithTime(+currentPage, +limit, qs);
   }
 
-  @Get('by-month-year')
-  @ResponseMessage('Lấy danh sách phiếu chi theo tháng và năm')
-  async findByMonthAndYear(
-    @Query('month') month: number,
-    @Query('year') year: number,
-  ) {
-    return this.expensesService.findByMonthAndYear(month, year);
-  }
-
   @Get(':id')
   @ResponseMessage('Lấy thông tin phiếu chi')
   findOne(@Param('id') id: string) {

@@ -42,6 +42,12 @@ export class ExpenseCategoriesController {
     return this.expenseCategoriesService.findAll(+currentPage, +limit, qs);
   }
 
+  @Get('by-time')
+  @ResponseMessage('Lấy thông tin danh mục chi theo thời gian')
+  findExpenseCategoriesByTime(@Query() qs: string) {
+    return this.expenseCategoriesService.findExpenseCategoriesByTime(qs);
+  }
+
   @Get(':id')
   @ResponseMessage('Lấy thông tin danh mục chi')
   findOne(@Param('id') id: string) {

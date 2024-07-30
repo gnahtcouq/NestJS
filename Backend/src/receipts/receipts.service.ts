@@ -149,7 +149,7 @@ export class ReceiptsService {
       .select('-history')
       .exec();
 
-    const totalFee = await this.receiptModel.aggregate([
+    const totalAmount = await this.receiptModel.aggregate([
       { $match: filter },
       {
         $group: {
@@ -165,33 +165,10 @@ export class ReceiptsService {
         pageSize: limit,
         pages: totalPages,
         total: totalItems,
-        totalAmount: totalFee[0]?.total || 0,
+        totalAmount: totalAmount[0]?.total || 0,
       },
       result,
     };
-  }
-
-  async findByMonthAndYear(month: number, year: number) {
-    // Xác định ngày bắt đầu và ngày kết thúc của tháng và năm cần tìm kiếm
-    const startDate = new Date(year, month - 1, 1); // month - 1 vì tháng trong JavaScript là từ 0 đến 11
-    const endDate = new Date(
-      year,
-      month - 1,
-      new Date(year, month, 0).getDate(),
-      23,
-      59,
-      59,
-      999,
-    );
-
-    const filter = {
-      time: {
-        $gte: startDate.toISOString(),
-        $lte: endDate.toISOString(),
-      },
-    };
-
-    return await this.receiptModel.find(filter);
   }
 
   async findOne(id: string) {

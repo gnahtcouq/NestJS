@@ -128,23 +128,15 @@ export class UsersController {
     return { email: result };
   }
 
-  @Post('request-forgot-password/:id')
+  @Public()
+  @Post('request-forgot-password')
   @ResponseMessage('Gửi yêu cầu đặt lại mật khẩu')
-  async requestForgotPassword(
-    @Param('id') id: string,
-    @Body('email') email: string,
-    @Body('newPassword') newPassword: string,
-    @User() user: IUser,
-  ) {
-    const result = await this.usersService.requestForgotPassword(
-      id,
-      email,
-      newPassword,
-      user,
-    );
+  async requestForgotPassword(@Body('email') email: string) {
+    const result = await this.usersService.requestForgotPassword(email);
     return { success: result };
   }
 
+  @Public()
   @Post('confirm-forgot-password/:id')
   @ResponseMessage('Xác nhận đặt lại mật khẩu')
   async confirmForgotPassword(

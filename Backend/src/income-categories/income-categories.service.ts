@@ -182,12 +182,8 @@ export class IncomeCategoriesService {
     return updated;
   }
 
-  async findIncomeCategoriesByTime(
-    currentPage: number,
-    limit: number,
-    qs: string,
-  ) {
-    const { filter, population, projection } = aqp(qs);
+  async findIncomeCategoriesByTime(qs: string) {
+    const { filter, population } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
@@ -195,22 +191,16 @@ export class IncomeCategoriesService {
     if (filter.year) {
       const year = filter.year;
       delete filter.year; // Xóa year khỏi filter để tránh ảnh hưởng đến query khác
-      filter.year = year;
+      filter.year = year.toString();
     }
 
-    const offset = (currentPage - 1) * limit;
-    let defaultLimit = +limit ? +limit : 10;
-
     const totalItems = (await this.incomeCategoryModel.find(filter)).length;
-    const totalPages = Math.ceil(totalItems / defaultLimit);
 
     const result = await this.incomeCategoryModel
       .find(filter)
-      .skip(offset)
-      .limit(defaultLimit)
       .sort('-year')
       .populate(population)
-      .select(projection as any)
+      .select('budget')
       .exec();
 
     const totalBudget = await this.incomeCategoryModel.aggregate([
@@ -218,16 +208,13 @@ export class IncomeCategoriesService {
       {
         $group: {
           _id: null,
-          total: { $sum: { $toDouble: '$budget' } }, // Chuyển đổi budget thành số thực trước khi tính tổng
+          total: { $sum: { $toDouble: '$budget' } },
         },
       },
     ]);
 
     return {
       meta: {
-        current: currentPage, // trang hiện tại
-        pageSize: limit, // số lượng bản ghi đã lấy
-        pages: totalPages, // tổng số trang
         total: totalItems, // tổng số bản ghi
         totalBudget: totalBudget[0]?.total || 0, // tổng số tiền
       },

@@ -48,15 +48,6 @@ export class ReceiptsController {
     return this.receiptsService.findReceiptWithTime(+currentPage, +limit, qs);
   }
 
-  @Get('by-month-year')
-  @ResponseMessage('Lấy danh sách phiếu thu theo tháng và năm')
-  async findByMonthAndYear(
-    @Query('month') month: number,
-    @Query('year') year: number,
-  ) {
-    return this.receiptsService.findByMonthAndYear(month, year);
-  }
-
   @Get(':id')
   @ResponseMessage('Lấy thông tin phiếu thu')
   findOne(@Param('id') id: string) {
