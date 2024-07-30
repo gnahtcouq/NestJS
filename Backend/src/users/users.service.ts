@@ -646,6 +646,19 @@ export class UsersService {
       throw new BadRequestException('Mật khẩu mới không hợp lệ');
     }
 
+    if (
+      !(
+        /[a-z]/.test(newPassword) &&
+        /[A-Z]/.test(newPassword) &&
+        /\d/.test(newPassword) &&
+        newPassword.length >= 8
+      )
+    ) {
+      throw new BadRequestException(
+        'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
+      );
+    }
+
     // Tìm kiếm user theo userId và verificationCodePassword
     const findUser = await this.userModel.findOne({
       _id: id,
