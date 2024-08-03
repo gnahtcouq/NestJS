@@ -157,6 +157,15 @@ export class UnionistsService {
     delete filter.current;
     delete filter.pageSize;
 
+    if (filter.leaving) {
+      if (filter.leaving == 1) {
+        filter.leavingDate = '1970-01-01';
+      } else if (filter.leaving == 2) {
+        filter.leavingDate = { $ne: '1970-01-01' };
+      }
+      delete filter.leaving;
+    }
+
     let offset = (+currentPage - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
 
