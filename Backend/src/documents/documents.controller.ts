@@ -10,7 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
-import { CreateDocumentDto, CreateUserDocDto } from './dto/create-document.dto';
+import { CreateUserDocDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
@@ -46,32 +46,6 @@ export class DocumentsController {
   findOne(@Param('id') id: string) {
     return this.documentsService.findOne(id);
   }
-
-  // @Public()
-  // @Post('test')
-  // async testFindByUrl(): Promise<any> {
-  //   try {
-  //     const documentUrl =
-  //       '2024_05_07_THONG BAO NOP BO SUNG CCCD-1717951343307.pdf';
-  //     const document = await this.documentsService.findByUrl(documentUrl);
-
-  //     if (document) {
-  //       return {
-  //         message: 'Document found.',
-  //         document,
-  //       };
-  //     } else {
-  //       return {
-  //         message: 'Document not found.',
-  //       };
-  //     }
-  //   } catch (error) {
-  //     return {
-  //       message: 'Error occurred:',
-  //       error: error.message,
-  //     };
-  //   }
-  // }
 
   @Patch(':id')
   @ResponseMessage('Cập nhật trạng thái văn bản')

@@ -9,6 +9,8 @@ import { TransformInterceptor } from 'src/core/transform.interceptor';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
+import { DocumentMiddleware } from 'src/middlewares/document-access.middleware';
+import { DocumentsService } from 'src/documents/documents.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -22,7 +24,12 @@ async function bootstrap() {
   app.useGlobalGuards(new JwtAuthGuard(reflector));
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
 
-  app.useStaticAssets(join(__dirname, '..', 'public')); //js, css, images
+  const documentService = app.get(DocumentsService);
+  app.use('/files', new DocumentMiddleware(documentService).use());
+  app.useStaticAssets(join(__dirname, '..', 'public/files'), {
+    prefix: '/files',
+  });
+
   app.setBaseViewsDir(join(__dirname, '..', 'views')); //view
   app.setViewEngine('ejs');
 

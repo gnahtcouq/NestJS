@@ -83,6 +83,10 @@ export class DocumentsService {
     };
   }
 
+  async findByUrl(url: string) {
+    return this.documentModel.findOne({ url }).exec();
+  }
+
   async findOne(id: string) {
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new BadRequestException('ID không hợp lệ!');

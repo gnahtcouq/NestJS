@@ -15,5 +15,6 @@ import {
       { name: Document.name, schema: DocumentSchema },
     ]),
   ],
+  exports: [DocumentsService],
 })
 export class DocumentsModule {}
