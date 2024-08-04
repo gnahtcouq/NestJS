@@ -57,6 +57,15 @@ export class DocumentsService {
     delete filter.current;
     delete filter.pageSize;
 
+    if (filter.isActive) {
+      if (filter.isActive == 1) {
+        filter.status = 'ACTIVE';
+      } else if (filter.isActive == 2) {
+        filter.status = 'INACTIVE';
+      }
+      delete filter.isActive;
+    }
+
     let offset = (+currentPage - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
 
@@ -94,13 +103,10 @@ export class DocumentsService {
 
     const document = await this.documentModel.findOne({
       _id: id,
-      status: 'ACTIVE', // Chỉ lấy tài liệu có trạng thái ACTIVE
     });
 
     if (!document) {
-      throw new NotFoundException(
-        'Văn bản không tồn tại hoặc đã bị hạn chế quyền truy cập!',
-      );
+      throw new NotFoundException('Văn bản không tồn tại!');
     }
 
     return document;

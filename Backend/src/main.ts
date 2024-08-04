@@ -25,7 +25,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
 
   const documentService = app.get(DocumentsService);
-  app.use('/files', new DocumentMiddleware(documentService).use());
+  app.use('/files/document', new DocumentMiddleware(documentService).use());
   app.useStaticAssets(join(__dirname, '..', 'public/files'), {
     prefix: '/files',
   });
