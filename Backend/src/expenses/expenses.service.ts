@@ -21,8 +21,15 @@ export class ExpensesService {
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto, userM: IUser) {
-    const { id, description, time, amount, userId, expenseCategoryId } =
-      createExpenseDto;
+    const {
+      id,
+      description,
+      time,
+      amount,
+      userId,
+      expenseCategoryId,
+      documentId,
+    } = createExpenseDto;
 
     const existingExpense = await this.expenseModel.findOne({ id });
 
@@ -40,6 +47,7 @@ export class ExpensesService {
       amount,
       userId,
       expenseCategoryId,
+      documentId,
       createdBy: {
         _id: userM._id,
         email: userM.email,

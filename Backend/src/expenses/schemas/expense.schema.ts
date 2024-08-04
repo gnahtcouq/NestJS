@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
@@ -23,6 +22,9 @@ export class Expense {
 
   @Prop()
   expenseCategoryId: string;
+
+  @Prop()
+  documentId: string;
 
   @Prop({ type: mongoose.Schema.Types.Array })
   history: {

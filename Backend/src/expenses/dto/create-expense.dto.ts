@@ -26,4 +26,9 @@ export class CreateExpenseDto {
     message: 'Mã danh mục chi không được để trống',
   })
   expenseCategoryId: string;
+
+  @IsNotEmpty({
+    message: 'Mã văn bản không được để trống',
+  })
+  documentId: string;
 }
