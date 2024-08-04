@@ -137,6 +137,7 @@ export class UnionistsService {
         new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
         new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
         new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
+        new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
       ],
       CCCD,
       departmentId,
@@ -498,13 +499,13 @@ export class UnionistsService {
     }
 
     // Tìm kiếm unionist theo unionistId và verificationCode
-    const findUser = await this.unionistModel.findOne({
+    const findUnionist = await this.unionistModel.findOne({
       _id: unionistId,
       verificationCode,
       verificationExpires: { $gt: new Date() }, // verificationCode phải hợp lệ
     });
 
-    if (!findUser) {
+    if (!findUnionist) {
       throw new BadRequestException('Mã xác minh không hợp lệ hoặc đã hết hạn');
     }
 
@@ -518,6 +519,121 @@ export class UnionistsService {
     });
 
     return newEmail;
+  }
+
+  async requestForgotPassword(email: string) {
+    // Validate email format
+    if (email && !this.isValidEmail(email)) {
+      throw new BadRequestException('Email không hợp lệ');
+    }
+
+    const isExist = await this.unionistModel.findOne({ email: email });
+
+    if (!isExist) {
+      throw new BadRequestException(
+        `Email không tồn tại trên hệ thống. Vui lòng thử lại với email khác`,
+      );
+    }
+
+    // tạo mã xác nhận và thời gian hết hạn
+    const uuid = uuidv4().replace(/-/g, '');
+    const verificationCodePassword = uuid.slice(0, 5);
+    const verificationExpiresPassword = new Date(Date.now() + 20 * 60 * 1000); // 20 phút
+
+    let result = null;
+
+    if (isExist) {
+      result = await this.unionistModel.updateOne(
+        { email: email },
+        {
+          verificationCodePassword,
+          verificationExpiresPassword,
+        },
+      );
+    }
+
+    // Lấy email hiện tại từ cơ sở dữ liệu
+    const currentUnionist = await this.unionistModel
+      .findOne({ email: email })
+      .select('email');
+
+    // Send confirmation email to current email
+    await this.sendForgotPasswordConfirmationEmail(
+      currentUnionist.email,
+      verificationCodePassword,
+    );
+
+    return result;
+  }
+
+  async sendForgotPasswordConfirmationEmail(
+    email: string,
+    verificationCodePassword: string,
+  ) {
+    const currentUnionist = await this.unionistModel.findOne({ email: email });
+
+    await this.mailerService.sendMail({
+      to: email,
+      from: '"Công Đoàn Trường ĐHCNSG" <support@stu.id.vn>',
+      subject: 'Xác Nhận Yêu Cầu Đặt Lại Mật Khẩu',
+      template: 'forgot-password',
+      context: {
+        receiver: currentUnionist.name,
+        verificationCodePassword,
+        url: `${this.configService.get<string>(
+          'FRONTEND_URL',
+        )}/confirm-forgot-password/${currentUnionist._id}`,
+      },
+    });
+  }
+
+  async confirmForgotPassword(
+    id: string,
+    verificationCodePassword: string,
+    newPassword: string,
+  ) {
+    // Kiểm tra định dạng mật khẩu mới
+    if (!newPassword) {
+      throw new BadRequestException('Mật khẩu mới không hợp lệ');
+    }
+
+    if (
+      !(
+        /[a-z]/.test(newPassword) &&
+        /[A-Z]/.test(newPassword) &&
+        /\d/.test(newPassword) &&
+        newPassword.length >= 8
+      )
+    ) {
+      throw new BadRequestException(
+        'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
+      );
+    }
+
+    // Tìm kiếm unionist theo unionistId và verificationCodePassword
+    const findUnionist = await this.unionistModel.findOne({
+      _id: id,
+      verificationCodePassword,
+      verificationExpiresPassword: { $gt: new Date() }, // verificationCode phải hợp lệ
+    });
+
+    if (!findUnionist) {
+      throw new BadRequestException('Mã xác minh không hợp lệ hoặc đã hết hạn');
+    }
+
+    // Cập nhật password và xóa verificationCodePassword, verificationExpiresPassword
+    const result = await this.unionistModel.findOneAndUpdate(
+      { _id: id },
+      {
+        password: this.getHashPassword(newPassword),
+        $unset: {
+          verificationCodePassword: 1,
+          verificationExpiresPassword: 1,
+        },
+      },
+    );
+
+    return result;
   }
 
   private isValidEmail(email: string): boolean {

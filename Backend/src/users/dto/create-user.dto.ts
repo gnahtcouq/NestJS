@@ -40,14 +40,10 @@ export class CreateUserDto {
   })
   gender: string;
 
-  @IsNotEmpty({
-    message: 'Địa chỉ không được để trống',
-  })
+  @IsOptional()
   address: string;
 
-  @IsOptional({
-    message: 'CCCD không được để trống',
-  })
+  @IsOptional()
   CCCD: string;
 
   @IsOptional()
@@ -60,7 +56,7 @@ export class CreateUserDto {
   permissions: mongoose.Schema.Types.ObjectId[];
 
   @IsOptional()
-  note?: string;
+  note: string;
 }
 
 export class RegisterUserDto {
@@ -95,9 +91,6 @@ export class RegisterUserDto {
   })
   gender: string;
 
-  @IsNotEmpty({
-    message: 'Địa chỉ không được để trống',
-  })
   address: string;
 
   note: string;

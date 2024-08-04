@@ -17,12 +17,6 @@ export class UpdateUnionistDto extends OmitType(CreateUnionistDto, [
   _id: string;
 
   @IsOptional()
-  @IsNotEmpty({
-    message: 'CCCD không được để trống',
-  })
-  CCCD: string;
-
-  @IsOptional()
   @IsNotEmpty({ message: 'Quyền hạn không được để trống' })
   @IsMongoId({
     each: true,
@@ -62,5 +56,5 @@ export class UpdateUnionistDto extends OmitType(CreateUnionistDto, [
   unionEntryDate: Date;
 
   @IsOptional()
-  note?: string;
+  note: string;
 }

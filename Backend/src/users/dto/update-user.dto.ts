@@ -11,12 +11,6 @@ export class UpdateUserDto extends OmitType(CreateUserDto, [
   _id: string;
 
   @IsOptional()
-  @IsNotEmpty({
-    message: 'CCCD không được để trống',
-  })
-  CCCD: string;
-
-  @IsOptional()
   @IsNotEmpty({ message: 'Quyền hạn không được để trống' })
   @IsMongoId({
     each: true,

@@ -44,14 +44,10 @@ export class CreateUnionistDto {
   })
   gender: string;
 
-  @IsNotEmpty({
-    message: 'Địa chỉ không được để trống',
-  })
+  @IsOptional()
   address: string;
 
-  @IsOptional({
-    message: 'CCCD không được để trống',
-  })
+  @IsOptional()
   CCCD: string;
 
   @IsOptional()
@@ -72,18 +68,18 @@ export class CreateUnionistDto {
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate({ message: 'Ngày chuyển đến không đúng định dạng' })
-  joiningDate?: Date;
+  joiningDate: Date;
 
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate({ message: 'Ngày chuyển đi không đúng định dạng' })
-  leavingDate?: Date;
+  leavingDate: Date;
 
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate({ message: 'Ngày vào công đoàn không đúng định dạng' })
-  unionEntryDate?: Date;
+  unionEntryDate: Date;
 
   @IsOptional()
-  note?: string;
+  note: string;
 }

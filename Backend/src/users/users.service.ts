@@ -140,7 +140,7 @@ export class UsersService {
   }
 
   async register(user: RegisterUserDto) {
-    let { name, email, password, dateOfBirth, gender, address } = user;
+    let { name, email, password, dateOfBirth, gender } = user;
 
     // Convert email to lowercase
     email = email.toLowerCase();
@@ -188,10 +188,6 @@ export class UsersService {
       throw new BadRequestException('Giới tính không hợp lệ');
     }
 
-    if (address && address.length > 50) {
-      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
-    }
-
     const hashPassword = this.getHashPassword(password);
     let newRegister = await this.userModel.create({
       name,
@@ -199,7 +195,6 @@ export class UsersService {
       password: hashPassword,
       dateOfBirth,
       gender,
-      address,
       note: null,
       permissions: [
         new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên

@@ -144,6 +144,29 @@ export class UnionistsController {
     return { email: result };
   }
 
+  @Public()
+  @Post('request-forgot-password')
+  @ResponseMessage('Gửi yêu cầu đặt lại mật khẩu')
+  async requestForgotPassword(@Body('email') email: string) {
+    const result = await this.unionistsService.requestForgotPassword(email);
+    return { success: result };
+  }
+
+  @Public()
+  @Post('confirm-forgot-password/:id')
+  @ResponseMessage('Xác nhận đặt lại mật khẩu')
+  async confirmForgotPassword(
+    @Param('id') id: string,
+    @Body('verificationCodePassword') verificationCodePassword: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return await this.unionistsService.confirmForgotPassword(
+      id,
+      verificationCodePassword,
+      newPassword,
+    );
+  }
+
   @Post('change-password/:id')
   @ResponseMessage('Thay đổi mật khẩu')
   async requestPasswordChange(
