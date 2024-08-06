@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateReceiptDto {
   @IsNotEmpty({ message: 'Mã phiếu thu không được để trống' })
@@ -27,8 +27,6 @@ export class CreateReceiptDto {
   })
   incomeCategoryId: string;
 
-  @IsNotEmpty({
-    message: 'Mã văn bản không được để trống',
-  })
+  @IsOptional()
   documentId: string;
 }

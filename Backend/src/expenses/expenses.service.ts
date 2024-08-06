@@ -10,14 +10,27 @@ import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
-import { isValidateDate } from 'src/util/utils';
+import { formatCurrency, isValidateDate } from 'src/util/utils';
 import dayjs from 'dayjs';
+import { Response } from 'express';
+import * as Handlebars from 'handlebars';
+import * as puppeteer from 'puppeteer';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
+import { Readable } from 'stream';
+import { ExpenseCategoriesService } from 'src/expense-categories/expense-categories.service';
+import { UsersService } from 'src/users/users.service';
+
+const handlebars = allowInsecurePrototypeAccess(Handlebars);
 
 @Injectable()
 export class ExpensesService {
   constructor(
     @InjectModel(Expense.name)
     private expenseModel: SoftDeleteModel<ExpenseDocument>,
+    private usersService: UsersService,
+    private expenseCategoriesService: ExpenseCategoriesService,
   ) {}
 
   async create(createExpenseDto: CreateExpenseDto, userM: IUser) {
@@ -435,5 +448,67 @@ export class ExpensesService {
       totalRowsRead,
       validRowsCount,
     };
+  }
+
+  async exportExpenseToPDF(id: string, res: Response) {
+    const expense = await this.expenseModel.findOne({
+      id: id,
+    });
+
+    if (!expense) {
+      throw new BadRequestException('Không tìm thấy phiếu chi');
+    }
+
+    const expenseCategory = await this.expenseCategoriesService.findOne(
+      expense.expenseCategoryId,
+    );
+    const user = await this.usersService.findUserNameWithUserId(expense.userId);
+
+    const expenseCategoryName = expenseCategory?.description || '';
+    const userName = user?.name || '';
+
+    expense.amount = formatCurrency(expense.amount);
+    const formattedTime = dayjs(new Date(expense.time)).format('DD/MM/YYYY');
+
+    const expenseWithFormattedTime = {
+      ...expense.toObject(),
+      formattedTime: formattedTime,
+      expenseCategoryName: expenseCategoryName,
+      userName: userName,
+    };
+
+    const templatePath = join(
+      process.cwd(),
+      'src',
+      'expenses',
+      'templates',
+      'expense.hbs',
+    );
+
+    const templateHtml = readFileSync(templatePath, 'utf8');
+    const template = handlebars.compile(templateHtml);
+    const html = template(expenseWithFormattedTime);
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setContent(html);
+
+    // Generate the PDF
+    const pdfBuffer = await page.pdf({ format: 'A5', landscape: true });
+
+    await browser.close();
+
+    // Create a readable stream from the buffer
+    const pdfStream = new Readable();
+    pdfStream.push(pdfBuffer);
+    pdfStream.push(null);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="expense-${id}.pdf"`,
+    });
+
+    pdfStream.pipe(res);
   }
 }

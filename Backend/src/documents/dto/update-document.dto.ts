@@ -21,6 +21,9 @@ class UpdatedBy {
 
 class History {
   @IsNotEmpty()
+  id: string;
+
+  @IsNotEmpty()
   name: string;
 
   @IsNotEmpty()
@@ -41,7 +44,10 @@ export class UpdateDocumentDto extends PartialType(CreateDocumentDto) {
   _id: string;
 
   @IsOptional()
-  @IsNotEmpty({ message: 'Tên văn bản không được để trống' })
+  id: string;
+
+  @IsOptional()
+  @IsNotEmpty({ message: 'Tên CV/VB không được để trống' })
   name: string;
 
   @IsOptional()

@@ -15,5 +15,6 @@ import {
   ],
   controllers: [IncomeCategoriesController],
   providers: [IncomeCategoriesService],
+  exports: [IncomeCategoriesService],
 })
 export class IncomeCategoriesModule {}

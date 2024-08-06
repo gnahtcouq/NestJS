@@ -10,6 +10,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Res,
 } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
@@ -17,6 +18,7 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @Controller('expenses')
 export class ExpensesController {
@@ -75,5 +77,11 @@ export class ExpensesController {
   @ResponseMessage('Tải lên danh sách phiếu chi')
   async upload(@UploadedFile() file: Express.Multer.File, @User() user: IUser) {
     return this.expensesService.uploadFile(file, user);
+  }
+
+  @Get('pdf/:id')
+  @ResponseMessage('Xuất file pdf phiếu chi')
+  async exportExpenseToPDF(@Param('id') id: string, @Res() res: Response) {
+    return this.expensesService.exportExpenseToPDF(id, res);
   }
 }

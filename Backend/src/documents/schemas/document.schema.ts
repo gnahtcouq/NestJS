@@ -6,6 +6,9 @@ export type DocumentDocument = HydratedDocument<Document>;
 @Schema({ timestamps: true })
 export class Document {
   @Prop()
+  id: string;
+
+  @Prop()
   name: string;
 
   @Prop()

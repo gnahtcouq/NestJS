@@ -24,10 +24,11 @@ export class DocumentsService {
   ) {}
 
   async create(createUserDocDto: CreateUserDocDto, user: IUser) {
-    const { name, url } = createUserDocDto;
+    const { id, name, url } = createUserDocDto;
     const { email, _id } = user;
 
     const newDocument = await this.documentModel.create({
+      id,
       name,
       url,
       email,
@@ -106,7 +107,7 @@ export class DocumentsService {
     });
 
     if (!document) {
-      throw new NotFoundException('Văn bản không tồn tại!');
+      throw new NotFoundException('CV/VB không tồn tại!');
     }
 
     return document;
@@ -127,6 +128,7 @@ export class DocumentsService {
       { _id },
       {
         $set: {
+          id: updateDocumentDto.id,
           name: updateDocumentDto.name,
           status: updateDocumentDto.status,
           updatedBy: {
@@ -136,6 +138,7 @@ export class DocumentsService {
         },
         $push: {
           history: {
+            id: updateDocumentDto.id,
             name: updateDocumentDto.name,
             status: updateDocumentDto.status,
             updatedAt: new Date(),
@@ -150,7 +153,7 @@ export class DocumentsService {
     return updated;
   }
 
-  async update(_id: string, status: string, user: IUser) {
+  async updateStatus(_id: string, status: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(_id)) {
       throw new BadRequestException('ID không hợp lệ!');
     }
@@ -164,6 +167,7 @@ export class DocumentsService {
         },
         $push: {
           history: {
+            id: _id,
             status,
             updatedAt: new Date(),
             updatedBy: {

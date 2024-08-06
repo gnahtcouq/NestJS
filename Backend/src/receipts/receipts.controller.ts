@@ -10,6 +10,9 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Res,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
@@ -17,6 +20,7 @@ import { UpdateReceiptDto } from './dto/update-receipt.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @Controller('receipts')
 export class ReceiptsController {
@@ -75,5 +79,11 @@ export class ReceiptsController {
   @ResponseMessage('Tải lên danh sách phiếu thu')
   async upload(@UploadedFile() file: Express.Multer.File, @User() user: IUser) {
     return this.receiptsService.uploadFile(file, user);
+  }
+
+  @Get('pdf/:id')
+  @ResponseMessage('Xuất file pdf phiếu thu')
+  async exportReceiptToPDF(@Param('id') id: string, @Res() res: Response) {
+    return this.receiptsService.exportReceiptToPDF(id, res);
   }
 }

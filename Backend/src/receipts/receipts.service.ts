@@ -10,14 +10,27 @@ import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
-import { isValidateDate } from 'src/util/utils';
+import { formatCurrency, isValidateDate } from 'src/util/utils';
 import dayjs from 'dayjs';
+import { Response } from 'express';
+import * as Handlebars from 'handlebars';
+import * as puppeteer from 'puppeteer';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
+import { Readable } from 'stream';
+import { IncomeCategoriesService } from 'src/income-categories/income-categories.service';
+import { UsersService } from 'src/users/users.service';
+
+const handlebars = allowInsecurePrototypeAccess(Handlebars);
 
 @Injectable()
 export class ReceiptsService {
   constructor(
     @InjectModel(Receipt.name)
     private receiptModel: SoftDeleteModel<ReceiptDocument>,
+    private usersService: UsersService,
+    private incomeCategoriesService: IncomeCategoriesService,
   ) {}
 
   async create(createReceiptDto: CreateReceiptDto, userM: IUser) {
@@ -439,5 +452,67 @@ export class ReceiptsService {
       totalRowsRead,
       validRowsCount,
     };
+  }
+
+  async exportReceiptToPDF(id: string, res: Response) {
+    const receipt = await this.receiptModel.findOne({
+      id: id,
+    });
+
+    if (!receipt) {
+      throw new BadRequestException('Không tìm thấy phiếu thu');
+    }
+
+    const incomeCategory = await this.incomeCategoriesService.findOne(
+      receipt.incomeCategoryId,
+    );
+    const user = await this.usersService.findUserNameWithUserId(receipt.userId);
+
+    const incomeCategoryName = incomeCategory?.description || '';
+    const userName = user?.name || '';
+
+    receipt.amount = formatCurrency(receipt.amount);
+    const formattedTime = dayjs(new Date(receipt.time)).format('DD/MM/YYYY');
+
+    const receiptWithFormattedTime = {
+      ...receipt.toObject(),
+      formattedTime: formattedTime,
+      incomeCategoryName: incomeCategoryName,
+      userName: userName,
+    };
+
+    const templatePath = join(
+      process.cwd(),
+      'src',
+      'receipts',
+      'templates',
+      'receipt.hbs',
+    );
+
+    const templateHtml = readFileSync(templatePath, 'utf8');
+    const template = handlebars.compile(templateHtml);
+    const html = template(receiptWithFormattedTime);
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setContent(html);
+
+    // Generate the PDF
+    const pdfBuffer = await page.pdf({ format: 'A5', landscape: true });
+
+    await browser.close();
+
+    // Create a readable stream from the buffer
+    const pdfStream = new Readable();
+    pdfStream.push(pdfBuffer);
+    pdfStream.push(null);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="receipt-${id}.pdf"`,
+    });
+
+    pdfStream.pipe(res);
   }
 }

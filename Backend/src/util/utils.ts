@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-import { BadRequestException } from '@nestjs/common';
 import dayjs from 'dayjs';
 export const nonAccentVietnamese = (str: string) => {
   str = str.replace(/A|Á|À|Ã|Ạ|Â|Ấ|Ầ|Ẫ|Ậ|Ă|Ắ|Ằ|Ẵ|Ặ/g, 'A');
@@ -61,4 +59,13 @@ export const isValidateDate = (date: Date): boolean => {
     parsedDate.year() >= minYear &&
     !parsedDate.isAfter(today)
   );
+};
+
+export const formatCurrency = (value) => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  })
+    .format(value)
+    .replace(/\./g, ',');
 };

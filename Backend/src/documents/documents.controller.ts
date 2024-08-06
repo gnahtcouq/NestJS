@@ -20,19 +20,19 @@ export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post()
-  @ResponseMessage('Tạo mới văn bản')
+  @ResponseMessage('Tạo mới CV/VB')
   create(@Body() createUserDocDto: CreateUserDocDto, @User() user: IUser) {
     return this.documentsService.create(createUserDocDto, user);
   }
 
   @Post('by-user')
-  @ResponseMessage('Lấy danh sách văn bản theo người dùng')
+  @ResponseMessage('Lấy danh sách CV/VB theo người dùng')
   getDocumentsByUser(@User() user: IUser) {
     return this.documentsService.findByUsers(user);
   }
 
   @Get()
-  @ResponseMessage('Lấy danh sách văn bản')
+  @ResponseMessage('Lấy danh sách CV/VB')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -42,23 +42,23 @@ export class DocumentsController {
   }
 
   @Get(':id')
-  @ResponseMessage('Lấy thông tin văn bản')
+  @ResponseMessage('Lấy thông tin CV/VB')
   findOne(@Param('id') id: string) {
     return this.documentsService.findOne(id);
   }
 
   @Patch(':id')
-  @ResponseMessage('Cập nhật trạng thái văn bản')
+  @ResponseMessage('Cập nhật trạng thái CV/VB')
   updateStatus(
     @Param('id') id: string,
     @Body('status') status: string,
     @User() user: IUser,
   ) {
-    return this.documentsService.update(id, status, user);
+    return this.documentsService.updateStatus(id, status, user);
   }
 
   @Put(':id')
-  @ResponseMessage('Cập nhật tên văn bản')
+  @ResponseMessage('Cập nhật tên CV/VB')
   async updateName(
     @Param('id') id: string,
     @Body() updateDocumentDto: UpdateDocumentDto,
@@ -68,13 +68,13 @@ export class DocumentsController {
   }
 
   @Delete(':id')
-  @ResponseMessage('Xóa văn bản')
+  @ResponseMessage('Xóa CV/VB')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.documentsService.remove(id, user);
   }
 
   @Post('count')
-  @ResponseMessage('Lấy số lượng văn bản')
+  @ResponseMessage('Lấy số lượng CV/VB')
   countDocuments() {
     return this.documentsService.countDocuments();
   }
