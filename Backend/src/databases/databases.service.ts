@@ -124,6 +124,7 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('6696d0f8eb2b81a905bd3155'), // cập nhật thông tin phiếu thu
               new ObjectId('6696d124eb2b81a905bd315e'), // xoá phiếu thu
               new ObjectId('66982ece2bec1e24eb383e7b'), // tải lên danh sách phiếu thu
+              new ObjectId('66b06327f7e7667af5893c7c'), // xuất phiếu thu ra file pdf
               new ObjectId('6696d059eb2b81a911bd3132'), // tạo mới phiếu chi
               new ObjectId('6696d084eb2b81a912bd313b'), // xem danh sách phiếu chi
               new ObjectId('66a7653e2beed38d9fd58883'), // lấy thông tin phiếu chi theo thời gian
@@ -131,6 +132,7 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('6696d0f8eb2b81a914bd3155'), // cập nhật thông tin phiếu chi
               new ObjectId('6696d124eb2b81a915bd315e'), // xoá phiếu chi
               new ObjectId('669833998a337a4d50aeb7f9'), // tải lên danh sách phiếu chi
+              new ObjectId('66b06341f7e7667af5893c87'), // xuất phiếu chi ra file pdf
               new ObjectId('6696d7d601d85c000b573a7d'), // tạo mới danh mục thu
               new ObjectId('6696d7ff01d85c000b573a86'), // xem danh sách danh mục thu
               new ObjectId('6696d82301d85c000b573a8f'), // xem thông tin chi tiết danh mục thu
