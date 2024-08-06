@@ -76,11 +76,11 @@ export class UpdateExpenseDto extends OmitType(CreateExpenseDto, []) {
   })
   expenseCategoryId: string;
 
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Mã văn bản không được để trống',
-  })
-  documentId: string;
+  // @IsOptional()
+  // @IsNotEmpty({
+  //   message: 'Mã văn bản không được để trống',
+  // })
+  // documentId: string;
 
   @IsOptional()
   @IsNotEmpty({ message: 'Lịch sử không được để trống' })

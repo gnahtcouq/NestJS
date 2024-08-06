@@ -41,7 +41,7 @@ export class ReceiptsService {
       time,
       amount,
       incomeCategoryId,
-      documentId,
+      // documentId,
     } = createReceiptDto;
 
     const existingReceipt = await this.receiptModel.findOne({ id });
@@ -60,7 +60,7 @@ export class ReceiptsService {
       time,
       amount,
       incomeCategoryId,
-      documentId,
+      // documentId,
       createdBy: {
         _id: userM._id,
         email: userM.email,

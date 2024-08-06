@@ -27,8 +27,8 @@ export class CreateExpenseDto {
   })
   expenseCategoryId: string;
 
-  @IsNotEmpty({
-    message: 'Mã văn bản không được để trống',
-  })
-  documentId: string;
+  // @IsNotEmpty({
+  //   message: 'Mã văn bản không được để trống',
+  // })
+  // documentId: string;
 }

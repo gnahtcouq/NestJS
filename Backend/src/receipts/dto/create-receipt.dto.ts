@@ -27,6 +27,6 @@ export class CreateReceiptDto {
   })
   incomeCategoryId: string;
 
-  @IsOptional()
-  documentId: string;
+  // @IsOptional()
+  // documentId: string;
 }

@@ -23,8 +23,8 @@ export class Expense {
   @Prop()
   expenseCategoryId: string;
 
-  @Prop()
-  documentId: string;
+  // @Prop()
+  // documentId: string;
 
   @Prop({ type: mongoose.Schema.Types.Array })
   history: {

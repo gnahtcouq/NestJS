@@ -41,7 +41,7 @@ export class ExpensesService {
       amount,
       userId,
       expenseCategoryId,
-      documentId,
+      // documentId,
     } = createExpenseDto;
 
     const existingExpense = await this.expenseModel.findOne({ id });
@@ -60,7 +60,7 @@ export class ExpensesService {
       amount,
       userId,
       expenseCategoryId,
-      documentId,
+      // documentId,
       createdBy: {
         _id: userM._id,
         email: userM.email,
