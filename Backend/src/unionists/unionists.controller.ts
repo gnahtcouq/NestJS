@@ -26,6 +26,7 @@ import { UpdateUnionistPermissionsDto } from 'src/unionists/dto/update-unionist-
 import { ChangePasswordDto } from 'src/unionists/dto/change-password.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { IUser } from 'src/users/users.interface';
+import { UpdateInfoUnionistDto } from 'src/unionists/dto/update-unionist-info.dto';
 
 @Controller('unionists')
 export class UnionistsController {
@@ -83,6 +84,21 @@ export class UnionistsController {
     let updatedUnionist = await this.unionistsService.update(
       id,
       updateUnionistDto,
+      user,
+    );
+    return updatedUnionist;
+  }
+
+  @Patch('info/:id')
+  @ResponseMessage('Công đoàn viên cập nhật thông tin')
+  async updateInfo(
+    @Param('id') id: string,
+    @Body() updateInfoUnionistDto: UpdateInfoUnionistDto,
+    @User() user: IUser,
+  ) {
+    let updatedUnionist = await this.unionistsService.updateInfo(
+      id,
+      updateInfoUnionistDto,
       user,
     );
     return updatedUnionist;

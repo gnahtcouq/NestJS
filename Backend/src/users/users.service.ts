@@ -29,6 +29,7 @@ import { parse, formatISO } from 'date-fns';
 import { UnionistsService } from 'src/unionists/unionists.service';
 import { isValidDateOfBirth } from 'src/util/utils';
 import dayjs from 'dayjs';
+import { UpdateInfoUserDto } from 'src/users/dto/update-user-info.dto';
 @Injectable()
 export class UsersService {
   private readonly encryptionKey: Buffer;
@@ -124,7 +125,7 @@ export class UsersService {
       address,
       permissions: [
         new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
-        new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+        new ObjectId('66b45ddc19284769298415e9'), //Thành viên cập nhật thông tin
         new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
         new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
         new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
@@ -198,7 +199,7 @@ export class UsersService {
       note: null,
       permissions: [
         new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
-        new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+        new ObjectId('66b45ddc19284769298415e9'), //Thành viên cập nhật thông tin
         new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
         new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
         new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
@@ -353,6 +354,67 @@ export class UsersService {
       },
       {
         ...updateUserDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
+
+    return updated;
+  }
+
+  async updateInfo(
+    _id: string,
+    updateInfoUserDto: UpdateInfoUserDto,
+    user: IUser,
+  ) {
+    let { email, name, dateOfBirth, gender, address } = updateInfoUserDto;
+
+    const currentEmail = await this.userModel.findOne({ _id });
+    // Convert email to lowercase
+    email = email.toLowerCase();
+
+    if (email !== currentEmail.email) {
+      const isExistUser = await this.userModel.findOne({ email });
+      const isExistUnionist = await this.unionistsService.findOneByUserName(
+        email,
+      );
+      if (isExistUser || isExistUnionist)
+        throw new BadRequestException(
+          `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
+        );
+    }
+
+    if (!isValidDateOfBirth(dateOfBirth)) {
+      throw new BadRequestException(
+        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
+      );
+    }
+
+    if (
+      gender &&
+      gender !== 'MALE' &&
+      gender !== 'FEMALE' &&
+      gender !== 'OTHER'
+    ) {
+      throw new BadRequestException('Giới tính không hợp lệ');
+    }
+
+    if (name && name.length > 50) {
+      throw new BadRequestException('Họ và tên không được vượt quá 30 ký tự');
+    }
+
+    if (address && address.length > 50) {
+      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
+    }
+
+    const updated = await this.userModel.updateOne(
+      {
+        _id: updateInfoUserDto._id,
+      },
+      {
+        ...updateInfoUserDto,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -924,7 +986,7 @@ export class UsersService {
           note: userNote,
           permissions: [
             new ObjectId('648ab6e7fa16b294212e4038'), // Xem thông tin chi tiết thành viên
-            new ObjectId('648ab719fa16b294212e4042'), // Cập nhật thông tin thành viên
+            new ObjectId('66b45ddc19284769298415e9'), // Thành viên cập nhật thông tin
             new ObjectId('6688dfd0a9b3d97d1b368c44'), // Gửi yêu cầu thay đổi email
             new ObjectId('66890545d40c708b15d2f329'), // Xác nhận thay đổi email
             new ObjectId('668b84dce8720bbbd18c7e77'), // Thay đổi mật khẩu

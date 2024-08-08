@@ -21,6 +21,7 @@ import { IUser } from 'src/users/users.interface';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateInfoUserDto } from 'src/users/dto/update-user-info.dto';
 
 @Controller('users') // => /users
 export class UsersController {
@@ -69,6 +70,21 @@ export class UsersController {
     @User() user: IUser,
   ) {
     let updatedUser = await this.usersService.update(id, updateUserDto, user);
+    return updatedUser;
+  }
+
+  @Patch('info/:id')
+  @ResponseMessage('Thành viên cập nhật thông tin')
+  async updateInfo(
+    @Param('id') id: string,
+    @Body() updateInfoUserDto: UpdateInfoUserDto,
+    @User() user: IUser,
+  ) {
+    let updatedUser = await this.usersService.updateInfo(
+      id,
+      updateInfoUserDto,
+      user,
+    );
     return updatedUser;
   }
 

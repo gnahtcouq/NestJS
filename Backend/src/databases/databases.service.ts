@@ -78,6 +78,7 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('648ab6e7fa16b294212e4038'), // xem thông tin chi tiết thành viên
               new ObjectId('648ab6fdfa16b294212e403d'), // xem danh sách thành viên
               new ObjectId('648ab719fa16b294212e4042'), // cập nhật thông tin thành viên
+              new ObjectId('66b45ddc19284769298415e9'), // thành viên cập nhật thông tin
               new ObjectId('66943bdd23978c1c8958970e'), // cập nhật quyền hạn thành viên
               new ObjectId('648ab728fa16b294212e4047'), // xoá thành viên
               new ObjectId('6697de58af6aeefbf633abf1'), // tải lên danh sách thành viên
@@ -89,6 +90,7 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('666f3672d8d4bd537d4407ef'), // xem thông tin chi tiết công đoàn viên
               new ObjectId('666f3679fdee1d528c846ebe'), // xem danh sách công đoàn viên
               new ObjectId('666f3680006c1579a34d5ec2'), // cập nhật thông tin công đoàn viên
+              new ObjectId('66b45770a24d3fc3d850430c'), // công đoàn viên cập nhật thông tin
               new ObjectId('666f3686b8bab8c9aef4c495'), // xoá công đoàn viên
               new ObjectId('6697ee9673975ad0a88c668e'), // tải lên danh sách công đoàn viên
               new ObjectId('666f368c80d7a70fa93fd90e'), // xem số lượng công đoàn viên
@@ -161,7 +163,7 @@ export class DatabasesService implements OnModuleInit {
             note: 'Công Đoàn Trường ĐHCNSG',
             permissions: [
               new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
-              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+              new ObjectId('66b45ddc19284769298415e9'), //Thành viên cập nhật thông tin
               new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
               new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
               new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
@@ -181,7 +183,7 @@ export class DatabasesService implements OnModuleInit {
             note: 'Công Đoàn Trường ĐHCNSG',
             permissions: [
               new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
-              new ObjectId('648ab719fa16b294212e4042'), //Cập nhật thông tin thành viên
+              new ObjectId('66b45ddc19284769298415e9'), //Thành viên cập nhật thông tin
               new ObjectId('6688dfd0a9b3d97d1b368c44'), //Gửi yêu cầu thay đổi email
               new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
               new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
@@ -209,7 +211,7 @@ export class DatabasesService implements OnModuleInit {
             unionEntryDate: '2002-10-29T00:00:00.00+00:00',
             permissions: [
               new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
-              new ObjectId('666f3680006c1579a34d5ec2'), //Cập nhật thông tin công đoàn viên
+              new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
               new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
               new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
               new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu

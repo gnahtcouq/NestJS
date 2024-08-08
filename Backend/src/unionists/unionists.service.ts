@@ -32,6 +32,7 @@ import { parse, formatISO } from 'date-fns';
 import { UsersService } from 'src/users/users.service';
 import dayjs from 'dayjs';
 import { isValidateDate, isValidDateOfBirth } from 'src/util/utils';
+import { UpdateInfoUnionistDto } from 'src/unionists/dto/update-unionist-info.dto';
 
 @Injectable()
 export class UnionistsService {
@@ -133,7 +134,7 @@ export class UnionistsService {
       address,
       permissions: [
         new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
-        new ObjectId('666f3680006c1579a34d5ec2'), //Cập nhật thông tin công đoàn viên
+        new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
         new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
         new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
         new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
@@ -343,6 +344,52 @@ export class UnionistsService {
       },
       {
         ...updateUnionistDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
+
+    return updated;
+  }
+
+  async updateInfo(
+    _id: string,
+    updateInfoUnionistDto: UpdateInfoUnionistDto,
+    user: IUser,
+  ) {
+    let { name, dateOfBirth, gender, address } = updateInfoUnionistDto;
+
+    if (!isValidDateOfBirth(dateOfBirth)) {
+      throw new BadRequestException(
+        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
+      );
+    }
+
+    if (
+      gender &&
+      gender !== 'MALE' &&
+      gender !== 'FEMALE' &&
+      gender !== 'OTHER'
+    ) {
+      throw new BadRequestException('Giới tính không hợp lệ');
+    }
+
+    if (name && name.length > 50) {
+      throw new BadRequestException('Họ và tên không được vượt quá 30 ký tự');
+    }
+
+    if (address && address.length > 50) {
+      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
+    }
+
+    const updated = await this.unionistModel.updateOne(
+      {
+        _id: updateInfoUnionistDto._id,
+      },
+      {
+        ...updateInfoUnionistDto,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -982,11 +1029,12 @@ export class UnionistsService {
           address: unionistAddress,
           note: unionistNote,
           permissions: [
-            new ObjectId('666f3672d8d4bd537d4407ef'), // Xem thông tin chi tiết công đoàn viên
-            new ObjectId('666f3680006c1579a34d5ec2'), // Cập nhật thông tin công đoàn viên
-            new ObjectId('6694cc16fda6b0a670cd3e42'), // Gửi yêu cầu thay đổi email
-            new ObjectId('6694cc7cfda6b0a670cd3e4b'), // Xác nhận thay đổi email
-            new ObjectId('6694cc9d047108a8053a8cce'), // Thay đổi mật khẩu
+            new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
+            new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
+            new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
+            new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
+            new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
+            new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
           ],
           joiningDate: formattedDateJoining,
           leavingDate: formattedDateLeaving,
