@@ -143,6 +143,53 @@ export class UnionistsService {
       delete filter.leaving;
     }
 
+    if (filter.year) {
+      const year = filter.year;
+      const startDate = `${year}-01-01`;
+      const endDate = `${year}-12-31`;
+      filter.joiningDate = { $gte: startDate, $lte: endDate };
+      delete filter.year;
+    }
+
+    // Xử lý khoảng thời gian từ tháng/năm đến tháng/năm cho joiningDate
+    if (filter.joiningStartMonthYear && filter.joiningEndMonthYear) {
+      const [startYear, startMonth] = filter.joiningStartMonthYear.split('/');
+      const [endYear, endMonth] = filter.joiningEndMonthYear.split('/');
+
+      const startDate = new Date(+startYear, +startMonth - 1, 1); // Ngày đầu tiên của tháng bắt đầu
+      const endDate = new Date(+endYear, +endMonth, 0); // Ngày cuối cùng của tháng kết thúc
+
+      filter.joiningDate = {
+        $gte: startDate.toISOString().split('T')[0],
+        $lte: endDate.toISOString().split('T')[0],
+      };
+
+      delete filter.joiningStartMonthYear;
+      delete filter.joiningEndMonthYear;
+    }
+
+    // Xử lý khoảng thời gian từ tháng/năm đến tháng/năm cho leavingDate
+    if (filter.leavingStartMonthYear && filter.leavingEndMonthYear) {
+      const [leavingStartYear, leavingStartMonth] =
+        filter.leavingStartMonthYear.split('/');
+      const [leavingEndYear, leavingEndMonth] =
+        filter.leavingEndMonthYear.split('/');
+
+      const leavingStartDate = new Date(
+        +leavingStartYear,
+        +leavingStartMonth - 1,
+        1,
+      ); // Ngày đầu tiên của tháng bắt đầu
+      const leavingEndDate = new Date(+leavingEndYear, +leavingEndMonth, 0); // Ngày cuối cùng của tháng kết thúc
+
+      filter.leavingDate = {
+        $gte: leavingStartDate.toISOString().split('T')[0],
+        $lte: leavingEndDate.toISOString().split('T')[0],
+      };
+      delete filter.leavingStartMonthYear;
+      delete filter.leavingEndMonthYear;
+    }
+
     let offset = (+currentPage - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
 
