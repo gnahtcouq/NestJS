@@ -1,3 +1,4 @@
+import { formatISO, parse } from 'date-fns';
 import dayjs from 'dayjs';
 export const nonAccentVietnamese = (str: string) => {
   str = str.replace(/A|Á|À|Ã|Ạ|Â|Ấ|Ầ|Ẫ|Ậ|Ă|Ắ|Ằ|Ẵ|Ặ/g, 'A');
@@ -152,4 +153,24 @@ export const isValidTypeDateRangeId = (id, type, format) => {
 
   const datePart = match[1];
   return isValidDateRange(datePart, format);
+};
+
+export const convertToISODate = (dateStr: string): string => {
+  // Phân tích chuỗi ngày từ định dạng dd/mm/yyyy
+  const [day, month, year] = dateStr.split('/').map(Number);
+
+  // Tạo đối tượng ngày với ngày cụ thể và lấy thời gian hiện tại
+  const now = new Date();
+  const date = new Date(
+    year,
+    month - 1,
+    day,
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+    now.getMilliseconds(),
+  );
+
+  // Định dạng đối tượng ngày thành ISO 8601
+  return date.toISOString();
 };

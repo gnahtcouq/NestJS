@@ -51,7 +51,7 @@ export class DatabasesService implements OnModuleInit {
           {
             id: 'STU00001',
             name: 'ADMIN',
-            email: 'admin@stu.id.vn',
+            email: 'admin@stu.edu.vn',
             password: this.userService.getHashPassword(
               this.configService.get<string>('INIT_PASSWORD'),
             ),
@@ -172,7 +172,7 @@ export class DatabasesService implements OnModuleInit {
           {
             id: 'STU00003',
             name: 'Lại Văn Toàn',
-            email: 'dh52006741@student.stu.edu.vn',
+            email: 'dh52006741@stu.edu.vn',
             password: this.userService.getHashPassword(
               this.configService.get<string>('INIT_PASSWORD'),
             ),
@@ -197,7 +197,7 @@ export class DatabasesService implements OnModuleInit {
           {
             id: 'CD00001',
             name: 'UNIONIST',
-            email: 'unionist@stu.id.vn',
+            email: 'unionist@stu.edu.vn',
             password: this.unionistService.getHashPassword(
               this.configService.get<string>('INIT_PASSWORD'),
             ),

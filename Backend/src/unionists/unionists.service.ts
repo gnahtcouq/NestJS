@@ -28,11 +28,10 @@ import { ChangePasswordDto } from 'src/unionists/dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 import { IUser } from 'src/users/users.interface';
 import * as xlsx from 'xlsx';
-import { parse, formatISO } from 'date-fns';
 import { UsersService } from 'src/users/users.service';
-import dayjs from 'dayjs';
 import { UpdateInfoUnionistDto } from 'src/unionists/dto/update-unionist-info.dto';
 import {
+  convertToISODate,
   isValidDateOfBirth,
   isValidDateRange,
   isValidEmail,
@@ -105,8 +104,8 @@ export class UnionistsService {
       password: hashPassword,
       dateOfBirth,
       gender,
-      phoneNumber,
-      address,
+      phoneNumber: phoneNumber ? phoneNumber : null,
+      address: address ? address : null,
       permissions: [
         new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
         new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
@@ -115,12 +114,12 @@ export class UnionistsService {
         new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
         new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
       ],
-      CCCD,
-      departmentId,
-      joiningDate,
-      leavingDate,
-      unionEntryDate,
-      note,
+      CCCD: CCCD ? CCCD : null,
+      departmentId: departmentId ? departmentId : null,
+      joiningDate: joiningDate ? joiningDate : '1970-01-01',
+      leavingDate: leavingDate ? leavingDate : '1970-01-01',
+      unionEntryDate: unionEntryDate ? unionEntryDate : '1970-01-01',
+      note: note ? note : null,
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -640,7 +639,7 @@ export class UnionistsService {
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter(async (row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
-      if ((row as any[]).length < 10) {
+      if ((row as any[]).length < 12) {
         // Cần ít nhất 11 cột
         invalidRows.push(index + 2);
         return false;
@@ -651,12 +650,14 @@ export class UnionistsService {
       const unionistName = row[1];
       const unionistGender = row[2];
       const unionistBirthday = row[3];
-      const unionistCCCD = row[4] || null;
-      const unionistAddress = row[5] || null;
-      const unionistNote = row[6] || null;
-      const unionistJoiningDate = row[7] || null;
-      const unionistLeavingDate = row[8] || null;
-      const unionistUnionEntryDate = row[9] || null;
+      const unionistPhoneNumber = row[4] || null;
+      const unionistCCCD = row[5] || null;
+      const unionistAddress = row[6] || null;
+      const unionistNote = row[7] || null;
+      const unionistJoiningDate = row[8] || null;
+      const unionistLeavingDate = row[9] || null;
+      const unionistUnionEntryDate = row[10] || null;
+      const unionistDepartment = row[11] || null;
 
       // Kiểm tra các giá trị cần thiết
       if (
@@ -691,6 +692,21 @@ export class UnionistsService {
       }
 
       if (unionistName.length > 30) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra số điện thoại nếu có
+      if (
+        unionistPhoneNumber &&
+        !/^(03|05|07|08|09)[0-9]{8}$/.test(unionistPhoneNumber)
+      ) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra đơn vị nếu có
+      if (unionistDepartment && !/^DV\d{2}$/.test(unionistDepartment)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -756,7 +772,7 @@ export class UnionistsService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0 || invalidRows.length > 0) {
+    if (filteredData.length === 0 && invalidRows.length > 0) {
       throw new BadRequestException(
         'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
@@ -764,60 +780,37 @@ export class UnionistsService {
 
     // Lưu dữ liệu vào cơ sở dữ liệu
     for (const row of filteredData) {
-      const unionistEmail = row[0];
+      let unionistEmail = row[0];
       const unionistName = row[1];
       const unionistGender = row[2];
       const unionistBirthday = row[3];
-      const unionistCCCD = row[4] || null;
-      const unionistAddress = row[5];
-      const unionistNote = row[6] || null;
-      const unionistJoiningDate = row[7] || null;
-      const unionistLeavingDate = row[8] || null;
-      const unionistUnionEntryDate = row[9] || null;
+      const unionistPhoneNumber = row[4] || null;
+      const unionistCCCD = row[5] || null;
+      const unionistAddress = row[6] || null;
+      const unionistNote = row[7] || null;
+      const unionistJoiningDate = row[8] || null;
+      const unionistLeavingDate = row[9] || null;
+      const unionistUnionEntryDate = row[10] || null;
+      const unionistDepartment = row[11] || null;
 
-      const [day, month, year] = unionistBirthday.split('/');
-      const parsedDate = parse(
-        `${day}/${month}/${year}`,
-        'dd/MM/yyyy',
-        new Date(),
-      );
-      const formattedDateBirthday = formatISO(parsedDate);
+      // Convert email to lowercase
+      unionistEmail = unionistEmail.toLowerCase();
 
-      let formattedDateJoining = null;
-      let formattedDateLeaving = null;
-      let formattedDateUnionEntry = null;
+      const formattedDateBirthday = convertToISODate(unionistBirthday);
+      let formattedDateJoining = '1970-01-01';
+      let formattedDateLeaving = '1970-01-01';
+      let formattedDateUnionEntry = '1970-01-01';
 
-      if (unionistJoiningDate) {
-        const [jDay, jMonth, jYear] = unionistJoiningDate.split('/');
-        const parsedJoiningDate = parse(
-          `${jDay}/${jMonth}/${jYear}`,
-          'dd/MM/yyyy',
-          new Date(),
-        );
-        formattedDateJoining = formatISO(parsedJoiningDate);
-      }
+      if (unionistJoiningDate)
+        formattedDateJoining = convertToISODate(unionistJoiningDate);
 
-      if (unionistLeavingDate) {
-        const [lDay, lMonth, lYear] = unionistLeavingDate.split('/');
-        const parsedLeavingDate = parse(
-          `${lDay}/${lMonth}/${lYear}`,
-          'dd/MM/yyyy',
-          new Date(),
-        );
-        formattedDateLeaving = formatISO(parsedLeavingDate);
-      }
+      if (unionistLeavingDate)
+        formattedDateLeaving = convertToISODate(unionistLeavingDate);
 
-      if (unionistUnionEntryDate) {
-        const [ueDay, ueMonth, ueYear] = unionistUnionEntryDate.split('/');
-        const parsedUnionEntryDate = parse(
-          `${ueDay}/${ueMonth}/${ueYear}`,
-          'dd/MM/yyyy',
-          new Date(),
-        );
-        formattedDateUnionEntry = formatISO(parsedUnionEntryDate);
-      }
+      if (unionistUnionEntryDate)
+        formattedDateUnionEntry = convertToISODate(unionistUnionEntryDate);
 
-      if (existingEmail.length > 0) {
+      if (existingEmail.length === 0) {
         try {
           // Tạo mới bản ghi unionist
           await this.unionistModel.create({
@@ -828,6 +821,7 @@ export class UnionistsService {
             email: unionistEmail,
             gender: unionistGender,
             dateOfBirth: formattedDateBirthday,
+            phoneNumber: unionistPhoneNumber,
             CCCD: unionistCCCD,
             address: unionistAddress,
             note: unionistNote,
@@ -842,6 +836,7 @@ export class UnionistsService {
             joiningDate: formattedDateJoining,
             leavingDate: formattedDateLeaving,
             unionEntryDate: formattedDateUnionEntry,
+            departmentId: unionistDepartment,
             createdBy: {
               _id: user._id,
               email: user.email,

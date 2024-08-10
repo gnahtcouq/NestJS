@@ -56,8 +56,17 @@ export class UsersService {
   };
 
   async create(createUserDto: CreateUserDto, @User() user: IUser) {
-    let { name, email, password, dateOfBirth, gender, address, CCCD, note } =
-      createUserDto;
+    let {
+      name,
+      email,
+      password,
+      dateOfBirth,
+      gender,
+      address,
+      phoneNumber,
+      CCCD,
+      note,
+    } = createUserDto;
 
     // Convert email to lowercase
     email = email.toLowerCase();
@@ -85,6 +94,7 @@ export class UsersService {
         new ObjectId('66890545d40c708b15d2f329'), //Xác nhận thay đổi email
         new ObjectId('668b84dce8720bbbd18c7e77'), //Thay đổi mật khẩu
       ],
+      phoneNumber,
       CCCD,
       note,
       createdBy: {
@@ -123,6 +133,7 @@ export class UsersService {
       password: hashPassword,
       dateOfBirth,
       gender,
+      phoneNumber: null,
       note: null,
       permissions: [
         new ObjectId('648ab6e7fa16b294212e4038'), //Xem thông tin chi tiết thành viên
@@ -749,7 +760,7 @@ export class UsersService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0 || invalidRows.length > 0) {
+    if (filteredData.length === 0 && invalidRows.length > 0) {
       throw new BadRequestException(
         'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
@@ -773,7 +784,7 @@ export class UsersService {
       );
       const formattedDate = formatISO(parsedDate);
 
-      if (existingEmail.length > 0) {
+      if (existingEmail.length === 0) {
         try {
           // Tạo mới bản ghi user
           await this.userModel.create({

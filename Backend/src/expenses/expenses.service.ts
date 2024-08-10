@@ -350,7 +350,7 @@ export class ExpensesService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0 || invalidRows.length > 0) {
+    if (filteredData.length === 0 && invalidRows.length > 0) {
       throw new BadRequestException(
         'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
