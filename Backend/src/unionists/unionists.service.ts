@@ -36,6 +36,7 @@ import {
   isValidDateRange,
   isValidEmail,
 } from 'src/util/utils';
+import { isNull } from 'util';
 
 @Injectable()
 export class UnionistsService {
@@ -634,7 +635,7 @@ export class UnionistsService {
     const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
 
     const invalidRows = [];
-    const existingEmail = [];
+    const emailChecks = [];
 
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
     const filteredData = data.slice(1).filter(async (row, index) => {
@@ -646,7 +647,7 @@ export class UnionistsService {
       }
 
       // Kiểm tra các giá trị cột có hợp lệ không
-      const unionistEmail = row[0];
+      let unionistEmail = row[0];
       const unionistName = row[1];
       const unionistGender = row[2];
       const unionistBirthday = row[3];
@@ -690,6 +691,9 @@ export class UnionistsService {
         invalidRows.push(index + 2);
         return false;
       }
+
+      // Convert email to lowercase
+      unionistEmail = unionistEmail.toLowerCase();
 
       if (unionistName.length > 30) {
         invalidRows.push(index + 2);
@@ -754,17 +758,8 @@ export class UnionistsService {
         return false;
       }
 
-      // Kiểm tra xem bản ghi đã tồn tại chưa
-      const existingUnionist = await this.unionistModel.findOne({
-        name: unionistName,
-        email: unionistEmail,
-      });
-
-      const isExistUser = await this.usersService.findOneByUserName(
-        unionistEmail,
-      );
-
-      if (existingUnionist || isExistUser) existingEmail.push(index + 2);
+      emailChecks.push(this.unionistModel.findOne({ email: unionistEmail }));
+      emailChecks.push(this.usersService.findOneByUserName(unionistEmail));
 
       return true;
     });
@@ -772,9 +767,32 @@ export class UnionistsService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
+    // Kiểm tra email
+    const emailResults = await Promise.all(emailChecks);
+    const emailSet = new Set();
+
+    emailResults.forEach((result) => {
+      if (result) {
+        emailSet.add(result.email);
+      }
+    });
+
+    const existingEmails = new Set();
+    filteredData.forEach((row) => {
+      const email = row[0].toLowerCase();
+      if (emailSet.has(email)) {
+        existingEmails.add(email);
+      }
+    });
+
     if (filteredData.length === 0 && invalidRows.length > 0) {
       throw new BadRequestException(
         'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
+      );
+    }
+    if (existingEmails.size > 0) {
+      throw new BadRequestException(
+        'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
       );
     }
 
@@ -810,47 +828,39 @@ export class UnionistsService {
       if (unionistUnionEntryDate)
         formattedDateUnionEntry = convertToISODate(unionistUnionEntryDate);
 
-      if (existingEmail.length === 0) {
-        try {
-          // Tạo mới bản ghi unionist
-          await this.unionistModel.create({
-            name: unionistName,
-            password: this.getHashPassword(
-              this.configService.get<string>('INIT_PASSWORD'),
-            ),
-            email: unionistEmail,
-            gender: unionistGender,
-            dateOfBirth: formattedDateBirthday,
-            phoneNumber: unionistPhoneNumber,
-            CCCD: unionistCCCD,
-            address: unionistAddress,
-            note: unionistNote,
-            permissions: [
-              new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
-              new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
-              new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
-              new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
-              new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
-              new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
-            ],
-            joiningDate: formattedDateJoining,
-            leavingDate: formattedDateLeaving,
-            unionEntryDate: formattedDateUnionEntry,
-            departmentId: unionistDepartment,
-            createdBy: {
-              _id: user._id,
-              email: user.email,
-            },
-          });
-        } catch (error) {
-          throw new BadRequestException(
-            `Lỗi khi lưu dữ liệu: ${error.message}`,
-          );
-        }
-      } else {
-        throw new BadRequestException(
-          'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
-        );
+      try {
+        // Tạo mới bản ghi unionist
+        await this.unionistModel.create({
+          name: unionistName,
+          password: this.getHashPassword(
+            this.configService.get<string>('INIT_PASSWORD'),
+          ),
+          email: unionistEmail,
+          gender: unionistGender,
+          dateOfBirth: formattedDateBirthday,
+          phoneNumber: unionistPhoneNumber,
+          CCCD: unionistCCCD,
+          address: unionistAddress,
+          note: unionistNote,
+          permissions: [
+            new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
+            new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
+            new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
+            new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
+            new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
+            new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
+          ],
+          joiningDate: formattedDateJoining,
+          leavingDate: formattedDateLeaving,
+          unionEntryDate: formattedDateUnionEntry,
+          departmentId: unionistDepartment,
+          createdBy: {
+            _id: user._id,
+            email: user.email,
+          },
+        });
+      } catch (error) {
+        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
       }
     }
 
