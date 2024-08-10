@@ -12,6 +12,7 @@ import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
+import { isValidTypeDateRangeId } from 'src/util/utils';
 
 @Injectable()
 export class ExpenseCategoriesService {
@@ -160,42 +161,17 @@ export class ExpenseCategoriesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { id, description, year, budget } = updateExpenseCategoryDto;
-
-    if (id !== undefined) {
-      throw new BadRequestException('Không thể cập nhật mã danh mục chi');
-    }
-
-    // Kiểm tra budget
-    const parsedBudget = parseFloat(budget);
-    if (
-      isNaN(parsedBudget) ||
-      parsedBudget < 1000 ||
-      parsedBudget >= 10000000000
-    )
-      throw new BadRequestException(
-        'Dự toán không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
-      );
+    const { description, year } = updateExpenseCategoryDto;
 
     // Kiểm tra trùng lặp
     const existingCategory = await this.expenseCategoryModel.findOne({
-      $or: [
-        { description, year, _id: { $ne: _id } },
-        { description, year, id, _id: { $ne: _id } },
-      ],
+      $or: [{ description, year, _id: { $ne: _id } }],
     });
 
     if (existingCategory) {
       throw new BadRequestException(
         'Mô tả và năm hoặc mã danh mục chi đã tồn tại',
       );
-    }
-
-    // Kiểm tra năm hợp lệ
-    const currentYear = new Date().getFullYear();
-    const parseYear = Number(year);
-    if (parseYear < 1900 || parseYear > currentYear) {
-      throw new BadRequestException('Năm không hợp lệ');
     }
 
     const updated = await this.expenseCategoryModel.updateOne(
@@ -270,9 +246,10 @@ export class ExpenseCategoriesService {
     const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
 
     const invalidRows = [];
+    const existingExpenseCategory = [];
 
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
-    const filteredData = data.slice(1).filter((row, index) => {
+    const filteredData = data.slice(1).filter(async (row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
       if ((row as any[]).length < 4) {
         return false;
@@ -295,21 +272,23 @@ export class ExpenseCategoriesService {
       }
 
       // Kiểm tra mã danh mục chi
-      const idRegex = /^DMC\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!idRegex.test(id)) {
+      if (!isValidTypeDateRangeId(id, 'DMC', 'categoryyyyymmdd')) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra độ dài mô tả
+      if (expenseCategoryDescription.length > 50) {
         invalidRows.push(index + 2);
         return false;
       }
 
       const yearRegex = /^\d{4}$/;
-
       if (!yearRegex.test(expenseCategoryYear)) {
         invalidRows.push(index + 2);
         return false;
       }
-
       const year = Number(expenseCategoryYear);
-
       // Kiểm tra năm hợp lệ
       const currentYear = new Date().getFullYear();
       if (year < 1900 || year > currentYear) {
@@ -317,17 +296,27 @@ export class ExpenseCategoriesService {
         return false;
       }
 
+      // Kiểm tra xem bản ghi đã tồn tại chưa
+      const res = await this.expenseCategoryModel.findOne({
+        $or: [
+          {
+            description: expenseCategoryDescription,
+            year: expenseCategoryYear,
+          },
+          { id, year: expenseCategoryYear },
+        ],
+      });
+      if (res) existingExpenseCategory.push(index + 2);
+
       return true;
     });
 
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0) {
-      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
-    } else if (invalidRows.length > 0) {
+    if (filteredData.length === 0 || invalidRows.length > 0) {
       throw new BadRequestException(
-        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+        'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
     }
 
@@ -338,45 +327,45 @@ export class ExpenseCategoriesService {
       const expenseCategoryBudget = parseFloat(row[2]);
       const expenseCategoryYear = row[3];
 
-      try {
-        // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingCategory = await this.expenseCategoryModel.findOne({
-          $or: [
-            {
-              description: expenseCategoryDescription,
-              year: expenseCategoryYear,
+      if (existingExpenseCategory.length > 0) {
+        try {
+          // Tạo mới bản ghi phiếu thu
+          await this.expenseCategoryModel.create({
+            id: id,
+            description: expenseCategoryDescription,
+            budget: expenseCategoryBudget,
+            year: expenseCategoryYear,
+            createdBy: {
+              _id: user._id,
+              email: user.email,
             },
-            { id, year: expenseCategoryYear },
-          ],
-        });
-
-        if (existingCategory) {
+            history: [
+              {
+                description: `${expenseCategoryDescription} (Đầu tiên)`,
+                budget: expenseCategoryBudget,
+                year: expenseCategoryYear,
+                updatedAt: new Date(),
+                updatedBy: {
+                  _id: user._id,
+                  email: user.email,
+                },
+              },
+            ],
+          });
+        } catch (error) {
           throw new BadRequestException(
-            `Nội dung  ${expenseCategoryDescription} và năm ${expenseCategoryYear} hoặc mã danh mục chi (${expenseCategoryYear}) đã tồn tại`,
+            `Lỗi khi lưu dữ liệu: ${error.message}`,
           );
         }
-
-        // Tạo mới bản ghi phiếu thu
-        await this.expenseCategoryModel.create({
-          id: id,
-          description: expenseCategoryDescription,
-          budget: expenseCategoryBudget,
-          year: expenseCategoryYear,
-          createdBy: {
-            _id: user._id,
-            email: user.email,
-          },
-          isDeleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      } catch (error) {
-        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      } else {
+        throw new BadRequestException(
+          'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
+        );
       }
     }
 
     return {
-      message: 'Tải file lên thành công',
+      message: 'Nhập dữ liệu từ file excel thành công',
       totalRowsRead,
       validRowsCount,
     };

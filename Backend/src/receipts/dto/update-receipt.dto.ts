@@ -38,43 +38,9 @@ class History {
   updatedBy: UpdatedBy;
 }
 
-export class UpdateReceiptDto extends OmitType(CreateReceiptDto, []) {
+export class UpdateReceiptDto extends OmitType(CreateReceiptDto, ['id']) {
   @IsNotEmpty({ message: 'ID không được để trống' })
   _id: string;
-
-  @IsOptional()
-  @IsNotEmpty({ message: 'Mã phiếu thu không được để trống' })
-  id: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Nội dung thu không được để trống',
-  })
-  description: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Thời gian thu không được để trống',
-  })
-  time: Date;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Số tiền thu không được để trống',
-  })
-  amount: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Mã thành viên không được để trống',
-  })
-  userId: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Mã danh mục thu không được để trống',
-  })
-  incomeCategoryId: string;
 
   // @IsOptional()
   // documentId: string;

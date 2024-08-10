@@ -42,25 +42,6 @@ export const convertSlug = (str: string) => {
   return str;
 };
 
-export const isValidDateOfBirth = (dateOfBirth: Date): boolean => {
-  const date = dayjs(dateOfBirth);
-  const today = dayjs();
-  const age = today.diff(date, 'year');
-  const minYear = 1900;
-  return date.isValid() && date.year() >= minYear && age >= 18;
-};
-
-export const isValidateDate = (date: Date): boolean => {
-  const parsedDate = dayjs(date).startOf('day');
-  const today = dayjs().startOf('day');
-  const minYear = 1900;
-  return (
-    parsedDate.isValid() &&
-    parsedDate.year() >= minYear &&
-    !parsedDate.isAfter(today)
-  );
-};
-
 export const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -69,3 +50,78 @@ export const formatCurrency = (value) => {
     .format(value)
     .replace(/\./g, ',');
 };
+
+export function isValidDateRange(datePart, format) {
+  let year, month, day;
+
+  switch (format) {
+    case 'yyyymmdd':
+      // Regex để kiểm tra định dạng yyyymmdd
+      const dateRegex = /^\d{8}$/;
+      if (!dateRegex.test(datePart)) {
+        return false;
+      }
+      year = parseInt(datePart.slice(0, 4), 10);
+      month = parseInt(datePart.slice(4, 6), 10);
+      day = parseInt(datePart.slice(6, 8), 10);
+      break;
+
+    case 'categoryyyyymmdd':
+      // Regex để kiểm tra định dạng yyyymmdd
+      const categoryDateRegex = /^\d{8}$/;
+      if (!categoryDateRegex.test(datePart)) {
+        return false;
+      }
+      year = parseInt(datePart.slice(0, 4), 10);
+      month = parseInt(datePart.slice(4, 6), 10);
+      day = parseInt(datePart.slice(6, 8), 10);
+      break;
+
+    case 'dd/mm/yyyy':
+      // Regex để kiểm tra định dạng dd/mm/yyyy
+      const dayMonthYearRegex =
+        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+      if (!dayMonthYearRegex.test(datePart)) {
+        return false;
+      }
+      [day, month, year] = datePart.split('/').map(Number);
+      break;
+
+    default:
+      return false;
+  }
+
+  // Kiểm tra năm không nhỏ hơn 1970
+  if (year < 1970) {
+    return false;
+  }
+
+  // Tạo đối tượng Date và kiểm tra tính hợp lệ
+  const date = new Date(year, month - 1, day);
+
+  // Kiểm tra ngày có hợp lệ không
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return false;
+  }
+
+  // Kiểm tra ngày không nằm sau ngày hiện tại và không trước ngày 01/01/1970
+  const minDate = dayjs('1970-01-01');
+  const currentDate = dayjs();
+  const isAfterMinDate = dayjs(date).isSameOrAfter(minDate, 'day');
+  const isBeforeCurrentDate = dayjs(date).isSameOrBefore(currentDate, 'day');
+
+  return isAfterMinDate && isBeforeCurrentDate;
+}
+
+export function isValidTypeDateRangeId(id, type, format) {
+  const typeRegex = new RegExp(`^${type}(\\d{8})$`);
+  const match = id.match(typeRegex);
+  if (!match) return false;
+
+  const datePart = match[1];
+  return isValidDateRange(datePart, format);
+}

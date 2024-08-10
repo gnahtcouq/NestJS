@@ -38,36 +38,11 @@ class History {
   updatedBy: UpdatedBy;
 }
 
-export class UpdateIncomeCategoryDto extends OmitType(
-  CreateIncomeCategoryDto,
-  [],
-) {
+export class UpdateIncomeCategoryDto extends OmitType(CreateIncomeCategoryDto, [
+  'id',
+]) {
   @IsNotEmpty({ message: 'ID không được để trống' })
   _id: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Mã danh mục thu không được để trống',
-  })
-  id: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Nội dung danh mục thu không được để trống',
-  })
-  description: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Dự toán không được để trống',
-  })
-  budget: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Năm không được để trống',
-  })
-  year: string;
 
   @IsOptional()
   @IsNotEmpty({ message: 'Lịch sử không được để trống' })

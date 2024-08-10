@@ -12,6 +12,7 @@ import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
+import { isValidTypeDateRangeId } from 'src/util/utils';
 
 @Injectable()
 export class IncomeCategoriesService {
@@ -117,42 +118,17 @@ export class IncomeCategoriesService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { id, description, year, budget } = updateIncomeCategoryDto;
-
-    if (id !== undefined) {
-      throw new BadRequestException('Không thể cập nhật mã danh mục thu');
-    }
-
-    // Kiểm tra budget
-    const parsedBudget = parseFloat(budget);
-    if (
-      isNaN(parsedBudget) ||
-      parsedBudget < 1000 ||
-      parsedBudget >= 10000000000
-    )
-      throw new BadRequestException(
-        'Dự toán không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
-      );
+    const { description, year } = updateIncomeCategoryDto;
 
     // Kiểm tra trùng lặp
     const existingCategory = await this.incomeCategoryModel.findOne({
-      $or: [
-        { description, year, _id: { $ne: _id } },
-        { description, year, id, _id: { $ne: _id } },
-      ],
+      $or: [{ description, year, _id: { $ne: _id } }],
     });
 
     if (existingCategory) {
       throw new BadRequestException(
         'Mô tả và năm hoặc mã danh mục thu đã tồn tại',
       );
-    }
-
-    // Kiểm tra năm hợp lệ
-    const currentYear = new Date().getFullYear();
-    const parseYear = Number(year);
-    if (parseYear < 1900 || parseYear > currentYear) {
-      throw new BadRequestException('Năm không hợp lệ');
     }
 
     const updated = await this.incomeCategoryModel.updateOne(
@@ -267,9 +243,10 @@ export class IncomeCategoriesService {
     const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
 
     const invalidRows = [];
+    const existingIncomeCategory = [];
 
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
-    const filteredData = data.slice(1).filter((row, index) => {
+    const filteredData = data.slice(1).filter(async (row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
       if ((row as any[]).length < 4) {
         return false;
@@ -293,27 +270,41 @@ export class IncomeCategoriesService {
       }
 
       // Kiểm tra mã danh mục thu
-      const idRegex = /^DMT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!idRegex.test(id)) {
+      if (!isValidTypeDateRangeId(id, 'DMT', 'categoryyyyymmdd')) {
+        invalidRows.push(index + 2);
+        return false;
+      }
+
+      // Kiểm tra độ dài mô tả
+      if (incomeCategoryDescription.length > 50) {
         invalidRows.push(index + 2);
         return false;
       }
 
       const yearRegex = /^\d{4}$/;
-
       if (!yearRegex.test(incomeCategoryYear)) {
         invalidRows.push(index + 2);
         return false;
       }
-
       const year = Number(incomeCategoryYear);
-
       // Kiểm tra năm hợp lệ
       const currentYear = new Date().getFullYear();
-      if (year < 1900 || year > currentYear) {
+      if (year < 1970 || year > currentYear) {
         invalidRows.push(index + 2);
         return false;
       }
+
+      // Kiểm tra xem bản ghi đã tồn tại chưa
+      const res = await this.incomeCategoryModel.findOne({
+        $or: [
+          {
+            description: incomeCategoryDescription,
+            year: incomeCategoryYear,
+          },
+          { id, year: incomeCategoryYear },
+        ],
+      });
+      if (res) existingIncomeCategory.push(index + 2);
 
       return true;
     });
@@ -321,11 +312,9 @@ export class IncomeCategoriesService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0) {
-      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
-    } else if (invalidRows.length > 0) {
+    if (filteredData.length === 0 || invalidRows.length > 0) {
       throw new BadRequestException(
-        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+        'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
     }
 
@@ -336,45 +325,45 @@ export class IncomeCategoriesService {
       const incomeCategoryBudget = parseFloat(row[2]);
       const incomeCategoryYear = row[3];
 
-      try {
-        // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingCategory = await this.incomeCategoryModel.findOne({
-          $or: [
-            {
-              description: incomeCategoryDescription,
-              year: incomeCategoryYear,
+      if (existingIncomeCategory.length > 0) {
+        try {
+          // Tạo mới bản ghi phiếu thu
+          await this.incomeCategoryModel.create({
+            id: id,
+            description: incomeCategoryDescription,
+            budget: incomeCategoryBudget,
+            year: incomeCategoryYear,
+            createdBy: {
+              _id: user._id,
+              email: user.email,
             },
-            { id, year: incomeCategoryYear },
-          ],
-        });
-
-        if (existingCategory) {
+            history: [
+              {
+                description: `${incomeCategoryDescription} (Đầu tiên)`,
+                budget: incomeCategoryBudget,
+                year: incomeCategoryYear,
+                updatedAt: new Date(),
+                updatedBy: {
+                  _id: user._id,
+                  email: user.email,
+                },
+              },
+            ],
+          });
+        } catch (error) {
           throw new BadRequestException(
-            `Nội dung  ${incomeCategoryDescription} và năm ${incomeCategoryYear} hoặc mã danh mục thu (${incomeCategoryYear}) đã tồn tại`,
+            `Lỗi khi lưu dữ liệu: ${error.message}`,
           );
         }
-
-        // Tạo mới bản ghi phiếu thu
-        await this.incomeCategoryModel.create({
-          id: id,
-          description: incomeCategoryDescription,
-          budget: incomeCategoryBudget,
-          year: incomeCategoryYear,
-          createdBy: {
-            _id: user._id,
-            email: user.email,
-          },
-          isDeleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      } catch (error) {
-        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      } else {
+        throw new BadRequestException(
+          'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
+        );
       }
     }
 
     return {
-      message: 'Tải file lên thành công',
+      message: 'Nhập dữ liệu từ file excel thành công',
       totalRowsRead,
       validRowsCount,
     };

@@ -26,6 +26,9 @@ export class User {
   gender: string;
 
   @Prop()
+  phoneNumber: string;
+
+  @Prop()
   address: string;
 
   @Prop()

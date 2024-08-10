@@ -10,7 +10,11 @@ import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
-import { formatCurrency, isValidateDate } from 'src/util/utils';
+import {
+  formatCurrency,
+  isValidDateRange,
+  isValidTypeDateRangeId,
+} from 'src/util/utils';
 import dayjs from 'dayjs';
 import { Response } from 'express';
 import * as Handlebars from 'handlebars';
@@ -49,9 +53,6 @@ export class ReceiptsService {
     if (existingReceipt) {
       throw new BadRequestException(`Mã phiếu thu ${id} đã tồn tại`);
     }
-
-    if (!isValidateDate(time))
-      throw new BadRequestException('Thời gian thu không hợp lệ');
 
     const newReceipt = await this.receiptModel.create({
       userId,
@@ -211,26 +212,6 @@ export class ReceiptsService {
     if (!mongoose.Types.ObjectId.isValid(_id))
       throw new BadRequestException('ID không hợp lệ');
 
-    const { id, amount, time } = updateReceiptDto;
-
-    if (id !== undefined) {
-      throw new BadRequestException('Không thể cập nhật mã phiếu thu');
-    }
-
-    // Kiểm tra amount
-    const parsedAmount = parseFloat(amount);
-    if (
-      isNaN(parsedAmount) ||
-      parsedAmount < 1000 ||
-      parsedAmount >= 10000000000
-    )
-      throw new BadRequestException(
-        'Số tiền không hợp lệ (Hợp lệ từ 1000đ -> 10 tỷ)',
-      );
-
-    if (!isValidateDate(time))
-      throw new BadRequestException('Thời gian thu không hợp lệ');
-
     const updated = await this.receiptModel.updateOne(
       { _id: updateReceiptDto._id },
       {
@@ -288,7 +269,7 @@ export class ReceiptsService {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // for .xlsx
     ];
     if (!allowedTypes.includes(file.mimetype)) {
-      throw new BadRequestException('Chỉ cho phép nhập từ file Excel');
+      throw new BadRequestException('Chỉ cho phép nhập từ file excel');
     }
 
     // Đọc dữ liệu từ file Excel
@@ -301,11 +282,11 @@ export class ReceiptsService {
     });
 
     const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
-
     const invalidRows = [];
+    const existingReceipt = [];
 
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
-    const filteredData = data.slice(1).filter((row, index) => {
+    const filteredData = data.slice(1).filter(async (row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
       if ((row as any[]).length < 6) {
         return false;
@@ -327,57 +308,45 @@ export class ReceiptsService {
         !receiptTime ||
         isNaN(parsedAmount) ||
         parsedAmount < 1000 ||
-        parsedAmount >= 10000000000
+        parsedAmount > 10000000000
       ) {
         invalidRows.push(index + 2);
         return false;
       }
 
       // Kiểm tra mã phiếu thu
-      const idRegex = /^PT\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!idRegex.test(id)) {
+      if (!isValidTypeDateRangeId(id, 'PT', 'yyyymmdd')) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      // Kiểm tra ngày tháng năm
-      const dayMonthYearRegex =
-        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-      if (!dayMonthYearRegex.test(receiptTime)) {
+      // Kiểm tra độ dài mô tả
+      if (receiptDescription.length > 50) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      const [day, month, year] = receiptTime.split('/').map(Number);
-      // Kiểm tra năm không nhỏ hơn 1900
-      if (year < 1900) {
+      // Kiểm tra mã danh mục thu
+      if (
+        !isValidTypeDateRangeId(
+          receiptIncomeCategoryId,
+          'DMT',
+          'categoryyyyymmdd',
+        )
+      ) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      const isValidDate = (
-        day: number,
-        month: number,
-        year: number,
-      ): boolean => {
-        const date = new Date(year, month - 1, day);
-        return (
-          date.getFullYear() === year &&
-          date.getMonth() === month - 1 &&
-          date.getDate() === day
-        );
-      };
-
-      if (!isValidDate(day, month, year)) {
+      // Kiểm tra ngày hợp lệ
+      if (!isValidDateRange(receiptTime, 'dd/mm/yyyy')) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      // Kiểm tra ngày không nằm sau ngày hiện tại
-      if (dayjs(new Date(year, month - 1, day)).isAfter(dayjs())) {
-        invalidRows.push(index + 2);
-        return false;
-      }
+      // Kiểm tra xem bản ghi đã tồn tại hay chưa
+      const res = await this.receiptModel.findOne({ id });
+      if (res) existingReceipt.push(index + 2);
 
       return true;
     });
@@ -385,11 +354,9 @@ export class ReceiptsService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0) {
-      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
-    } else if (invalidRows.length > 0) {
+    if (filteredData.length === 0 || invalidRows.length > 0) {
       throw new BadRequestException(
-        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+        'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
     }
 
@@ -416,39 +383,47 @@ export class ReceiptsService {
       parsedDate.setMilliseconds(currentDateTime.getMilliseconds());
       const formattedDate = formatISO(parsedDate);
 
-      try {
-        // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingReceipt = await this.receiptModel.findOne({
-          id: id,
-        });
-
-        if (existingReceipt) {
-          throw new BadRequestException(`Mã phiếu thu ${id} đã tồn tại`);
+      if (existingReceipt.length === 0) {
+        try {
+          // Tạo mới bản ghi phiếu thu
+          await this.receiptModel.create({
+            id: id,
+            description: receiptDescription,
+            time: formattedDate,
+            amount: receiptAmount,
+            userId: receiptUserId,
+            incomeCategoryId: receiptIncomeCategoryId,
+            createdBy: {
+              _id: user._id,
+              email: user.email,
+            },
+            history: [
+              {
+                description: `${receiptDescription} (Đầu tiên)`,
+                time: formattedDate,
+                amount: receiptAmount,
+                updatedAt: new Date(),
+                updatedBy: {
+                  _id: user._id,
+                  email: user.email,
+                },
+              },
+            ],
+          });
+        } catch (error) {
+          throw new BadRequestException(
+            `Lỗi khi lưu dữ liệu: ${error.message}`,
+          );
         }
-
-        // Tạo mới bản ghi phiếu thu
-        await this.receiptModel.create({
-          userId: receiptUserId,
-          id: id,
-          description: receiptDescription,
-          incomeCategoryId: receiptIncomeCategoryId,
-          time: formattedDate,
-          amount: receiptAmount,
-          createdBy: {
-            _id: user._id,
-            email: user.email,
-          },
-          isDeleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      } catch (error) {
-        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      } else {
+        throw new BadRequestException(
+          'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
+        );
       }
     }
 
     return {
-      message: 'Tải file lên thành công',
+      message: 'Nhập dữ liệu từ file excel thành công',
       totalRowsRead,
       validRowsCount,
     };

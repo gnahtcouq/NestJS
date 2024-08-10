@@ -25,6 +25,9 @@ export class Unionist {
   gender: string;
 
   @Prop()
+  phoneNumber: string;
+
+  @Prop()
   address: string;
 
   @Prop()

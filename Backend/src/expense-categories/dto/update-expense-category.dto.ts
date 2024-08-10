@@ -40,34 +40,10 @@ class History {
 
 export class UpdateExpenseCategoryDto extends OmitType(
   CreateExpenseCategoryDto,
-  [],
+  ['id'],
 ) {
   @IsNotEmpty({ message: 'ID không được để trống' })
   _id: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Mã danh mục chi không được để trống',
-  })
-  id: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Nội dung danh mục chi không được để trống',
-  })
-  description: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Dự toán không được để trống',
-  })
-  budget: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Năm không được để trống',
-  })
-  year: string;
 
   @IsOptional()
   @IsNotEmpty({ message: 'Lịch sử không được để trống' })

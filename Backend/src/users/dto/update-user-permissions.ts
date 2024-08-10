@@ -1,35 +1,18 @@
-/* eslint-disable prettier/prettier */
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
 import { IsArray, IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
 import mongoose from 'mongoose';
 
-// export class UpdateUserDto extends PartialType(CreateUserDto) {}
 export class UpdateUserPermissionsDto extends OmitType(CreateUserDto, [
+  'email',
   'password',
+  'name',
+  'dateOfBirth',
+  'gender',
+  'phoneNumber',
+  'address',
+  'CCCD',
 ] as const) {
-  @IsOptional()
-  @IsNotEmpty({ message: 'ID không được để trống' })
-  _id: string;
-
-  @IsOptional()
-  name: string;
-
-  @IsOptional()
-  email: string;
-
-  @IsOptional()
-  dateOfBirth: Date;
-
-  @IsOptional()
-  gender: string;
-
-  @IsOptional()
-  address: string;
-
-  @IsOptional()
-  CCCD: string;
-
   @IsOptional()
   @IsNotEmpty({ message: 'Quyền hạn không được để trống' })
   @IsMongoId({

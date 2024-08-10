@@ -31,7 +31,6 @@ import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
 import { UsersService } from 'src/users/users.service';
 import dayjs from 'dayjs';
-import { isValidateDate, isValidDateOfBirth } from 'src/util/utils';
 import { UpdateInfoUnionistDto } from 'src/unionists/dto/update-unionist-info.dto';
 
 @Injectable()
@@ -68,6 +67,7 @@ export class UnionistsService {
       password,
       dateOfBirth,
       gender,
+      phoneNumber,
       address,
       CCCD,
       departmentId,
@@ -92,37 +92,6 @@ export class UnionistsService {
         `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
       );
 
-    if (
-      !(
-        /[a-z]/.test(password) &&
-        /[A-Z]/.test(password) &&
-        /\d/.test(password) &&
-        password.length >= 8
-      )
-    ) {
-      throw new BadRequestException(
-        'Mật khẩu phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
-      );
-    }
-
-    if (!isValidDateOfBirth(dateOfBirth))
-      throw new BadRequestException(
-        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
-      );
-
-    if (address && address.length > 50) {
-      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
-    }
-
-    if (!isValidateDate(joiningDate))
-      throw new BadRequestException('Ngày chuyển đến không hợp lệ');
-
-    if (!isValidateDate(leavingDate))
-      throw new BadRequestException('Ngày chuyển đi không hợp lệ');
-
-    if (!isValidateDate(unionEntryDate))
-      throw new BadRequestException('Ngày vào công đoàn không hợp lệ');
-
     const hashPassword = this.getHashPassword(password);
 
     let newUnionist = await this.unionistModel.create({
@@ -131,6 +100,7 @@ export class UnionistsService {
       password: hashPassword,
       dateOfBirth,
       gender,
+      phoneNumber,
       address,
       permissions: [
         new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
@@ -273,18 +243,7 @@ export class UnionistsService {
 
   async update(_id: string, updateUnionistDto: UpdateUnionistDto, user: IUser) {
     //logic check email exist
-    let {
-      email,
-      name,
-      dateOfBirth,
-      gender,
-      address,
-      CCCD,
-      note,
-      joiningDate,
-      leavingDate,
-      unionEntryDate,
-    } = updateUnionistDto;
+    let { email } = updateUnionistDto;
     const currentEmail = await this.unionistModel.findOne({ _id });
     // Convert email to lowercase
     email = email.toLowerCase();
@@ -297,46 +256,6 @@ export class UnionistsService {
           `Email đã tồn tại trên hệ thống. Vui lòng sử dụng email khác`,
         );
     }
-
-    if (!isValidDateOfBirth(dateOfBirth)) {
-      throw new BadRequestException(
-        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
-      );
-    }
-
-    if (
-      gender &&
-      gender !== 'MALE' &&
-      gender !== 'FEMALE' &&
-      gender !== 'OTHER'
-    ) {
-      throw new BadRequestException('Giới tính không hợp lệ');
-    }
-
-    if (name && name.length > 50) {
-      throw new BadRequestException('Họ và tên không được vượt quá 30 ký tự');
-    }
-
-    if (address && address.length > 50) {
-      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
-    }
-
-    if (CCCD && !/^\d{12}$/.test(CCCD)) {
-      throw new BadRequestException('CCCD không hợp lệ');
-    }
-
-    if (note && note.length > 30) {
-      throw new BadRequestException('Ghi chú không được vượt quá 30 ký tự');
-    }
-
-    if (!isValidateDate(joiningDate))
-      throw new BadRequestException('Ngày chuyển đến không hợp lệ');
-
-    if (!isValidateDate(leavingDate))
-      throw new BadRequestException('Ngày chuyển đi không hợp lệ');
-
-    if (!isValidateDate(unionEntryDate))
-      throw new BadRequestException('Ngày vào công đoàn không hợp lệ');
 
     const updated = await this.unionistModel.updateOne(
       {
@@ -359,31 +278,6 @@ export class UnionistsService {
     updateInfoUnionistDto: UpdateInfoUnionistDto,
     user: IUser,
   ) {
-    let { name, dateOfBirth, gender, address } = updateInfoUnionistDto;
-
-    if (!isValidDateOfBirth(dateOfBirth)) {
-      throw new BadRequestException(
-        'Ngày sinh không hợp lệ hoặc chưa đủ 18 tuổi',
-      );
-    }
-
-    if (
-      gender &&
-      gender !== 'MALE' &&
-      gender !== 'FEMALE' &&
-      gender !== 'OTHER'
-    ) {
-      throw new BadRequestException('Giới tính không hợp lệ');
-    }
-
-    if (name && name.length > 50) {
-      throw new BadRequestException('Họ và tên không được vượt quá 30 ký tự');
-    }
-
-    if (address && address.length > 50) {
-      throw new BadRequestException('Địa chỉ không được vượt quá 50 ký tự');
-    }
-
     const updated = await this.unionistModel.updateOne(
       {
         _id: updateInfoUnionistDto._id,
