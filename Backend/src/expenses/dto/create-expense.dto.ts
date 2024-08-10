@@ -1,5 +1,11 @@
 import { Transform } from 'class-transformer';
-import { IsDate, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
+import {
+  IsDate,
+  IsNotEmpty,
+  IsOptional,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 import { IsAmountInRange } from 'src/util/is-amount-in-range.validator';
 import { IsValidDateRange } from 'src/util/is-valid-date-range.validator';
 import { IsValidExpenseCategoryCode } from 'src/util/is-valid-expense-category-code.validator';
@@ -33,6 +39,9 @@ export class CreateExpenseDto {
   amount: string;
 
   @IsNotEmpty({ message: 'Mã thành viên không được để trống' })
+  @Matches(/^STU\d{5}$/, {
+    message: 'Mã thành viên phải có định dạng STU00001 với 00001 là số',
+  })
   userId: string;
 
   @IsNotEmpty({
@@ -42,7 +51,7 @@ export class CreateExpenseDto {
   expenseCategoryId: string;
 
   // @IsNotEmpty({
-  //   message: 'Mã văn bản không được để trống',
+  //   message: 'Mã CV/VB không được để trống',
   // })
   // documentId: string;
 }

@@ -58,7 +58,7 @@ export class DocumentsController {
   }
 
   @Put(':id')
-  @ResponseMessage('Cập nhật tên CV/VB')
+  @ResponseMessage('Cập nhật tiêu đề CV/VB')
   async updateName(
     @Param('id') id: string,
     @Body() updateDocumentDto: UpdateDocumentDto,

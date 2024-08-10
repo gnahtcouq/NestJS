@@ -638,7 +638,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad4fedafdb9754f40b863',
-    name: 'Tạo mới văn bản',
+    name: 'Tạo mới CV/VB',
     apiPath: '/api/v1/documents',
     method: 'POST',
     module: 'DOCUMENTS',
@@ -654,7 +654,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad511dafdb9754f40b868',
-    name: 'Xem danh sách văn bản',
+    name: 'Xem danh sách CV/VB',
     apiPath: '/api/v1/documents',
     method: 'GET',
     module: 'DOCUMENTS',
@@ -670,7 +670,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad522dafdb9754f40b86d',
-    name: 'Xem thông tin chi tiết văn bản',
+    name: 'Xem thông tin chi tiết CV/VB',
     apiPath: '/api/v1/documents/:id',
     method: 'GET',
     module: 'DOCUMENTS',
@@ -686,7 +686,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad53bdafdb9754f40b872',
-    name: 'Xoá văn bản',
+    name: 'Xoá CV/VB',
     apiPath: '/api/v1/documents/:id',
     method: 'DELETE',
     module: 'DOCUMENTS',
@@ -702,7 +702,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad555dafdb9754f40b877',
-    name: 'Cập nhật trạng thái văn bản',
+    name: 'Cập nhật trạng thái CV/VB',
     apiPath: '/api/v1/documents/:id',
     method: 'PATCH',
     module: 'DOCUMENTS',
@@ -718,7 +718,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '6684fc817e6150f6975463aa',
-    name: 'Cập nhật tên văn bản',
+    name: 'Cập nhật tên CV/VB',
     apiPath: '/api/v1/documents/:id',
     method: 'PUT',
     module: 'DOCUMENTS',
@@ -734,7 +734,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '648ad56ddafdb9754f40b87c',
-    name: 'Xem danh sách văn bản theo thành viên',
+    name: 'Xem danh sách CV/VB theo thành viên',
     apiPath: '/api/v1/documents/by-user',
     method: 'POST',
     module: 'DOCUMENTS',
@@ -750,7 +750,7 @@ export const INIT_PERMISSIONS = [
   },
   {
     _id: '6666f037cea8012c358bae9e',
-    name: 'Xem số lượng văn bản',
+    name: 'Xem số lượng CV/VB',
     apiPath: '/api/v1/documents/count',
     method: 'POST',
     module: 'DOCUMENTS',

@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType } from '@nestjs/mapped-types';
 import { CreateDocumentDto } from './create-document.dto';
 import {
   IsArray,
@@ -38,21 +38,14 @@ class History {
   updatedBy: UpdatedBy;
 }
 
-export class UpdateDocumentDto extends PartialType(CreateDocumentDto) {
+export class UpdateDocumentDto extends OmitType(CreateDocumentDto, [
+  'url',
+  'email',
+  'userId',
+]) {
   @IsOptional()
   @IsNotEmpty({ message: 'ID không được để trống' })
   _id: string;
-
-  @IsOptional()
-  id: string;
-
-  @IsOptional()
-  @IsNotEmpty({ message: 'Tên CV/VB không được để trống' })
-  name: string;
-
-  @IsOptional()
-  @IsNotEmpty({ message: 'Trạng thái không được để trống' })
-  status: string;
 
   @IsOptional()
   @IsNotEmpty({ message: 'Lịch sử không được để trống' })

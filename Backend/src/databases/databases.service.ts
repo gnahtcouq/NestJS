@@ -105,14 +105,14 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('648ad4ccdafdb9754f40b859'), // xem danh sách bài đăng
               new ObjectId('648ad4d9dafdb9754f40b85e'), // xoá bài đăng
               new ObjectId('6666f06b3254c2be902bfe5e'), // xem số lượng bài đăng
-              new ObjectId('648ad4fedafdb9754f40b863'), // tạo mới văn bản
-              new ObjectId('648ad511dafdb9754f40b868'), // xem danh sách văn bản
-              new ObjectId('648ad522dafdb9754f40b86d'), // xem thông tin chi tiết văn bản
-              new ObjectId('648ad53bdafdb9754f40b872'), // xoá văn bản
-              new ObjectId('648ad555dafdb9754f40b877'), // cập nhật trạng thái văn bản
-              new ObjectId('6684fc817e6150f6975463aa'), // cập nhật tên văn bản
-              new ObjectId('648ad56ddafdb9754f40b87c'), // xem danh sách văn bản theo thành viên
-              new ObjectId('6666f037cea8012c358bae9e'), // xem số lượng văn bản
+              new ObjectId('648ad4fedafdb9754f40b863'), // tạo mới CV/VB
+              new ObjectId('648ad511dafdb9754f40b868'), // xem danh sách CV/VB
+              new ObjectId('648ad522dafdb9754f40b86d'), // xem thông tin chi tiết CV/VB
+              new ObjectId('648ad53bdafdb9754f40b872'), // xoá CV/VB
+              new ObjectId('648ad555dafdb9754f40b877'), // cập nhật trạng thái CV/VB
+              new ObjectId('6684fc817e6150f6975463aa'), // cập nhật tên CV/VB
+              new ObjectId('648ad56ddafdb9754f40b87c'), // xem danh sách CV/VB theo thành viên
+              new ObjectId('6666f037cea8012c358bae9e'), // xem số lượng CV/VB
               new ObjectId('669659a0c5d4e84cd7515859'), // tạo mới công đoàn phí
               new ObjectId('66965b6286e8a509567a218e'), // xem danh sách công đoàn phí
               new ObjectId('66a5e5a406d2f0606ea29bae'), // lấy thông tin đóng công đoàn phí theo công đoàn viên

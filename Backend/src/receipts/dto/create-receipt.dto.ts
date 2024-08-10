@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsDate, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsDate, IsNotEmpty, Matches, MaxLength } from 'class-validator';
 import { IsAmountInRange } from 'src/util/is-amount-in-range.validator';
 import { IsValidDateRange } from 'src/util/is-valid-date-range.validator';
 import { IsValidIncomeCategoryCode } from 'src/util/is-valid-income-category-code.validator';
@@ -33,6 +33,9 @@ export class CreateReceiptDto {
   amount: string;
 
   @IsNotEmpty({ message: 'Mã thành viên không được để trống' })
+  @Matches(/^STU\d{5}$/, {
+    message: 'Mã thành viên phải có định dạng STU00001 với 00001 là số',
+  })
   userId: string;
 
   @IsNotEmpty({

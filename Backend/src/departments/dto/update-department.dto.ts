@@ -1,21 +1,9 @@
+import { OmitType } from '@nestjs/mapped-types';
 import { IsNotEmpty, IsOptional } from 'class-validator';
+import { CreateDepartmentDto } from 'src/departments/dto/create-department.dto';
 
-export class UpdateDepartmentDto {
+export class UpdateDepartmentDto extends OmitType(CreateDepartmentDto, []) {
   @IsOptional()
-  @IsNotEmpty({
-    message: 'Tên không được để trống',
-  })
-  name: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Mô tả không được để trống',
-  })
-  description: string;
-
-  @IsOptional()
-  @IsNotEmpty({
-    message: 'Logo không được để trống',
-  })
-  logo: string;
+  @IsNotEmpty({ message: 'ID không được để trống' })
+  _id: string;
 }
