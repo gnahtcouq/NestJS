@@ -99,6 +99,9 @@ export class CreateUserDto {
   permissions: mongoose.Schema.Types.ObjectId[];
 
   @IsOptional()
+  @MaxLength(50, {
+    message: 'Ghi chú phải có độ dài dưới 50 kí tự',
+  })
   note: string;
 }
 

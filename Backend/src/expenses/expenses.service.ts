@@ -256,7 +256,7 @@ export class ExpensesService {
   async uploadFile(file: Express.Multer.File, user: IUser) {
     // Kiểm tra xem file có tồn tại không
     if (!file) {
-      throw new BadRequestException('Không tìm thấy file để tải lên');
+      throw new BadRequestException('Không tìm thấy file để nhập dữ liệu');
     }
 
     // Kiểm tra loại file

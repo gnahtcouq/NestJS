@@ -51,7 +51,12 @@ export const formatCurrency = (value) => {
     .replace(/\./g, ',');
 };
 
-export function isValidDateRange(datePart, format) {
+export const isValidEmail = (email: string): boolean => {
+  const emailRegex = /@stu\.edu\.vn$/;
+  return emailRegex.test(email);
+};
+
+export const isValidDateRange = (datePart, format) => {
   let year, month, day;
 
   switch (format) {
@@ -115,13 +120,36 @@ export function isValidDateRange(datePart, format) {
   const isBeforeCurrentDate = dayjs(date).isSameOrBefore(currentDate, 'day');
 
   return isAfterMinDate && isBeforeCurrentDate;
-}
+};
 
-export function isValidTypeDateRangeId(id, type, format) {
+export const isValidDateOfBirth = (birthDate: string): boolean => {
+  // Kiểm tra ngày sinh có hợp lệ không
+  if (!isValidDateRange(birthDate, 'dd/mm/yyyy')) {
+    return false;
+  }
+
+  // Chuyển đổi ngày sinh thành đối tượng dayjs
+  const birthDateDayjs = dayjs(birthDate, 'DD/MM/YYYY');
+
+  // Ngày hiện tại
+  const today = dayjs();
+
+  // Ngày đủ 18 tuổi
+  const eighteenYearsAgo = today.subtract(18, 'year');
+
+  // Kiểm tra ngày sinh không nhỏ hơn 01/01/1970 và người đó phải từ 18 tuổi trở lên
+  const minDate = dayjs('1970-01-01');
+  return (
+    birthDateDayjs.isSameOrAfter(minDate, 'day') &&
+    birthDateDayjs.isBefore(eighteenYearsAgo, 'day')
+  );
+};
+
+export const isValidTypeDateRangeId = (id, type, format) => {
   const typeRegex = new RegExp(`^${type}(\\d{8})$`);
   const match = id.match(typeRegex);
   if (!match) return false;
 
   const datePart = match[1];
   return isValidDateRange(datePart, format);
-}
+};

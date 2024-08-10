@@ -32,6 +32,11 @@ import { parse, formatISO } from 'date-fns';
 import { UsersService } from 'src/users/users.service';
 import dayjs from 'dayjs';
 import { UpdateInfoUnionistDto } from 'src/unionists/dto/update-unionist-info.dto';
+import {
+  isValidDateOfBirth,
+  isValidDateRange,
+  isValidEmail,
+} from 'src/util/utils';
 
 @Injectable()
 export class UnionistsService {
@@ -80,8 +85,8 @@ export class UnionistsService {
     // Convert email to lowercase
     email = email.toLowerCase();
 
-    if (!this.isValidEmail(email)) {
-      throw new BadRequestException('Email mới không hợp lệ');
+    if (!isValidEmail(email)) {
+      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
     }
 
     const isExistUnionist = await this.unionistModel.findOne({ email });
@@ -363,8 +368,8 @@ export class UnionistsService {
     unionist: IUnionist,
   ) {
     // Validate new email format
-    if (!this.isValidEmail(newEmail)) {
-      throw new BadRequestException('Email mới không hợp lệ');
+    if (!isValidEmail(newEmail)) {
+      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
     }
 
     const isExist = await this.unionistModel.findOne({ email: newEmail });
@@ -435,8 +440,8 @@ export class UnionistsService {
     const newEmail = this.decrypt(encryptedNewEmail);
 
     // Kiểm tra định dạng email mới
-    if (!this.isValidEmail(newEmail)) {
-      throw new BadRequestException('Email mới không hợp lệ');
+    if (!isValidEmail(newEmail)) {
+      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
     }
 
     // Tìm kiếm unionist theo unionistId và verificationCode
@@ -464,7 +469,7 @@ export class UnionistsService {
 
   async requestForgotPassword(email: string) {
     // Validate email format
-    if (email && !this.isValidEmail(email)) {
+    if (email && !isValidEmail(email)) {
       throw new BadRequestException('Email không hợp lệ');
     }
 
@@ -577,26 +582,8 @@ export class UnionistsService {
     return result;
   }
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  }
-
   async changePassword(id: string, changePasswordDto: ChangePasswordDto) {
     const { currentPassword, newPassword } = changePasswordDto;
-
-    if (
-      !(
-        /[a-z]/.test(newPassword) &&
-        /[A-Z]/.test(newPassword) &&
-        /\d/.test(newPassword) &&
-        newPassword.length >= 8
-      )
-    ) {
-      throw new BadRequestException(
-        'Mật khẩu mới phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
-      );
-    }
 
     const foundUser = await this.findOneWithPassword(id);
     if (!foundUser) {
@@ -624,7 +611,7 @@ export class UnionistsService {
   async uploadFile(file: Express.Multer.File, user: IUser) {
     // Kiểm tra xem file có tồn tại không
     if (!file) {
-      throw new BadRequestException('Không tìm thấy file để tải lên');
+      throw new BadRequestException('Không tìm thấy file để nhập dữ liệu');
     }
 
     // Kiểm tra loại file
@@ -648,9 +635,10 @@ export class UnionistsService {
     const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
 
     const invalidRows = [];
+    const existingEmail = [];
 
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
-    const filteredData = data.slice(1).filter((row, index) => {
+    const filteredData = data.slice(1).filter(async (row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
       if ((row as any[]).length < 10) {
         // Cần ít nhất 11 cột
@@ -664,7 +652,7 @@ export class UnionistsService {
       const unionistGender = row[2];
       const unionistBirthday = row[3];
       const unionistCCCD = row[4] || null;
-      const unionistAddress = row[5];
+      const unionistAddress = row[5] || null;
       const unionistNote = row[6] || null;
       const unionistJoiningDate = row[7] || null;
       const unionistLeavingDate = row[8] || null;
@@ -675,15 +663,14 @@ export class UnionistsService {
         !unionistEmail ||
         !unionistName ||
         !unionistGender ||
-        !unionistBirthday ||
-        !unionistAddress
+        !unionistBirthday
       ) {
         invalidRows.push(index + 2);
         return false;
       }
 
       // Kiểm tra email
-      if (!this.isValidEmail(unionistEmail)) {
+      if (!isValidEmail(unionistEmail)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -698,44 +685,12 @@ export class UnionistsService {
         return false;
       }
 
-      // Kiểm tra ngày sinh
-      const dayMonthYearRegex =
-        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-      if (!dayMonthYearRegex.test(unionistBirthday)) {
+      if (!isValidDateOfBirth(unionistBirthday)) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      const [day, month, year] = unionistBirthday.split('/').map(Number);
-      // Kiểm tra năm sinh không nhỏ hơn 1900
-      if (year < 1900) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
-      const isValidDate = (
-        day: number,
-        month: number,
-        year: number,
-      ): boolean => {
-        const date = new Date(year, month - 1, day);
-        return (
-          date.getFullYear() === year &&
-          date.getMonth() === month - 1 &&
-          date.getDate() === day
-        );
-      };
-
-      if (!isValidDate(day, month, year)) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
-      // Kiểm tra tuổi
-      const dateOfBirth = dayjs(new Date(year, month - 1, day));
-      const today = dayjs();
-      const age = today.diff(dateOfBirth, 'year');
-      if (age < 18) {
+      if (unionistName.length > 30) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -746,83 +701,54 @@ export class UnionistsService {
         return false;
       }
 
-      if (unionistName && unionistName.length > 30) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
       if (unionistNote && unionistNote.length > 50) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      if (unionistAddress && unionistAddress.length > 50) {
+      if (unionistAddress && unionistAddress.length > 150) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      // Kiểm tra ngày tham gia nếu có
-      if (unionistJoiningDate) {
-        const [jDay, jMonth, jYear] = unionistJoiningDate
-          .split('/')
-          .map(Number);
-        if (
-          !dayMonthYearRegex.test(unionistJoiningDate) ||
-          !isValidDate(jDay, jMonth, jYear) ||
-          jYear < 1900 ||
-          jYear > today.year()
-        ) {
-          invalidRows.push(index + 2);
-          return false;
-        }
-        // Kiểm tra ngày không nằm sau ngày hiện tại
-        if (dayjs(new Date(jYear, jMonth - 1, jDay)).isAfter(dayjs())) {
-          invalidRows.push(index + 2);
-          return false;
-        }
+      // Kiểm tra ngày chuyển đến nếu có
+      if (
+        unionistJoiningDate &&
+        !isValidDateRange(unionistJoiningDate, 'dd/mm/yyyy')
+      ) {
+        invalidRows.push(index + 2);
+        return false;
       }
 
-      // Kiểm tra ngày rời khỏi nếu có
-      if (unionistLeavingDate) {
-        const [lDay, lMonth, lYear] = unionistLeavingDate
-          .split('/')
-          .map(Number);
-        if (
-          !dayMonthYearRegex.test(unionistLeavingDate) ||
-          !isValidDate(lDay, lMonth, lYear) ||
-          lYear < 1900 ||
-          lYear > today.year()
-        ) {
-          invalidRows.push(index + 2);
-          return false;
-        }
-        // Kiểm tra ngày không nằm sau ngày hiện tại
-        if (dayjs(new Date(lYear, lMonth - 1, lDay)).isAfter(dayjs())) {
-          invalidRows.push(index + 2);
-          return false;
-        }
+      // Kiểm tra ngày rời đi nếu có
+      if (
+        unionistLeavingDate &&
+        !isValidDateRange(unionistLeavingDate, 'dd/mm/yyyy')
+      ) {
+        invalidRows.push(index + 2);
+        return false;
       }
 
       // Kiểm tra ngày gia nhập công đoàn nếu có
-      if (unionistUnionEntryDate) {
-        const [ueDay, ueMonth, ueYear] = unionistUnionEntryDate
-          .split('/')
-          .map(Number);
-        if (
-          !dayMonthYearRegex.test(unionistUnionEntryDate) ||
-          !isValidDate(ueDay, ueMonth, ueYear) ||
-          ueYear < 1900 ||
-          ueYear > today.year()
-        ) {
-          invalidRows.push(index + 2);
-          return false;
-        }
-        // Kiểm tra ngày không nằm sau ngày hiện tại
-        if (dayjs(new Date(ueYear, ueMonth - 1, ueDay)).isAfter(dayjs())) {
-          invalidRows.push(index + 2);
-          return false;
-        }
+      if (
+        unionistUnionEntryDate &&
+        !isValidDateRange(unionistUnionEntryDate, 'dd/mm/yyyy')
+      ) {
+        invalidRows.push(index + 2);
+        return false;
       }
+
+      // Kiểm tra xem bản ghi đã tồn tại chưa
+      const existingUnionist = await this.unionistModel.findOne({
+        name: unionistName,
+        email: unionistEmail,
+      });
+
+      const isExistUser = await this.usersService.findOneByUserName(
+        unionistEmail,
+      );
+
+      if (existingUnionist || isExistUser) existingEmail.push(index + 2);
 
       return true;
     });
@@ -830,11 +756,9 @@ export class UnionistsService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0) {
-      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
-    } else if (invalidRows.length > 0) {
+    if (filteredData.length === 0 || invalidRows.length > 0) {
       throw new BadRequestException(
-        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+        'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
     }
 
@@ -893,61 +817,50 @@ export class UnionistsService {
         formattedDateUnionEntry = formatISO(parsedUnionEntryDate);
       }
 
-      try {
-        // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingUnionist = await this.unionistModel.findOne({
-          name: unionistName,
-          email: unionistEmail,
-        });
-
-        const isExistUser = await this.usersService.findOneByUserName(
-          unionistEmail,
-        );
-
-        if (existingUnionist || isExistUser) {
+      if (existingEmail.length > 0) {
+        try {
+          // Tạo mới bản ghi unionist
+          await this.unionistModel.create({
+            name: unionistName,
+            password: this.getHashPassword(
+              this.configService.get<string>('INIT_PASSWORD'),
+            ),
+            email: unionistEmail,
+            gender: unionistGender,
+            dateOfBirth: formattedDateBirthday,
+            CCCD: unionistCCCD,
+            address: unionistAddress,
+            note: unionistNote,
+            permissions: [
+              new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
+              new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
+              new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
+              new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
+              new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
+              new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
+            ],
+            joiningDate: formattedDateJoining,
+            leavingDate: formattedDateLeaving,
+            unionEntryDate: formattedDateUnionEntry,
+            createdBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          });
+        } catch (error) {
           throw new BadRequestException(
-            `Công đoàn viên ${unionistName} với email ${unionistEmail} đã tồn tại`,
+            `Lỗi khi lưu dữ liệu: ${error.message}`,
           );
         }
-
-        // Tạo mới bản ghi unionist
-        await this.unionistModel.create({
-          name: unionistName,
-          password: this.getHashPassword(
-            this.configService.get<string>('INIT_PASSWORD'),
-          ),
-          email: unionistEmail,
-          gender: unionistGender,
-          dateOfBirth: formattedDateBirthday,
-          CCCD: unionistCCCD,
-          address: unionistAddress,
-          note: unionistNote,
-          permissions: [
-            new ObjectId('666f3672d8d4bd537d4407ef'), //Xem thông tin chi tiết công đoàn viên
-            new ObjectId('66b45770a24d3fc3d850430c'), //Công đoàn viên cập nhật thông tin
-            new ObjectId('6694cc16fda6b0a670cd3e42'), //Gửi yêu cầu thay đổi email
-            new ObjectId('6694cc7cfda6b0a670cd3e4b'), //Xác nhận thay đổi email
-            new ObjectId('6694cc9d047108a8053a8cce'), //Thay đổi mật khẩu
-            new ObjectId('66a5e5a406d2f0606ea29bae'), //Lấy thông tin đóng công đoàn phí
-          ],
-          joiningDate: formattedDateJoining,
-          leavingDate: formattedDateLeaving,
-          unionEntryDate: formattedDateUnionEntry,
-          createdBy: {
-            _id: user._id,
-            email: user.email,
-          },
-          isDeleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      } catch (error) {
-        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      } else {
+        throw new BadRequestException(
+          'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
+        );
       }
     }
 
     return {
-      message: 'Tải file lên thành công',
+      message: 'Nhập dữ liệu từ file excel thành công',
       totalRowsRead,
       validRowsCount,
     };

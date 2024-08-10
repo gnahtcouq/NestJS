@@ -27,8 +27,8 @@ import { ObjectId } from 'mongodb'; // Import the ObjectId class from the 'mongo
 import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
 import { UnionistsService } from 'src/unionists/unionists.service';
-import dayjs from 'dayjs';
 import { UpdateInfoUserDto } from 'src/users/dto/update-user-info.dto';
+import { isValidDateOfBirth, isValidEmail } from 'src/util/utils';
 @Injectable()
 export class UsersService {
   private readonly encryptionKey: Buffer;
@@ -61,10 +61,6 @@ export class UsersService {
 
     // Convert email to lowercase
     email = email.toLowerCase();
-
-    if (!this.isValidEmail(email)) {
-      throw new BadRequestException('Email mới không hợp lệ');
-    }
 
     //logic check email exist
     const isExist = await this.userModel.findOne({ email });
@@ -105,8 +101,8 @@ export class UsersService {
     // Convert email to lowercase
     email = email.toLowerCase();
 
-    if (!this.isValidEmail(email)) {
-      throw new BadRequestException('Email mới không hợp lệ');
+    if (!isValidEmail(email)) {
+      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
     }
 
     //logic check email exist
@@ -395,8 +391,8 @@ export class UsersService {
 
   async requestChangeEmail(userId: string, newEmail: string, user: IUser) {
     // Validate new email format
-    if (!this.isValidEmail(newEmail)) {
-      throw new BadRequestException('Email mới không hợp lệ');
+    if (!isValidEmail(newEmail)) {
+      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
     }
 
     const isExist = await this.userModel.findOne({ email: newEmail });
@@ -472,8 +468,8 @@ export class UsersService {
     const newEmail = this.decrypt(encryptedNewEmail);
 
     // Kiểm tra định dạng email mới
-    if (!this.isValidEmail(newEmail)) {
-      throw new BadRequestException('Email mới không hợp lệ');
+    if (!isValidEmail(newEmail)) {
+      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
     }
 
     // Tìm kiếm user theo userId và verificationCode
@@ -501,7 +497,7 @@ export class UsersService {
 
   async requestForgotPassword(email: string) {
     // Validate email format
-    if (email && !this.isValidEmail(email)) {
+    if (email && !isValidEmail(email)) {
       throw new BadRequestException('Email không hợp lệ');
     }
 
@@ -614,26 +610,8 @@ export class UsersService {
     return result;
   }
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  }
-
   async changePassword(id: string, changePasswordDto: ChangePasswordDto) {
     const { currentPassword, newPassword } = changePasswordDto;
-
-    if (
-      !(
-        /[a-z]/.test(newPassword) &&
-        /[A-Z]/.test(newPassword) &&
-        /\d/.test(newPassword) &&
-        newPassword.length >= 8
-      )
-    ) {
-      throw new BadRequestException(
-        'Mật khẩu mới phải có ít nhất một ký tự thường, một ký tự hoa, một số và có độ dài tối thiểu là 8 ký tự',
-      );
-    }
 
     const foundUser = await this.findOneWithPassword(id);
     if (!foundUser) {
@@ -661,7 +639,7 @@ export class UsersService {
   async uploadFile(file: Express.Multer.File, user: IUser) {
     // Kiểm tra xem file có tồn tại không
     if (!file) {
-      throw new BadRequestException('Không tìm thấy file để tải lên');
+      throw new BadRequestException('Không tìm thấy file để nhập dữ liệu');
     }
 
     // Kiểm tra loại file
@@ -685,9 +663,10 @@ export class UsersService {
     const totalRowsRead = data.length - 1; // Trừ đi hàng đầu tiên là header
 
     const invalidRows = [];
+    const existingEmail = [];
 
     // Lọc bỏ các dòng rỗng và kiểm tra dữ liệu hợp lệ
-    const filteredData = data.slice(1).filter((row, index) => {
+    const filteredData = data.slice(1).filter(async (row, index) => {
       // Kiểm tra dòng có đủ các cột cần thiết không
       if ((row as any[]).length < 7) {
         // Cần ít nhất 8 cột
@@ -701,23 +680,17 @@ export class UsersService {
       const userGender = row[2];
       const userBirthday = row[3];
       const userCCCD = row[4] || null;
-      const userAddress = row[5];
+      const userAddress = row[5] || null;
       const userNote = row[6] || null;
 
       // Kiểm tra các giá trị cần thiết
-      if (
-        !userEmail ||
-        !userName ||
-        !userGender ||
-        !userBirthday ||
-        !userAddress
-      ) {
+      if (!userEmail || !userName || !userGender || !userBirthday) {
         invalidRows.push(index + 2);
         return false;
       }
 
       // Kiểm tra email
-      if (!this.isValidEmail(userEmail)) {
+      if (!isValidEmail(userEmail)) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -732,44 +705,12 @@ export class UsersService {
         return false;
       }
 
-      // Kiểm tra ngày sinh
-      const dayMonthYearRegex =
-        /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-      if (!dayMonthYearRegex.test(userBirthday)) {
+      if (!isValidDateOfBirth(userBirthday)) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      const [day, month, year] = userBirthday.split('/').map(Number);
-      // Kiểm tra năm sinh không nhỏ hơn 1900
-      if (year < 1900) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
-      const isValidDate = (
-        day: number,
-        month: number,
-        year: number,
-      ): boolean => {
-        const date = new Date(year, month - 1, day);
-        return (
-          date.getFullYear() === year &&
-          date.getMonth() === month - 1 &&
-          date.getDate() === day
-        );
-      };
-
-      if (!isValidDate(day, month, year)) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
-      // Kiểm tra tuổi
-      const dateOfBirth = dayjs(new Date(year, month - 1, day));
-      const today = dayjs();
-      const age = today.diff(dateOfBirth, 'year');
-      if (age < 18) {
+      if (userName.length > 30) {
         invalidRows.push(index + 2);
         return false;
       }
@@ -780,20 +721,27 @@ export class UsersService {
         return false;
       }
 
-      if (userName && userName.length > 30) {
-        invalidRows.push(index + 2);
-        return false;
-      }
-
       if (userNote && userNote.length > 50) {
         invalidRows.push(index + 2);
         return false;
       }
 
-      if (userAddress && userAddress.length > 50) {
+      if (userAddress && userAddress.length > 150) {
         invalidRows.push(index + 2);
         return false;
       }
+
+      // Kiểm tra xem bản ghi đã tồn tại chưa
+      const existingUser = await this.userModel.findOne({
+        name: userName,
+        email: userEmail,
+      });
+
+      const isExistUnionist = await this.unionistsService.findOneByUserName(
+        userEmail,
+      );
+
+      if (existingUser || isExistUnionist) existingEmail.push(index + 2);
 
       return true;
     });
@@ -801,11 +749,9 @@ export class UsersService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0) {
-      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
-    } else if (invalidRows.length > 0) {
+    if (filteredData.length === 0 || invalidRows.length > 0) {
       throw new BadRequestException(
-        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+        'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
     }
 
@@ -816,7 +762,7 @@ export class UsersService {
       const userGender = row[2];
       const userBirthday = row[3];
       const userCCCD = row[4] || null;
-      const userAddress = row[5];
+      const userAddress = row[5] || null;
       const userNote = row[6] || null;
 
       const [day, month, year] = userBirthday.split('/');
@@ -827,57 +773,46 @@ export class UsersService {
       );
       const formattedDate = formatISO(parsedDate);
 
-      try {
-        // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingUser = await this.userModel.findOne({
-          name: userName,
-          email: userEmail,
-        });
-
-        const isExistUnionist = await this.unionistsService.findOneByUserName(
-          userEmail,
-        );
-
-        if (existingUser || isExistUnionist) {
+      if (existingEmail.length > 0) {
+        try {
+          // Tạo mới bản ghi user
+          await this.userModel.create({
+            name: userName,
+            password: this.getHashPassword(
+              this.configService.get<string>('INIT_PASSWORD'),
+            ),
+            email: userEmail,
+            gender: userGender,
+            dateOfBirth: formattedDate,
+            CCCD: userCCCD,
+            address: userAddress,
+            note: userNote,
+            permissions: [
+              new ObjectId('648ab6e7fa16b294212e4038'), // Xem thông tin chi tiết thành viên
+              new ObjectId('66b45ddc19284769298415e9'), // Thành viên cập nhật thông tin
+              new ObjectId('6688dfd0a9b3d97d1b368c44'), // Gửi yêu cầu thay đổi email
+              new ObjectId('66890545d40c708b15d2f329'), // Xác nhận thay đổi email
+              new ObjectId('668b84dce8720bbbd18c7e77'), // Thay đổi mật khẩu
+            ],
+            createdBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          });
+        } catch (error) {
           throw new BadRequestException(
-            `Thành viên ${userName} với email ${userEmail} đã tồn tại`,
+            `Lỗi khi lưu dữ liệu: ${error.message}`,
           );
         }
-
-        // Tạo mới bản ghi user
-        await this.userModel.create({
-          name: userName,
-          password: this.getHashPassword(
-            this.configService.get<string>('INIT_PASSWORD'),
-          ),
-          email: userEmail,
-          gender: userGender,
-          dateOfBirth: formattedDate,
-          CCCD: userCCCD,
-          address: userAddress,
-          note: userNote,
-          permissions: [
-            new ObjectId('648ab6e7fa16b294212e4038'), // Xem thông tin chi tiết thành viên
-            new ObjectId('66b45ddc19284769298415e9'), // Thành viên cập nhật thông tin
-            new ObjectId('6688dfd0a9b3d97d1b368c44'), // Gửi yêu cầu thay đổi email
-            new ObjectId('66890545d40c708b15d2f329'), // Xác nhận thay đổi email
-            new ObjectId('668b84dce8720bbbd18c7e77'), // Thay đổi mật khẩu
-          ],
-          createdBy: {
-            _id: user._id,
-            email: user.email,
-          },
-          isDeleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      } catch (error) {
-        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
+      } else {
+        throw new BadRequestException(
+          'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
+        );
       }
     }
 
     return {
-      message: 'Tải file lên thành công',
+      message: 'Nhập dữ liệu từ file excel thành công',
       totalRowsRead,
       validRowsCount,
     };
