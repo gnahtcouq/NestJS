@@ -115,6 +115,7 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('6666f037cea8012c358bae9e'), // xem số lượng văn bản
               new ObjectId('669659a0c5d4e84cd7515859'), // tạo mới công đoàn phí
               new ObjectId('66965b6286e8a509567a218e'), // xem danh sách công đoàn phí
+              new ObjectId('66a5e5a406d2f0606ea29bae'), // lấy thông tin đóng công đoàn phí theo công đoàn viên
               new ObjectId('66965e152d2ec3b0bfc03595'), // xem thông tin chi tiết công đoàn phí
               new ObjectId('66965e332d2ec3b0bfc0359e'), // cập nhật thông tin công đoàn phí
               new ObjectId('66968e1a0979f9a91572e2ff'), // xoá công đoàn phí
@@ -137,12 +138,14 @@ export class DatabasesService implements OnModuleInit {
               new ObjectId('66b06341f7e7667af5893c87'), // xuất phiếu chi ra file pdf
               new ObjectId('6696d7d601d85c000b573a7d'), // tạo mới danh mục thu
               new ObjectId('6696d7ff01d85c000b573a86'), // xem danh sách danh mục thu
+              new ObjectId('66a7a0f074da797d021c8fa5'), // lấy thông tin danh mục thu theo thời gian
               new ObjectId('6696d82301d85c000b573a8f'), // xem thông tin chi tiết danh mục thu
               new ObjectId('6696d84201d85c000b573a98'), // cập nhật thông tin danh mục thu
               new ObjectId('6696d86201d85c000b573aa9'), // xoá danh mục thu
               new ObjectId('66983866b6e411bcaa957dbb'), // tải lên danh sách danh mục thu
               new ObjectId('6696d7d601d85c000b529a7d'), // tạo mới danh mục chi
               new ObjectId('6696d7ff01d85c000b530a86'), // xem danh sách danh mục chi
+              new ObjectId('66a84674201f3104030b05a6'), // lấy thông tin danh mục chi theo thời gian
               new ObjectId('6696d82301d85c000b531a8f'), // xem thông tin chi tiết danh mục chi
               new ObjectId('6696d84201d85c000b532a98'), // cập nhật thông tin danh mục chi
               new ObjectId('6696d86201d85c000b533aa9'), // xoá danh mục chi
