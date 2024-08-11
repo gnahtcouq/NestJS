@@ -22,7 +22,6 @@ import { IncomeCategoriesModule } from './income-categories/income-categories.mo
 import { ExpensesModule } from './expenses/expenses.module';
 import { ExpenseCategoriesModule } from './expense-categories/expense-categories.module';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -65,7 +64,6 @@ import { HealthModule } from './health/health.module';
     IncomeCategoriesModule,
     ExpensesModule,
     ExpenseCategoriesModule,
-    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
