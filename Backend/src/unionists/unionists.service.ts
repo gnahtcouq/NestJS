@@ -32,11 +32,14 @@ import { UsersService } from 'src/users/users.service';
 import { UpdateInfoUnionistDto } from 'src/unionists/dto/update-unionist-info.dto';
 import {
   convertToISODate,
+  decrypt,
+  encrypt,
   isValidDateOfBirth,
   isValidDateRange,
   isValidEmail,
 } from 'src/util/utils';
 import { isNull } from 'util';
+import { sendNotification } from '../util/utils';
 
 @Injectable()
 export class UnionistsService {
@@ -391,24 +394,6 @@ export class UnionistsService {
     return await this.unionistModel.countDocuments({ isDeleted: false });
   }
 
-  private encrypt(text: string): string {
-    const iv = randomBytes(this.ivLength);
-    const cipher = createCipheriv('aes-256-cbc', this.encryptionKey, iv);
-    let encrypted = cipher.update(text);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return iv.toString('hex') + ':' + encrypted.toString('hex');
-  }
-
-  private decrypt(text: string): string {
-    const textParts = text.split(':');
-    const iv = Buffer.from(textParts.shift(), 'hex');
-    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-    const decipher = createDecipheriv('aes-256-cbc', this.encryptionKey, iv);
-    let decrypted = decipher.update(encryptedText);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    return decrypted.toString();
-  }
-
   async requestChangeEmail(
     unionistId: string,
     newEmail: string,
@@ -439,7 +424,11 @@ export class UnionistsService {
     );
 
     // Encrypt new email
-    const encryptedNewEmail = this.encrypt(newEmail);
+    const encryptedNewEmail = encrypt(
+      newEmail,
+      this.ivLength,
+      this.encryptionKey,
+    );
 
     // Lấy email hiện tại từ cơ sở dữ liệu
     const currentUser = await this.unionistModel
@@ -484,7 +473,7 @@ export class UnionistsService {
     encryptedNewEmail: string,
   ) {
     // Decrypt email mới
-    const newEmail = this.decrypt(encryptedNewEmail);
+    const newEmail = decrypt(encryptedNewEmail, this.encryptionKey);
 
     // Kiểm tra định dạng email mới
     if (!isValidEmail(newEmail)) {
@@ -534,6 +523,17 @@ export class UnionistsService {
     const verificationExpiresPassword = new Date(Date.now() + 20 * 60 * 1000); // 20 phút
 
     let result = null;
+
+    if (isExist.phoneNumber !== null) {
+      try {
+        await sendNotification(isExist.phoneNumber, verificationCodePassword);
+      } catch (error) {
+        throw new BadRequestException(
+          'Lỗi khi gửi mã xác nhận qua tin nhắn Zalo',
+          error,
+        );
+      }
+    }
 
     if (isExist) {
       result = await this.unionistModel.updateOne(

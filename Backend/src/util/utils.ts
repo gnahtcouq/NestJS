@@ -1,5 +1,7 @@
-import { formatISO, parse } from 'date-fns';
 import dayjs from 'dayjs';
+import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
+import axios from 'axios';
+
 export const nonAccentVietnamese = (str: string) => {
   str = str.replace(/A|Á|À|Ã|Ạ|Â|Ấ|Ầ|Ẫ|Ậ|Ă|Ắ|Ằ|Ẵ|Ặ/g, 'A');
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
@@ -41,6 +43,28 @@ export const convertSlug = (str: string) => {
     .replace(/-+/g, '-'); // collapse dashes
 
   return str;
+};
+
+export const encrypt = (
+  text: string,
+  ivLength: number,
+  encryptionKey: Buffer,
+): string => {
+  const iv = randomBytes(ivLength);
+  const cipher = createCipheriv('aes-256-cbc', encryptionKey, iv);
+  let encrypted = cipher.update(text);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return iv.toString('hex') + ':' + encrypted.toString('hex');
+};
+
+export const decrypt = (text: string, encryptionKey: Buffer): string => {
+  const textParts = text.split(':');
+  const iv = Buffer.from(textParts.shift(), 'hex');
+  const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+  const decipher = createDecipheriv('aes-256-cbc', encryptionKey, iv);
+  let decrypted = decipher.update(encryptedText);
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
+  return decrypted.toString();
 };
 
 export const formatCurrency = (value) => {
@@ -173,4 +197,25 @@ export const convertToISODate = (dateStr: string): string => {
 
   // Định dạng đối tượng ngày thành ISO 8601
   return date.toISOString();
+};
+
+export const sendNotification = async (phoneNumber: string, otpStr: string) => {
+  const response = await axios.post(
+    `${process.env.ZNS_URL}`,
+    {
+      mode: 'development',
+      template_id: `${process.env.ZNS_TEMPLATE_ID}`,
+      template_data: {
+        otp: otpStr,
+      },
+      phone: phoneNumber,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        access_token: `${process.env.ZNS_ACCESS_TOKEN}`,
+      },
+    },
+  );
+  return response.data;
 };

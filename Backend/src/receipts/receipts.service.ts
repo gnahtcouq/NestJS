@@ -122,7 +122,11 @@ export class ReceiptsService {
     delete filter.current;
     delete filter.pageSize;
 
+    // Get the current year if not provided
+    const currentYear = new Date().getFullYear();
+
     let dateFilter = {};
+
     if (filter.year) {
       // Tìm kiếm theo năm
       const year = filter.year;
@@ -145,11 +149,17 @@ export class ReceiptsService {
       const end = new Date(
         new Date(`${endYear}-${endMonth}-01T00:00:00.000Z`).setMonth(
           parseInt(endMonth),
-        ) - 1,
+          0, // Set the day to the last day of the month
+        ),
       );
       dateFilter = { $gte: start, $lte: end };
       delete filter.startMonthYear;
       delete filter.endMonthYear;
+    } else {
+      // Default to current year if no year/monthYear/startMonthYear/endMonthYear filters are provided
+      const start = new Date(`${currentYear}-01-01T00:00:00.000Z`);
+      const end = new Date(`${currentYear}-12-31T23:59:59.999Z`);
+      dateFilter = { $gte: start, $lte: end };
     }
 
     if (Object.keys(dateFilter).length) {

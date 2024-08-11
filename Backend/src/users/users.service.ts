@@ -21,14 +21,19 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
-import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 import { ObjectId } from 'mongodb'; // Import the ObjectId class from the 'mongodb' module
 import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
 import { UnionistsService } from 'src/unionists/unionists.service';
 import { UpdateInfoUserDto } from 'src/users/dto/update-user-info.dto';
-import { isValidDateOfBirth, isValidEmail } from 'src/util/utils';
+import {
+  decrypt,
+  encrypt,
+  isValidDateOfBirth,
+  isValidEmail,
+  sendNotification,
+} from 'src/util/utils';
 @Injectable()
 export class UsersService {
   private readonly encryptionKey: Buffer;
@@ -382,24 +387,6 @@ export class UsersService {
     return await this.userModel.countDocuments({ isDeleted: false });
   }
 
-  private encrypt(text: string): string {
-    const iv = randomBytes(this.ivLength);
-    const cipher = createCipheriv('aes-256-cbc', this.encryptionKey, iv);
-    let encrypted = cipher.update(text);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return iv.toString('hex') + ':' + encrypted.toString('hex');
-  }
-
-  private decrypt(text: string): string {
-    const textParts = text.split(':');
-    const iv = Buffer.from(textParts.shift(), 'hex');
-    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-    const decipher = createDecipheriv('aes-256-cbc', this.encryptionKey, iv);
-    let decrypted = decipher.update(encryptedText);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    return decrypted.toString();
-  }
-
   async requestChangeEmail(userId: string, newEmail: string, user: IUser) {
     // Validate new email format
     if (!isValidEmail(newEmail)) {
@@ -433,7 +420,11 @@ export class UsersService {
     );
 
     // Encrypt new email
-    const encryptedNewEmail = this.encrypt(newEmail);
+    const encryptedNewEmail = encrypt(
+      newEmail,
+      this.ivLength,
+      this.encryptionKey,
+    );
 
     // Lấy email hiện tại từ cơ sở dữ liệu
     const currentUser = await this.userModel.findById(userId).select('email');
@@ -476,7 +467,7 @@ export class UsersService {
     encryptedNewEmail: string,
   ) {
     // Decrypt email mới
-    const newEmail = this.decrypt(encryptedNewEmail);
+    const newEmail = decrypt(encryptedNewEmail, this.encryptionKey);
 
     // Kiểm tra định dạng email mới
     if (!isValidEmail(newEmail)) {
@@ -538,17 +529,17 @@ export class UsersService {
     }
 
     // Lấy email hiện tại từ cơ sở dữ liệu
-    const currentUser = await this.userModel
-      .findOne({ email: email })
-      .select('email');
+    const currentUserEmail = isExist.email;
+
+    await sendNotification(isExist.phoneNumber, verificationCodePassword);
 
     // Send confirmation email to current email
     await this.sendForgotPasswordConfirmationEmail(
-      currentUser.email,
+      currentUserEmail,
       verificationCodePassword,
     );
 
-    return result;
+    return { _id: isExist._id, result };
   }
 
   async sendForgotPasswordConfirmationEmail(

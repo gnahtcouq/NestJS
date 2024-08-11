@@ -21,9 +21,16 @@ import { ReceiptsModule } from './receipts/receipts.module';
 import { IncomeCategoriesModule } from './income-categories/income-categories.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { ExpenseCategoriesModule } from './expense-categories/expense-categories.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot({
+      ttl: 60, // 60s
+      limit: 10, // 10 lần
+    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -58,6 +65,7 @@ import { ExpenseCategoriesModule } from './expense-categories/expense-categories
     IncomeCategoriesModule,
     ExpensesModule,
     ExpenseCategoriesModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

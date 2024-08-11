@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -11,8 +10,6 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
-  BadRequestException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';

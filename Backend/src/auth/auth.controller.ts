@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Controller,
   Post,
@@ -8,16 +7,11 @@ import {
   Res,
   Req,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
-import {
-  Public,
-  ResponseMessage,
-  Unionist,
-  User,
-} from 'src/decorator/customize';
-import { IUnionist } from 'src/unionists/unionists.interface';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { UnionistsService } from 'src/unionists/unionists.service';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { IUser } from 'src/users/users.interface';
@@ -33,6 +27,8 @@ export class AuthController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard)
+  @Throttle(3, 60) //3 requests per 60 seconds
   @Post('/login')
   @ResponseMessage('Đăng nhập thành công')
   handleLogin(@Req() req, @Res({ passthrough: true }) response: Response) {
