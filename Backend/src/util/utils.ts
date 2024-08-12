@@ -199,23 +199,81 @@ export const convertToISODate = (dateStr: string): string => {
   return date.toISOString();
 };
 
+export const convertPhoneNumberToInternationalFormat = (phoneNumber) => {
+  // Giả định rằng số điện thoại Việt Nam luôn bắt đầu với 0
+  // và cần thêm mã quốc gia (84) ở đầu
+  return phoneNumber.startsWith('0')
+    ? '84' + phoneNumber.slice(1)
+    : phoneNumber;
+};
+
+const refreshTokenUrl = `${process.env.ZNS_REFRESH_TOKEN_URL}`;
+const refreshToken = `${process.env.ZNS_REFRESH_TOKEN}`;
+const secretKey = `${process.env.ZNS_SECRET_KEY}`;
+const appId = `${process.env.ZNS_APP_ID}`;
+
+let newAccessToken = process.env.ZNS_ACCESS_TOKEN;
+
+const getNewAccessToken = async () => {
+  try {
+    console.log('Tạo mới access token ZNS...');
+    const response = await axios.post(
+      refreshTokenUrl,
+      {
+        app_id: appId,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      },
+      {
+        headers: {
+          Secret_key: secretKey,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    );
+
+    newAccessToken = response.data.access_token;
+    console.log('access token mới:', newAccessToken);
+    process.env.ZNS_ACCESS_TOKEN = newAccessToken; // Cập nhật biến môi trường
+
+    // Cập nhật refreshToken nếu có mới
+    const newRefreshToken = response.data.refresh_token;
+    if (newRefreshToken) {
+      process.env.ZNS_REFRESH_TOKEN = newRefreshToken;
+    }
+  } catch (error) {
+    throw new Error('Lỗi khi tạo mới access token ZNS');
+  }
+};
+
 export const sendNotification = async (phoneNumber: string, otpStr: string) => {
-  const response = await axios.post(
-    `${process.env.ZNS_URL}`,
-    {
-      mode: 'development',
-      template_id: `${process.env.ZNS_TEMPLATE_ID}`,
-      template_data: {
-        otp: otpStr,
+  try {
+    const response = await axios.post(
+      `${process.env.ZNS_URL}`,
+      {
+        mode: 'development',
+        template_id: `${process.env.ZNS_TEMPLATE_ID}`,
+        template_data: {
+          otp: otpStr,
+        },
+        phone: phoneNumber,
       },
-      phone: phoneNumber,
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        access_token: `${process.env.ZNS_ACCESS_TOKEN}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          access_token: `${process.env.ZNS_ACCESS_TOKEN}`,
+        },
       },
-    },
-  );
-  return response.data;
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.error === -124) {
+      // Nếu token hết hạn, làm mới token và thử lại
+      await getNewAccessToken();
+      return sendNotification(phoneNumber, otpStr); // Gửi lại yêu cầu với token mới
+    } else {
+      throw error;
+    }
+  }
 };

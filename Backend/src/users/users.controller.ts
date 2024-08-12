@@ -12,6 +12,7 @@ import {
   Put,
   UseInterceptors,
   UploadedFile,
+  UseFilters,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,6 +23,8 @@ import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import { UpdateUserPermissionsDto } from 'src/users/dto/update-user-permissions';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateInfoUserDto } from 'src/users/dto/update-user-info.dto';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottleExceptionFilter } from 'src/core/throttle-exception.filter';
 
 @Controller('users') // => /users
 export class UsersController {
@@ -73,6 +76,9 @@ export class UsersController {
     return updatedUser;
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle(3, 60) //3 requests per 60 seconds
+  @UseFilters(new ThrottleExceptionFilter())
   @Patch('info/:id')
   @ResponseMessage('Thành viên cập nhật thông tin')
   async updateInfo(
@@ -114,6 +120,9 @@ export class UsersController {
     return this.usersService.countUsers();
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle(3, 60) //3 requests per 60 seconds
+  @UseFilters(new ThrottleExceptionFilter())
   @Post('request-change-email/:id')
   @ResponseMessage('Gửi yêu cầu thay đổi email')
   async requestChangeEmail(
@@ -129,6 +138,9 @@ export class UsersController {
     return { success: result };
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle(3, 60) //3 requests per 60 seconds
+  @UseFilters(new ThrottleExceptionFilter())
   @Post('confirm-change-email/:id')
   @ResponseMessage('Xác nhận thay đổi email')
   async confirmChangeEmail(
@@ -145,6 +157,9 @@ export class UsersController {
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle(3, 60) //3 requests per 60 seconds
+  @UseFilters(new ThrottleExceptionFilter())
   @Post('request-forgot-password')
   @ResponseMessage('Gửi yêu cầu đặt lại mật khẩu')
   async requestForgotPassword(@Body('email') email: string) {
@@ -153,6 +168,9 @@ export class UsersController {
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle(3, 60) //3 requests per 60 seconds
+  @UseFilters(new ThrottleExceptionFilter())
   @Post('confirm-forgot-password/:id')
   @ResponseMessage('Xác nhận đặt lại mật khẩu')
   async confirmForgotPassword(

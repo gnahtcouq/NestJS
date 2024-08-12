@@ -27,6 +27,7 @@ import * as xlsx from 'xlsx';
 import { parse, formatISO } from 'date-fns';
 import { UnionistsService } from 'src/unionists/unionists.service';
 import { UpdateInfoUserDto } from 'src/users/dto/update-user-info.dto';
+import { convertPhoneNumberToInternationalFormat } from '../util/utils';
 import {
   decrypt,
   encrypt,
@@ -531,7 +532,16 @@ export class UsersService {
     // Lấy email hiện tại từ cơ sở dữ liệu
     const currentUserEmail = isExist.email;
 
-    await sendNotification(isExist.phoneNumber, verificationCodePassword);
+    // Chuyển đổi số điện thoại từ định dạng nội địa sang quốc tế
+    const formattedPhoneNumber = convertPhoneNumberToInternationalFormat(
+      isExist.phoneNumber,
+    );
+
+    const res = await sendNotification(
+      formattedPhoneNumber,
+      verificationCodePassword,
+    );
+    console.log(res);
 
     // Send confirmation email to current email
     await this.sendForgotPasswordConfirmationEmail(
