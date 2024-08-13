@@ -313,7 +313,7 @@ export class FeesService {
         !monthYear ||
         isNaN(parseFee) ||
         parseFee < 1000 ||
-        parseFee >= 10000000000
+        parseFee > 10000000000
       ) {
         invalidRows.push(index + 2);
         return false;
@@ -338,11 +338,9 @@ export class FeesService {
     // Số dòng hợp lệ
     const validRowsCount = filteredData.length;
 
-    if (filteredData.length === 0) {
-      throw new BadRequestException('Không có dữ liệu hợp lệ trong file');
-    } else if (invalidRows.length > 0) {
+    if (filteredData.length === 0 && invalidRows.length > 0) {
       throw new BadRequestException(
-        `Dữ liệu không hợp lệ ở các dòng: ${invalidRows.join(', ')}`,
+        'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
       );
     }
 
@@ -351,46 +349,43 @@ export class FeesService {
       const unionistId = row[0];
       const monthYear = row[1];
       const fee = parseFloat(row[2]);
+      // Kiểm tra xem bản ghi đã tồn tại chưa
+      const existingFee = await this.feeModel.findOne({
+        unionistId,
+        monthYear,
+      });
 
-      try {
-        // Kiểm tra xem bản ghi đã tồn tại chưa
-        const existingFee = await this.feeModel.findOne({
-          unionistId,
-          monthYear,
-        });
+      const isExistUnionist =
+        await this.unionistsService.findUnionistNameWithUnionistId(unionistId);
 
-        const isExistUnionist =
-          await this.unionistsService.findUnionistNameWithUnionistId(
+      if (!isExistUnionist) {
+        throw new BadRequestException(
+          'Dữ liệu không hợp lệ. Xin hãy kiểm tra lại quy tắc nhập liệu',
+        );
+      } else if (existingFee) {
+        throw new BadRequestException(
+          'Dữ liệu bị trùng lặp. Xin hãy kiểm tra lại',
+        );
+      } else {
+        try {
+          // Tạo mới bản ghi lệ phí
+          await this.feeModel.create({
             unionistId,
-          );
-
-        if (existingFee) {
+            monthYear,
+            fee,
+            createdBy: {
+              _id: user._id,
+              email: user.email,
+            },
+            isDeleted: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+        } catch (error) {
           throw new BadRequestException(
-            `Lệ phí ${monthYear} cho công đoàn viên có mã ${unionistId} đã tồn tại`,
+            `Lỗi khi lưu dữ liệu: ${error.message}`,
           );
         }
-
-        if (!isExistUnionist) {
-          throw new BadRequestException(
-            `Không tồn tại công đoàn viên có mã là ${unionistId}`,
-          );
-        }
-
-        // Tạo mới bản ghi lệ phí
-        await this.feeModel.create({
-          unionistId,
-          monthYear,
-          fee,
-          createdBy: {
-            _id: user._id,
-            email: user.email,
-          },
-          isDeleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      } catch (error) {
-        throw new BadRequestException(`Lỗi khi lưu dữ liệu: ${error.message}`);
       }
     }
 
