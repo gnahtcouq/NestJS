@@ -165,7 +165,7 @@ export class UnionistsController {
   @ResponseMessage('Gửi yêu cầu đặt lại mật khẩu')
   async requestForgotPassword(@Body('email') email: string) {
     const result = await this.unionistsService.requestForgotPassword(email);
-    return { success: result };
+    return result;
   }
 
   @Public()

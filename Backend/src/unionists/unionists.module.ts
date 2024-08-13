@@ -7,6 +7,7 @@ import {
   UnionistSchema,
 } from 'src/unionists/schemas/unionist.schema';
 import { UsersModule } from 'src/users/users.module';
+import { ZnssModule } from 'src/znss/znss.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from 'src/users/users.module';
     MongooseModule.forFeature([
       { name: Unionist.name, schema: UnionistSchema },
     ]),
+    ZnssModule,
   ],
   controllers: [UnionistsController],
   providers: [UnionistsService],

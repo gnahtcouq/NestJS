@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable prefer-const */
 import {
   BadRequestException,
@@ -33,8 +32,8 @@ import {
   encrypt,
   isValidDateOfBirth,
   isValidEmail,
-  sendNotification,
 } from 'src/util/utils';
+import { ZnssService } from 'src/znss/znss.service';
 @Injectable()
 export class UsersService {
   private readonly encryptionKey: Buffer;
@@ -44,6 +43,7 @@ export class UsersService {
     @Inject(forwardRef(() => UnionistsService))
     private readonly unionistsService: UnionistsService,
     private readonly mailerService: MailerService,
+    private readonly znssService: ZnssService,
     private configService: ConfigService,
   ) {
     const key = this.configService.get<string>('ENCRYPTION_KEY');
@@ -533,15 +533,16 @@ export class UsersService {
     const currentUserEmail = isExist.email;
 
     // Chuyển đổi số điện thoại từ định dạng nội địa sang quốc tế
-    const formattedPhoneNumber = convertPhoneNumberToInternationalFormat(
-      isExist.phoneNumber,
-    );
-
-    const res = await sendNotification(
-      formattedPhoneNumber,
-      verificationCodePassword,
-    );
-    console.log(res);
+    if (isExist.phoneNumber) {
+      const formattedPhoneNumber = convertPhoneNumberToInternationalFormat(
+        isExist.phoneNumber,
+      );
+      const res = await this.znssService.sendNotification(
+        formattedPhoneNumber,
+        verificationCodePassword,
+      );
+      console.log(res);
+    }
 
     // Send confirmation email to current email
     await this.sendForgotPasswordConfirmationEmail(

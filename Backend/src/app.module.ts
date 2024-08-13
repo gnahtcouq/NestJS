@@ -22,6 +22,7 @@ import { IncomeCategoriesModule } from './income-categories/income-categories.mo
 import { ExpensesModule } from './expenses/expenses.module';
 import { ExpenseCategoriesModule } from './expense-categories/expense-categories.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ZnssModule } from './znss/znss.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     IncomeCategoriesModule,
     ExpensesModule,
     ExpenseCategoriesModule,
+    ZnssModule,
   ],
   controllers: [AppController],
   providers: [AppService],

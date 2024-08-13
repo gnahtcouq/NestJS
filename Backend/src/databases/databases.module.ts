@@ -13,6 +13,8 @@ import {
   UnionistSchema,
 } from 'src/unionists/schemas/unionist.schema';
 import { UnionistsService } from 'src/unionists/unionists.service';
+import { Znss, ZnssSchema } from 'src/znss/schemas/znss.schema';
+import { ZnssService } from 'src/znss/znss.service';
 
 @Module({
   imports: [
@@ -20,9 +22,10 @@ import { UnionistsService } from 'src/unionists/unionists.service';
       { name: User.name, schema: UserSchema },
       { name: Unionist.name, schema: UnionistSchema },
       { name: Permission.name, schema: PermissionSchema },
+      { name: Znss.name, schema: ZnssSchema },
     ]),
   ],
   controllers: [DatabasesController],
-  providers: [DatabasesService, UsersService, UnionistsService],
+  providers: [DatabasesService, UsersService, UnionistsService, ZnssService],
 })
 export class DatabasesModule {}

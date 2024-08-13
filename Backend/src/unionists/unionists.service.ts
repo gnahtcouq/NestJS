@@ -31,6 +31,7 @@ import * as xlsx from 'xlsx';
 import { UsersService } from 'src/users/users.service';
 import { UpdateInfoUnionistDto } from 'src/unionists/dto/update-unionist-info.dto';
 import {
+  convertPhoneNumberToInternationalFormat,
   convertToISODate,
   decrypt,
   encrypt,
@@ -38,8 +39,7 @@ import {
   isValidDateRange,
   isValidEmail,
 } from 'src/util/utils';
-import { isNull } from 'util';
-import { sendNotification } from '../util/utils';
+import { ZnssService } from 'src/znss/znss.service';
 
 @Injectable()
 export class UnionistsService {
@@ -50,8 +50,9 @@ export class UnionistsService {
     private unionistModel: SoftDeleteModel<UnionistDocument>,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
-    private configService: ConfigService,
     private readonly mailerService: MailerService,
+    private readonly znssService: ZnssService,
+    private configService: ConfigService,
   ) {
     const key = this.configService.get<string>('ENCRYPTION_KEY');
     if (!key || key.length !== 64) {
@@ -524,17 +525,6 @@ export class UnionistsService {
 
     let result = null;
 
-    if (isExist.phoneNumber !== null) {
-      try {
-        await sendNotification(isExist.phoneNumber, verificationCodePassword);
-      } catch (error) {
-        throw new BadRequestException(
-          'Lỗi khi gửi mã xác nhận qua tin nhắn Zalo',
-          error,
-        );
-      }
-    }
-
     if (isExist) {
       result = await this.unionistModel.updateOne(
         { email: email },
@@ -546,17 +536,27 @@ export class UnionistsService {
     }
 
     // Lấy email hiện tại từ cơ sở dữ liệu
-    const currentUnionist = await this.unionistModel
-      .findOne({ email: email })
-      .select('email');
+    const currentUnionistEmail = isExist.email;
+
+    // Chuyển đổi số điện thoại từ định dạng nội địa sang quốc tế
+    if (isExist.phoneNumber) {
+      const formattedPhoneNumber = convertPhoneNumberToInternationalFormat(
+        isExist.phoneNumber,
+      );
+      const res = await this.znssService.sendNotification(
+        formattedPhoneNumber,
+        verificationCodePassword,
+      );
+      console.log(res);
+    }
 
     // Send confirmation email to current email
     await this.sendForgotPasswordConfirmationEmail(
-      currentUnionist.email,
+      currentUnionistEmail,
       verificationCodePassword,
     );
 
-    return result;
+    return { _id: isExist._id, result };
   }
 
   async sendForgotPasswordConfirmationEmail(
