@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable prefer-const */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
@@ -129,10 +128,12 @@ export class AuthService {
       this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       });
-
       let user = await this.usersService.findUserByToken(refreshToken);
+      let flagUser = 'user';
+
       if (!user) {
         user = await this.unionistsService.findUnionistByToken(refreshToken);
+        flagUser = 'unionist';
       }
       if (user) {
         //update refresh_token
@@ -144,6 +145,7 @@ export class AuthService {
           id,
           name,
           email,
+          type: flagUser,
         };
 
         const refresh_token = this.createRefreshToken(payload);
@@ -170,6 +172,7 @@ export class AuthService {
             name,
             email,
             permissions: temp?.permissions ?? [],
+            type: flagUser,
           },
         };
       } else {

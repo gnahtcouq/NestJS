@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
-import axios from 'axios';
 
 export const nonAccentVietnamese = (str: string) => {
   str = str.replace(/A|Á|À|Ã|Ạ|Â|Ấ|Ầ|Ẫ|Ậ|Ă|Ắ|Ằ|Ẵ|Ặ/g, 'A');

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 export interface IUnionist {
   _id: string;
   id: string;

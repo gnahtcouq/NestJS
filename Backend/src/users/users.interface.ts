@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 export interface IUser {
   _id: string;
   id: string;
