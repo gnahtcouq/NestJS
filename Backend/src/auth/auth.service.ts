@@ -150,12 +150,24 @@ export class AuthService {
 
         const refresh_token = this.createRefreshToken(payload);
 
-        //update user with refresh token
-        await this.usersService.updateUserToken(refresh_token, _id.toString());
+        let temp = null;
 
-        const temp = (
-          await this.usersService.findOne(_id.toString())
-        ).toObject();
+        //update user with refresh token
+        if (flagUser === 'user') {
+          await this.usersService.updateUserToken(
+            refresh_token,
+            _id.toString(),
+          );
+          temp = (await this.usersService.findOne(_id.toString())).toObject();
+        } else {
+          await this.unionistsService.updateUnionistToken(
+            refresh_token,
+            _id.toString(),
+          );
+          temp = (
+            await this.unionistsService.findOne(_id.toString())
+          ).toObject();
+        }
 
         //set refresh_token as cookies
         response.clearCookie('refresh_token');

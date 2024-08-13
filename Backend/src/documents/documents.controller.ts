@@ -31,6 +31,7 @@ export class DocumentsController {
     return this.documentsService.findByUsers(user);
   }
 
+  @Public()
   @Get()
   @ResponseMessage('Lấy danh sách CV/VB')
   findAll(
