@@ -398,7 +398,7 @@ export class ExpensesService {
             time: formattedDate,
             amount: expenseAmount,
             userId: expenseUserId,
-            incomeCategoryId: expenseIncomeCategoryId,
+            expenseCategoryId: expenseIncomeCategoryId,
             createdBy: {
               _id: user._id,
               email: user.email,
