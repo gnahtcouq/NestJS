@@ -43,39 +43,39 @@ export class ZnssService {
 
   getNewAccessToken = async () => {
     const existingZnss = await this.znssModel.findOne().exec();
-    try {
-      console.log('Tạo mới access token ZNS...');
-      const response = await axios.post(
-        process.env.ZNS_REFRESH_TOKEN_URL,
-        {
-          app_id: process.env.ZNS_APP_ID,
-          grant_type: 'refresh_token',
-          refresh_token: existingZnss.refresh_token,
+    console.log('Tạo mới access token ZNS...');
+    const response = await axios.post(
+      process.env.ZNS_REFRESH_TOKEN_URL,
+      {
+        app_id: process.env.ZNS_APP_ID,
+        grant_type: 'refresh_token',
+        refresh_token: existingZnss.refresh_token,
+      },
+      {
+        headers: {
+          Secret_key: process.env.ZNS_SECRET_KEY,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        {
-          headers: {
-            Secret_key: process.env.ZNS_SECRET_KEY,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
-      );
+      },
+    );
 
-      const newAccessToken = response.data.access_token;
-      const newRefreshToken = response.data.refresh_token;
-      console.log('access token mới:', newAccessToken);
-      console.log('refresh token mới:', newRefreshToken);
+    const newAccessToken = response.data.access_token;
+    const newRefreshToken = response.data.refresh_token;
+    console.log('access token mới:', newAccessToken);
+    console.log('refresh token mới:', newRefreshToken);
 
-      await this.znssModel.updateOne(existingZnss._id, {
+    await this.znssModel.updateOne(
+      { _id: existingZnss._id },
+      {
         $set: {
           access_token: newAccessToken,
           refresh_token: newRefreshToken,
         },
-      });
+      },
+    );
 
-      // Cập nhật refreshToken nếu có mới
-    } catch (error) {
-      throw new Error('Lỗi khi tạo mới access token ZNS');
-    }
+    if (!newAccessToken && !newRefreshToken)
+      return 'Tạo mới access token thất bại';
     return 'Tạo mới access token thành công';
   };
 

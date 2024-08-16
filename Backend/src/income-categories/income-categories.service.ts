@@ -276,7 +276,7 @@ export class IncomeCategoriesService {
       }
 
       // Kiểm tra độ dài mô tả
-      if (incomeCategoryDescription.length > 50) {
+      if (incomeCategoryDescription.length > 150) {
         invalidRows.push(index + 2);
         return false;
       }

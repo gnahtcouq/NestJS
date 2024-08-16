@@ -278,7 +278,7 @@ export class ExpenseCategoriesService {
       }
 
       // Kiểm tra độ dài mô tả
-      if (expenseCategoryDescription.length > 50) {
+      if (expenseCategoryDescription.length > 150) {
         invalidRows.push(index + 2);
         return false;
       }

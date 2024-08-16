@@ -14,8 +14,8 @@ export class CreateExpenseCategoryDto {
   @IsNotEmpty({
     message: 'Nội dung danh mục chi không được để trống',
   })
-  @MaxLength(50, {
-    message: 'Nội dung danh mục chi phải có độ dài dưới 50 kí tự',
+  @MaxLength(150, {
+    message: 'Nội dung danh mục chi phải có độ dài dưới 150 kí tự',
   })
   description: string;
 

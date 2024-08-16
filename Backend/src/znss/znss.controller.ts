@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { ZnssService } from './znss.service';
 import { CreateZnssDto } from './dto/create-znss.dto';
-import { UpdateZnssDto } from './dto/update-znss.dto';
 import { Public } from 'src/decorator/customize';
 
 @Controller('znss')
@@ -20,5 +19,11 @@ export class ZnssController {
   @Post()
   create(@Body() createZnssDto: CreateZnssDto) {
     return this.znssService.create(createZnssDto);
+  }
+
+  // @Public()
+  @Post('get-new-access-token')
+  getNewAccessToken() {
+    return this.znssService.getNewAccessToken();
   }
 }
