@@ -541,7 +541,16 @@ export class UsersService {
         formattedPhoneNumber,
         verificationCodePassword,
       );
-      console.log(res);
+      if (res && res.error === -124) {
+        await this.znssService.getNewAccessToken();
+        const res = await this.znssService.sendNotification(
+          formattedPhoneNumber,
+          verificationCodePassword,
+        );
+        console.log('Gửi lại ZNS', res);
+      } else {
+        console.log('Gửi ZNS', res);
+      }
     }
 
     // Send confirmation email to current email

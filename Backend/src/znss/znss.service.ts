@@ -62,8 +62,6 @@ export class ZnssService {
 
       const newAccessToken = response.data.access_token;
       const newRefreshToken = response.data.refresh_token;
-      console.log('Access token mới:', newAccessToken);
-      console.log('Refresh token mới:', newRefreshToken);
 
       await this.znssModel.updateOne(
         { _id: existingZnss._id },
@@ -79,7 +77,7 @@ export class ZnssService {
         throw new Error('Tạo mới access token thất bại');
       }
 
-      return newAccessToken;
+      return 'Tạo mới access token thành công';
     } catch (error) {
       console.error('Lỗi khi tạo mới access token:', error);
       throw new Error('Lỗi khi tạo mới access token');
@@ -87,7 +85,7 @@ export class ZnssService {
   };
 
   sendNotification = async (phoneNumber: string, otpStr: string) => {
-    let existingZnss = await this.znssModel.findOne().exec();
+    const existingZnss = await this.znssModel.findOne().exec();
     const response = await axios.post(
       `${process.env.ZNS_URL}`,
       {
@@ -106,34 +104,6 @@ export class ZnssService {
       },
     );
 
-    if (response && response.data && response.data.error === -124) {
-      // Nếu token hết hạn, làm mới token và thử lại
-      try {
-        const newAccessToken = await this.getNewAccessToken();
-        existingZnss = await this.znssModel.findOne().exec(); // Cập nhật dữ liệu hiện tại
-        return await axios
-          .post(
-            `${process.env.ZNS_URL}`,
-            {
-              mode: 'development',
-              template_id: `${process.env.ZNS_TEMPLATE_ID}`,
-              template_data: {
-                otp: otpStr,
-              },
-              phone: phoneNumber,
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                access_token: newAccessToken,
-              },
-            },
-          )
-          .then((response) => response.data);
-      } catch (tokenError) {
-        console.error('Lỗi khi làm mới token:', tokenError);
-        throw new Error('Lỗi khi làm mới token và gửi thông báo');
-      }
-    }
+    return response.data;
   };
 }
