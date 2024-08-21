@@ -44,70 +44,95 @@ export class ZnssService {
   getNewAccessToken = async () => {
     const existingZnss = await this.znssModel.findOne().exec();
     console.log('Tạo mới access token ZNS...');
-    const response = await axios.post(
-      process.env.ZNS_REFRESH_TOKEN_URL,
-      {
-        app_id: process.env.ZNS_APP_ID,
-        grant_type: 'refresh_token',
-        refresh_token: existingZnss.refresh_token,
-      },
-      {
-        headers: {
-          Secret_key: process.env.ZNS_SECRET_KEY,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      },
-    );
-
-    const newAccessToken = response.data.access_token;
-    const newRefreshToken = response.data.refresh_token;
-    console.log('access token mới:', newAccessToken);
-    console.log('refresh token mới:', newRefreshToken);
-
-    await this.znssModel.updateOne(
-      { _id: existingZnss._id },
-      {
-        $set: {
-          access_token: newAccessToken,
-          refresh_token: newRefreshToken,
-        },
-      },
-    );
-
-    if (!newAccessToken && !newRefreshToken)
-      return 'Tạo mới access token thất bại';
-    return 'Tạo mới access token thành công';
-  };
-
-  sendNotification = async (phoneNumber: string, otpStr: string) => {
-    const existingZnss = await this.znssModel.findOne().exec();
     try {
       const response = await axios.post(
-        `${process.env.ZNS_URL}`,
-        {
-          mode: 'development',
-          template_id: `${process.env.ZNS_TEMPLATE_ID}`,
-          template_data: {
-            otp: otpStr,
-          },
-          phone: phoneNumber,
-        },
+        process.env.ZNS_REFRESH_TOKEN_URL,
+        new URLSearchParams({
+          app_id: process.env.ZNS_APP_ID,
+          grant_type: 'refresh_token',
+          refresh_token: existingZnss.refresh_token,
+        }).toString(),
         {
           headers: {
-            'Content-Type': 'application/json',
-            access_token: existingZnss.access_token,
+            Secret_key: process.env.ZNS_SECRET_KEY,
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
         },
       );
 
-      return response.data;
+      const newAccessToken = response.data.access_token;
+      const newRefreshToken = response.data.refresh_token;
+      console.log('Access token mới:', newAccessToken);
+      console.log('Refresh token mới:', newRefreshToken);
+
+      await this.znssModel.updateOne(
+        { _id: existingZnss._id },
+        {
+          $set: {
+            access_token: newAccessToken,
+            refresh_token: newRefreshToken,
+          },
+        },
+      );
+
+      if (!newAccessToken || !newRefreshToken) {
+        throw new Error('Tạo mới access token thất bại');
+      }
+
+      return newAccessToken;
     } catch (error) {
-      if (error.response && error.response.error === -124) {
-        // Nếu token hết hạn, làm mới token và thử lại
-        await this.getNewAccessToken();
-        return this.sendNotification(phoneNumber, otpStr); // Gửi lại yêu cầu với token mới
-      } else {
-        throw error;
+      console.error('Lỗi khi tạo mới access token:', error);
+      throw new Error('Lỗi khi tạo mới access token');
+    }
+  };
+
+  sendNotification = async (phoneNumber: string, otpStr: string) => {
+    let existingZnss = await this.znssModel.findOne().exec();
+    const response = await axios.post(
+      `${process.env.ZNS_URL}`,
+      {
+        mode: 'development',
+        template_id: `${process.env.ZNS_TEMPLATE_ID}`,
+        template_data: {
+          otp: otpStr,
+        },
+        phone: phoneNumber,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          access_token: existingZnss.access_token,
+        },
+      },
+    );
+
+    if (response && response.data && response.data.error === -124) {
+      // Nếu token hết hạn, làm mới token và thử lại
+      try {
+        const newAccessToken = await this.getNewAccessToken();
+        existingZnss = await this.znssModel.findOne().exec(); // Cập nhật dữ liệu hiện tại
+        return await axios
+          .post(
+            `${process.env.ZNS_URL}`,
+            {
+              mode: 'development',
+              template_id: `${process.env.ZNS_TEMPLATE_ID}`,
+              template_data: {
+                otp: otpStr,
+              },
+              phone: phoneNumber,
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                access_token: newAccessToken,
+              },
+            },
+          )
+          .then((response) => response.data);
+      } catch (tokenError) {
+        console.error('Lỗi khi làm mới token:', tokenError);
+        throw new Error('Lỗi khi làm mới token và gửi thông báo');
       }
     }
   };

@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { ZnssService } from './znss.service';
 import { CreateZnssDto } from './dto/create-znss.dto';
 import { Public } from 'src/decorator/customize';
