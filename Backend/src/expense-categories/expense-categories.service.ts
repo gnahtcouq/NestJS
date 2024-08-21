@@ -107,11 +107,17 @@ export class ExpenseCategoriesService {
     delete filter.current;
     delete filter.pageSize;
 
+    // Get the current year if not provided
+    const currentYear = new Date().getFullYear();
+
     // Kiểm tra xem query string có chứa year hay không
     if (filter.year) {
       const year = filter.year;
       delete filter.year; // Xóa year khỏi filter để tránh ảnh hưởng đến query khác
       filter.year = year.toString();
+    } else {
+      // Default to current year if no year filters are provided
+      filter.year = currentYear.toString();
     }
 
     const totalItems = (await this.expenseCategoryModel.find(filter)).length;
