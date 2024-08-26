@@ -51,7 +51,7 @@ export class MailController {
         const posts = postWithMatchingThreads.map((item) => {
           const slug = convertSlug(item.name);
           const url = `${this.configService.get<string>(
-            'FRONTEND_URL',
+            'FRONTEND_URL_PROD',
           )}/post/${slug}?id=${item._id}`;
           return {
             name: item.name,
@@ -69,7 +69,7 @@ export class MailController {
             receiver: subs.name,
             posts: posts,
             urlAllPost: `${this.configService.get<string>(
-              'FRONTEND_URL',
+              'FRONTEND_URL_PROD',
             )}/post`,
           },
         });

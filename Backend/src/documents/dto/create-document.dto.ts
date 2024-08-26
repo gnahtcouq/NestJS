@@ -19,8 +19,8 @@ export class CreateDocumentDto {
     },
   )
   @IsNotEmpty({ message: 'Email không được để trống' })
-  @Matches(/@stu\.edu\.vn$/, {
-    message: 'Email phải có đuôi @stu.edu.vn',
+  @Matches(/@stu\.id\.vn$/, {
+    message: 'Email phải có đuôi @stu.id.vn',
   })
   email: string;
 

@@ -35,8 +35,8 @@ export class CreateUnionistDto {
       message: 'Email không đúng định dạng',
     },
   )
-  @Matches(/@stu\.edu\.vn$/, {
-    message: 'Email phải có đuôi @stu.edu.vn',
+  @Matches(/@stu\.id\.vn$/, {
+    message: 'Email phải có đuôi @stu.id.vn',
   })
   @IsNotEmpty({
     message: 'Email không được để trống',

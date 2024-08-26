@@ -118,7 +118,7 @@ export class UsersService {
     email = email.toLowerCase();
 
     if (!isValidEmail(email)) {
-      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
+      throw new BadRequestException('Email phải có đuôi @stu.id.vn');
     }
 
     //logic check email exist
@@ -391,7 +391,7 @@ export class UsersService {
   async requestChangeEmail(userId: string, newEmail: string, user: IUser) {
     // Validate new email format
     if (!isValidEmail(newEmail)) {
-      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
+      throw new BadRequestException('Email phải có đuôi @stu.id.vn');
     }
 
     const isExist = await this.userModel.findOne({ email: newEmail });
@@ -456,7 +456,7 @@ export class UsersService {
         receiver: user.name,
         verificationCode,
         url: `${this.configService.get<string>(
-          'FRONTEND_URL',
+          'FRONTEND_URL_PROD',
         )}/confirm-change-email/${user._id}?newEmail=${encryptedNewEmail}`,
       },
     });
@@ -472,7 +472,7 @@ export class UsersService {
 
     // Kiểm tra định dạng email mới
     if (!isValidEmail(newEmail)) {
-      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
+      throw new BadRequestException('Email phải có đuôi @stu.id.vn');
     }
 
     // Tìm kiếm user theo userId và verificationCode
@@ -577,7 +577,7 @@ export class UsersService {
         receiver: currentUser.name,
         verificationCodePassword,
         url: `${this.configService.get<string>(
-          'FRONTEND_URL',
+          'FRONTEND_URL_PROD',
         )}/confirm-forgot-password/${currentUser._id}`,
       },
     });

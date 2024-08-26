@@ -90,7 +90,7 @@ export class UnionistsService {
     email = email.toLowerCase();
 
     if (!isValidEmail(email)) {
-      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
+      throw new BadRequestException('Email phải có đuôi @stu.id.vn');
     }
 
     const isExistUnionist = await this.unionistModel.findOne({ email });
@@ -402,7 +402,7 @@ export class UnionistsService {
   ) {
     // Validate new email format
     if (!isValidEmail(newEmail)) {
-      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
+      throw new BadRequestException('Email phải có đuôi @stu.id.vn');
     }
 
     const isExist = await this.unionistModel.findOne({ email: newEmail });
@@ -462,7 +462,7 @@ export class UnionistsService {
         receiver: unionist.name,
         verificationCode,
         url: `${this.configService.get<string>(
-          'FRONTEND_URL',
+          'FRONTEND_URL_PROD',
         )}/confirm-change-email/${unionist._id}?newEmail=${encryptedNewEmail}`,
       },
     });
@@ -478,7 +478,7 @@ export class UnionistsService {
 
     // Kiểm tra định dạng email mới
     if (!isValidEmail(newEmail)) {
-      throw new BadRequestException('Email phải có đuôi @stu.edu.vn');
+      throw new BadRequestException('Email phải có đuôi @stu.id.vn');
     }
 
     // Tìm kiếm unionist theo unionistId và verificationCode
@@ -574,7 +574,7 @@ export class UnionistsService {
         receiver: currentUnionist.name,
         verificationCodePassword,
         url: `${this.configService.get<string>(
-          'FRONTEND_URL',
+          'FRONTEND_URL_PROD',
         )}/confirm-forgot-password/${currentUnionist._id}`,
       },
     });

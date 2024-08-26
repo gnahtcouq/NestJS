@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # restart: unless-stopped
+    restart: unless-stopped
     environment:
       - PORT=8080
       - NODE_ENV=production

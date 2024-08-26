@@ -76,7 +76,7 @@ export const formatCurrency = (value) => {
 };
 
 export const isValidEmail = (email: string): boolean => {
-  const emailRegex = /@stu\.edu\.vn$/;
+  const emailRegex = /@stu\.id\.vn$/;
   return emailRegex.test(email);
 };
 
